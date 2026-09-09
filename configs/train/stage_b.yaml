@@ -1,0 +1,49 @@
+train:
+  precision: bf16
+  compile: true
+
+  seed: 0
+  steps: 80000
+  log_every: 25
+  save_every: 5000
+  val_every: 1000
+  output_dir: checkpoints/stage_b
+
+  optimizer:
+    name: adamw
+    fused: true
+    lr: 1.0e-4
+    betas: [0.9, 0.95]
+    weight_decay: 0.03
+
+  scheduler:
+    type: cosine
+    warmup_steps: 500
+
+  grad_clip: 1.0
+  activation_checkpointing: false
+  gradient_accumulation: 1
+
+  batch:
+    auto_probe: true
+    preferred_micro_batch: 128
+    max_vram_gb: 7.2
+
+  ema:
+    enabled: true
+    device: cpu
+    decay: 0.9999
+    update_every: 8
+
+  flow:
+    timestep_sampling: uniform
+    loss: mse
+
+  tile_loss:
+    enabled: true
+    weight: 0.03
+    max_t: 0.7
+    border_width: 2
+
+  dataset: configs/data/stage_b.yaml
+  text_mmap: ""

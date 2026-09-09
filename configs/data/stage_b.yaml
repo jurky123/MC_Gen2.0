@@ -1,0 +1,28 @@
+stage: mc_domain
+
+build:
+  out_dir: data/build/mc_b
+  raw_root: data/raw/mc
+  download_dir: data/raw/mc/downloads
+  extracted_dir: data/raw/mc/extracted
+  allow_licenses: [cc0-1.0, cc-by-4.0]
+  require_review_licenses: [mit, apache-2.0, gpl-3.0, gpl-2.0]
+  deny_licenses: [arr, custom, licenseRef, no-ai, ai-training-prohibited]
+  target_size: 32
+  splits:
+    train: 0.9
+    val: 0.05
+    test: 0.05
+  seed: 0
+
+dataset:
+  images: data/build/mc_b/images.uint8.mmap
+  metadata: data/build/mc_b/metadata.parquet
+  splits: data/build/mc_b/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  text_mmap: ""
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: weak_prompt

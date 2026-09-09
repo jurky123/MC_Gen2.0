@@ -1,0 +1,23 @@
+stage: vlm_finetune
+
+build:
+  out_dir: data/build/mc_d
+  mc_build: data/build/mc_b
+  captions: data/build/mc_d/detailed_captions.jsonl
+  text_encoder: ""
+  text_dim: 768
+  max_text_tokens: 64
+  cond_dropout: 0.12
+  seed: 0
+
+dataset:
+  images: data/build/mc_d/images.uint8.mmap
+  metadata: data/build/mc_d/metadata.parquet
+  splits: data/build/mc_d/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  text_mmap: data/build/mc_d/text_embeddings.f32.mmap
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: detailed_caption

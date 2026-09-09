@@ -1,0 +1,23 @@
+model:
+  name: MCFlowDiTBaseNative16
+  image_size: 16
+  in_channels: 3
+  patch_size: 1
+
+  hidden_size: 512
+  num_heads: 8
+  mlp_ratio: 3.0
+  text_mlp_ratio: 1.0
+
+  double_stream_blocks: 3
+  single_stream_blocks: 6
+
+  text_dim: 768
+  max_text_tokens: 64
+
+  qk_norm: true
+  rope: 2d
+  activation: swiglu
+  bias: false
+
+  cond_dropout: 0.12

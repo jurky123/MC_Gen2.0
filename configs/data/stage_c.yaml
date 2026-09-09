@@ -1,0 +1,23 @@
+stage: weak_text
+
+build:
+  out_dir: data/build/mc_c
+  mc_build: data/build/mc_b
+  weak_labels: data/build/mc_b/weak_labels.jsonl
+  text_encoder: ""
+  text_dim: 768
+  max_text_tokens: 64
+  cond_dropout: 0.12
+  seed: 0
+
+dataset:
+  images: data/build/mc_c/images.uint8.mmap
+  metadata: data/build/mc_c/metadata.parquet
+  splits: data/build/mc_c/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  text_mmap: data/build/mc_c/text_embeddings.f32.mmap
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: weak_prompt

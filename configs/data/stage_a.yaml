@@ -1,0 +1,23 @@
+stage: generic
+
+build:
+  out_dir: data/build/generic
+  matsynth_dir: data/raw/matsynth
+  materialmaker_dir: data/raw/materialmaker
+  crop_sizes: [128, 256, 512, 1024]
+  target_size: 32
+  patches_per_material: [32, 128]
+  total_target: 250000
+  seed: 0
+
+dataset:
+  images: data/build/generic/images.uint8.mmap
+  metadata: data/build/generic/metadata.parquet
+  splits: data/build/generic/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  text_mmap: ""
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: weak_prompt

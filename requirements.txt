@@ -1,0 +1,17 @@
+torch>=2.4
+torchvision
+numpy
+pillow
+pyyaml
+einops
+transformers
+datasets
+huggingface_hub
+safetensors
+pyarrow
+xxhash
+opencv-python-headless
+imagehash
+fastapi
+uvicorn
+httpx

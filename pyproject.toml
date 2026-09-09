@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mc-texture-gen"
+version = "0.1.0"
+description = "Pixel-space Rectified Flow Transformer for Minecraft / voxel-game low-res texture generation"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.4",
+    "torchvision",
+    "numpy",
+    "pillow",
+    "pyyaml",
+    "einops",
+    "transformers",
+    "pyarrow",
+    "safetensors",
+    "fastapi",
+    "uvicorn",
+]
+
+[project.scripts]
+mc-train = "train.train:main"
+mc-sample = "infer.sample:main"
+mc-api = "infer.api:main"
+
+[tool.setuptools]
+packages = ["data", "model", "train", "infer", "eval"]
+
+[tool.setuptools.package-dir]
+"" = "src"

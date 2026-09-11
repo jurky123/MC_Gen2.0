@@ -37,7 +37,7 @@ def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun"
     for i, p in enumerate(prompts):
         seed = seeds[i] if seeds is not None else 0
         g = torch.Generator(device=device).manual_seed(int(seed))
-        z = torch.randn(1, 3, size, size, generator=g, device=device)
+        z = torch.randn(1, model.cfg.in_channels, size, size, generator=g, device=device)
         text = embs[i : i + 1]
         u = uncond[i : i + 1]
         x = sample(model, z, text, steps=steps, cfg=cfg, text_uncond=u, solver=solver)

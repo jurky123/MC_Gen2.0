@@ -14,10 +14,10 @@ def split_name(project_id):
     return "train" if value < 90 else "val" if value < 95 else "test"
 
 
-def build(source, out, image_size=32):
+def build(source, out, image_size=32, channels=4):
     files = sorted(Path(source).glob("*.parquet")); out = Path(out); out.mkdir(parents=True, exist_ok=True)
     total = sum(pq.ParquetFile(f).metadata.num_rows for f in files)
-    images = np.memmap(out / "images.uint8.mmap", dtype=np.uint8, mode="w+", shape=(total, image_size, image_size, 3))
+    images = np.memmap(out / "images.uint8.mmap", dtype=np.uint8, mode="w+", shape=(total, image_size, image_size, channels))
     writer = None; splits = {"train": [], "val": [], "test": []}; offset = 0
     for file in files:
         pf = pq.ParquetFile(file)
@@ -26,9 +26,12 @@ def build(source, out, image_size=32):
             for row in rows:
                 cell = row.pop("image") or {}; raw = cell.get("bytes")
                 img = Image.open(io.BytesIO(raw)).convert("RGBA")
-                bg = Image.new("RGBA", img.size, (0, 0, 0, 255)); bg.alpha_composite(img)
-                rgb = bg.convert("RGB").resize((image_size, image_size), Image.Resampling.NEAREST)
-                images[offset] = np.asarray(rgb, dtype=np.uint8)
+                if channels == 4:
+                    tile = img.resize((image_size, image_size), Image.Resampling.NEAREST)
+                else:
+                    bg = Image.new("RGBA", img.size, (0, 0, 0, 255)); bg.alpha_composite(img)
+                    tile = bg.convert("RGB").resize((image_size, image_size), Image.Resampling.NEAREST)
+                images[offset] = np.asarray(tile, dtype=np.uint8)
                 row["index"] = offset; row["weak_prompt"] = row.get("text") or ""
                 splits[split_name(row.get("project_id"))].append(offset)
                 meta.append(row); offset += 1
@@ -39,10 +42,11 @@ def build(source, out, image_size=32):
     if writer: writer.close()
     images.flush(); del images
     with (out / "splits.json").open("w") as f: json.dump(splits, f)
-    print(f"done rows={offset} train={len(splits['train'])} val={len(splits['val'])} test={len(splits['test'])}")
+    print(f"done rows={offset} channels={channels} train={len(splits['train'])} val={len(splits['val'])} test={len(splits['test'])}")
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("--source", default="data/raw/mc_text2image/data")
     p.add_argument("--out", default="data/build/mc_text2image32"); p.add_argument("--image-size", type=int, default=32)
-    a = p.parse_args(); build(a.source, a.out, a.image_size)
+    p.add_argument("--channels", type=int, default=4, choices=(3, 4))
+    a = p.parse_args(); build(a.source, a.out, a.image_size, a.channels)

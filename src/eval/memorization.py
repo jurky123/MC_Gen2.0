@@ -15,12 +15,14 @@ def nearest_neighbors(img_arr, mem, k=3):
     return [(int(i), float(d[i])) for i in order]
 
 
-def report_directory(png_dir, mmap_images, image_size=32, out_json=None):
+def report_directory(png_dir, mmap_images, image_size=32, out_json=None, channels=3):
     png_dir = Path(png_dir)
     files = [f for f in sorted(png_dir.glob("*.png")) if ".tiled." not in f.name]
-    bytes_per = image_size * image_size * 3
+    bytes_per = image_size * image_size * channels
     n = os.path.getsize(mmap_images) // bytes_per
-    mem = np.memmap(mmap_images, dtype=np.uint8, mode="r", shape=(n, image_size, image_size, 3))
+    mem = np.memmap(mmap_images, dtype=np.uint8, mode="r", shape=(n, image_size, image_size, channels))
+    if channels != 3:
+        mem = np.ascontiguousarray(mem[..., :3])
     rows = []
     for f in files:
         arr = np.asarray(Image.open(f).convert("RGB"))
@@ -40,8 +42,10 @@ def main():
     ap.add_argument("dir")
     ap.add_argument("mmap")
     ap.add_argument("--out", default="")
+    ap.add_argument("--size", type=int, default=32)
+    ap.add_argument("--channels", type=int, default=3, choices=(3, 4))
     args = ap.parse_args()
-    report_directory(args.dir, args.mmap, out_json=args.out or None)
+    report_directory(args.dir, args.mmap, image_size=args.size, out_json=args.out or None, channels=args.channels)
 
 
 if __name__ == "__main__":

@@ -66,7 +66,7 @@ def generate(req: GenerateRequest):
     ).to(device)
     uncond = torch.zeros_like(embs)
     g = torch.Generator(device=device).manual_seed(int(req.seed))
-    z = torch.randn(1, 3, cfg.image_size, cfg.image_size, generator=g, device=device)
+    z = torch.randn(1, cfg.in_channels, cfg.image_size, cfg.image_size, generator=g, device=device)
     with torch.no_grad():
         x = sample(model, z, embs, steps=req.steps, cfg=req.cfg, text_uncond=uncond, solver=req.solver)
     u8 = to_uint8(x[0]).permute(1, 2, 0).cpu().numpy()

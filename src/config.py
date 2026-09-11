@@ -62,6 +62,7 @@ class TrainConfig:
     log_every: int = 25
     save_every: int = 5000
     val_every: int = 1000
+    eval_every_epochs: int = 10
     output_dir: str = "checkpoints"
 
     optimizer: dict = field(default_factory=lambda: {

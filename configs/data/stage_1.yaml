@@ -1,0 +1,14 @@
+stage: pixel_and_mc_pretraining
+
+dataset:
+  images: data/build/stage1_32_rgba/images.uint8.mmap
+  metadata: data/build/stage1_32_rgba/metadata.parquet
+  splits: data/build/stage1_32_rgba/splits.json
+  image_size: 32
+  channels: 4
+  toroidal: false
+  normalize: true
+  text_mmap: ""
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: weak_prompt

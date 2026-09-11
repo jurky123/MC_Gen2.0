@@ -13,6 +13,7 @@ dataset:
   image_size: 16
   toroidal: true
   normalize: true
+  channels: 4
   text_mmap: data/build/mc_b16/text_embeddings.f32.mmap
   text_dim: 768
   max_text_tokens: 64

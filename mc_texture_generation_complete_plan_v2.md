@@ -1,10 +1,10 @@
 # Minecraft 低分辨率材质生成模型：完整数据、模型、训练与部署方案
 
-> 版本：v2.2
+> 版本：v2.3
 > 日期：2026-09-11
 > 目标：构建 Minecraft / voxel-game 低分辨率文生纹理模型。数据改为像素风素材与真实 MC 纹理；主模型、8GB 显存目标和 Rectified Flow Transformer 范式保持不变。
 
-> **v2.2 路线覆盖说明：** 本节及“0. 最终方案概要”是当前有效方案。后文 MatSynth、ambientCG、Material Maker、pseudo-pixel 和旧 Stage A/A.5/C/D 内容仅作历史参考，不再作为数据获取或训练依据。
+> **v2.3 路线覆盖说明：** 本节及“0. 最终方案概要”是当前有效方案。后文 MatSynth、ambientCG、Material Maker、pseudo-pixel、SigLIP2 和旧 Stage A/A.5/C/D 内容仅作历史参考，不再作为数据获取、文本条件编码或训练依据。
 
 ---
 
@@ -19,8 +19,8 @@ Kenney + itch.io free pixel-art assets + NathMen12 MC TextToImage
 Stage 2：Minecraft 弱标注训练
 NathMen12/16xModdedMinecraft-TextToImage + existing MC weak labels
         ↓
-Stage 3：Minecraft 精标注精调（数据暂不获取）
-curated Minecraft textures + manually/VLM verified captions
+Stage 3：Minecraft 精标注精调
+James-A/Minecraft-16x-Dataset + 后续人工复核精标注 MC 子集
         ↓
 MC-FlowDiT-Base
 Pixel-space Rectified Flow Transformer
@@ -30,7 +30,7 @@ Pixel-space Rectified Flow Transformer
 可选 4–8 step distillation
 ```
 
-当前数据约定：删除并停用 MatSynth、ambientCG 等真实世界通用材质；Stage 1 使用全部像素素材和全部 MC 数据；Stage 2 以 `NathMen12/16xModdedMinecraft-TextToImage` 的 1,034,057 条图文数据为主，并保留现有 MC 弱标签；Stage 3 只使用精标注 MC 子集且本轮不获取。项目限定为学习研究用途，但仍保存来源 URL、作者、页面标签和许可字段以保证可追溯。
+当前数据约定：删除并停用 MatSynth、ambientCG 等真实世界通用材质；Stage 1 使用全部像素素材和全部 MC 数据；Stage 2 以 `NathMen12/16xModdedMinecraft-TextToImage` 的 1,034,057 条图文数据为主，并保留现有 MC 弱标签；Stage 3 使用 James-A/Minecraft-16x-Dataset，并允许后续加入人工复核的精标注 MC 子集。项目限定为学习研究用途，但仍保存来源 URL、作者、页面标签和许可字段以保证可追溯。
 
 ## 0.1 当前数据落盘状态
 
@@ -39,7 +39,7 @@ Pixel-space Rectified Flow Transformer
 | NathMen12 MC TextToImage | 1,034,057 条已完整下载并转换为 32x32 mmap；train/val/test 为 941,104 / 43,184 / 49,769 | Stage 1 + Stage 2 主 MC 数据 |
 | Kenney Pixel Assets | 14 包、2,106 个源图片已处理为 4,312 个去重样本 | Stage 1 |
 | itch.io Free Pixel Art | 原始下载达到 30.022 GiB 硬上限；连通域切分进行中，本次记录点为 557,124 条 manifest | Stage 1 |
-| 精标注 MC 子集 | 本轮不获取 | Stage 3 占位 |
+| James-A/Minecraft-16x-Dataset | 已完整下载 1,519 条；train/validation/test 为 1,366 / 70 / 83，具有颜色、图案、光照、对称性、平铺方向、用途和整体描述等细粒度字段 | Stage 3 首个高质量精调集 |
 
 旧 OVAWARE 本地子集和 Modrinth 提取集继续保留作兼容、校验或补充，但不替代 NathMen12 主集。固定网格方式生成的旧 itch 切片为废弃中间产物，不可混入训练。
 
@@ -55,6 +55,41 @@ Pixel-space Rectified Flow Transformer
 
 处理完成后需进行分层抽样复核，重点检查极端长宽比对象、动画条带、粒子图、字体图、UI atlas 和意外保留的整张场景。通过复核后，才将 Kenney、itch 与全部 MC 样本合并为 Stage 1 mmap。Stage 1 合并构建目前尚未完成。
 
+## 0.3 文本条件编码器定案
+
+文本条件编码器固定为 `Qwen/Qwen3-VL-Embedding-2B`。选择 2B 而不是 8B，是因为编码质量足以覆盖短纹理描述和细粒度属性，同时离线编码成本、下载体积和本地运行门槛更低。其原生 embedding 为 2048 维，并支持 instruction-aware 表示；本项目首版保留原生 2048 维，不额外训练降维器。
+
+必须严格遵守以下用途边界：
+
+- Qwen3-VL-Embedding-2B **只用于文本条件注入**。
+- 输入始终是 prompt 文本；不向它输入训练图片或图文混合内容。
+- 不用它做图片去重、相似检索、数据筛选、caption 生成、caption 评分或质量检查。
+- 数据去重继续使用确定性的内容 SHA/像素规则，数据处理与文本编码保持解耦。
+
+统一条件流程：
+
+```text
+canonical prompt text
+        ↓
+frozen Qwen3-VL-Embedding-2B（text-only）
+        ↓
+L2-normalized pooled embedding [2048]
+        ↓
+offline FP16 mmap [N, 1, 2048]
+        ↓
+MC-FlowDiT text projection 2048 → hidden_size
+```
+
+编码 instruction 固定为：
+
+```text
+Represent this Minecraft or pixel-art texture description for conditional image generation.
+```
+
+Stage 1、Stage 2、Stage 3 与推理服务必须固定模型 revision、tokenizer、instruction、文本清洗规则和 L2 normalization。MC-FlowDiT 训练期间不加载 Qwen 权重；classifier-free guidance 的空条件使用同一编码器对空/负条件模板离线编码，或使用训练得到的 null condition，但二者只能选定一种并保持训练与推理一致。
+
+James-A 数据集的 `overall_texture_description` 作为详细文本视图；另由已有结构化字段按固定模板组成短文本视图。训练时可在两种文本视图间随机采样，但两者都仅以文本形式送入 Qwen 编码器。不得把对应图片送入 Qwen 编码器。
+
 推荐主模型：
 
 ```yaml
@@ -69,7 +104,8 @@ double_stream_blocks: 3
 single_stream_blocks: 6
 mlp_ratio: 3.0
 
-text_dim: 768
+text_dim: 2048
+max_text_tokens: 1
 position_encoding: 2D RoPE
 qk_norm: RMSNorm
 activation: SwiGLU
@@ -1582,10 +1618,10 @@ dataset annotation
 
 。
 
-生成模型的 text condition 推荐使用：
+生成模型的 text condition 固定使用：
 
 \[
-\boxed{\text{SigLIP2 text tower}}
+\boxed{\text{Qwen3-VL-Embedding-2B（text-only）}}
 \]
 
 。
@@ -1593,13 +1629,13 @@ dataset annotation
 训练前：
 
 ```text
-caption
+canonical prompt text
   ↓
-frozen SigLIP2
+frozen Qwen3-VL-Embedding-2B（禁止输入图片）
   ↓
-text embedding
+L2-normalized pooled embedding [2048]
   ↓
-offline save
+offline FP16 mmap [N,1,2048]
 ```
 
 训练时：
@@ -2221,9 +2257,9 @@ User Prompt
     ↓
 Text normalization
     ↓
-SigLIP2 text encoder
+Qwen3-VL-Embedding-2B text-only encoder
     ↓
-Text tokens
+2048-d pooled condition token
     ↓
 Gaussian noise [3,H,W]
     ↓
@@ -2334,15 +2370,7 @@ S_{seam}
 
 # 56.2 Prompt Alignment
 
-把 texture：
-
-```text
-nearest upscale → 224
-```
-
-再使用 SigLIP2 similarity。
-
-只作为辅助指标。
+使用固定 prompt 集进行人工盲评，并由下节的轻量属性分类器统计材质、形态、状态和颜色命中率。Qwen3-VL-Embedding 不接收生成图片，也不承担图文相似度评分。
 
 ---
 
@@ -2390,7 +2418,6 @@ palette diversity
 pHash
 RGB L2
 LPIPS
-SigLIP embedding
 ```
 
 。
@@ -2988,8 +3015,7 @@ coherent texture pack generation
 
 文本 / VLM：
 
-- SigLIP2
-- Qwen3-VL
+- Qwen3-VL-Embedding-2B（仅 text-only 条件注入）
 
 训练 Infra：
 

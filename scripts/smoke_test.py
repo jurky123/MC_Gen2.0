@@ -61,6 +61,7 @@ def write_configs():
             "metadata": str(build_dir / "metadata.parquet"),
             "splits": str(build_dir / "splits.json"),
             "image_size": 32,
+            "channels": 4,
             "toroidal": True,
             "normalize": True,
             "text_mmap": "",
@@ -107,7 +108,7 @@ def main():
     trainer = Trainer(mcfg, tcfg)
     trainer.train(str(data_yaml))
 
-    ckpt = ROOT / "checkpoints" / "smoke" / "final.pt"
+    ckpt = ROOT / "checkpoints" / "smoke" / "latest.pt"
     model, mcfg2 = load_model_from_checkpoint(ckpt, "cpu")
     prompts = ["mossy stone bricks", "oak planks with cracks"]
     imgs = sample_textures(model, prompts, seeds=[1, 2], steps=8, cfg=2.0, device="cpu", text_dim=mcfg2.text_dim, max_tokens=mcfg2.max_text_tokens)

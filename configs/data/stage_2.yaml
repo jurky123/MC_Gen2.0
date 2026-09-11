@@ -1,0 +1,14 @@
+stage: mc_weak_label_training
+
+dataset:
+  images: data/build/stage2_32/images.uint8.mmap
+  metadata: data/build/stage2_32/metadata.parquet
+  splits: data/build/stage2_32/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  channels: 4
+  text_mmap: ""
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: weak_prompt

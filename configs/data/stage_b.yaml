@@ -33,6 +33,7 @@ dataset:
   image_size: 32
   toroidal: true
   normalize: true
+  channels: 4
   text_mmap: ""
   text_dim: 768
   max_text_tokens: 64

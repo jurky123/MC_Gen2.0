@@ -37,6 +37,7 @@ def build_dataset(data_cfg_path, split, train_cfg):
         text_mmap=ds.get("text_mmap", ""),
         text_dim=int(ds.get("text_dim", 768)),
         max_text_tokens=int(ds.get("max_text_tokens", 64)),
+        channels=int(ds.get("channels", 3)),
     )
 
 
@@ -57,12 +58,14 @@ def probe_batch_size(model, data, text_cfg, train_cfg, device):
         return int(batch_cfg.get("preferred_micro_batch", 16))
     bs = int(batch_cfg.get("preferred_micro_batch", 128))
     max_gb = float(batch_cfg.get("max_vram_gb", 7.2))
-    size = model.cfg.image_size
+    base = getattr(model, "_orig_mod", model)
+    in_channels = base.cfg.in_channels
+    size = base.cfg.image_size
     text_dim = text_cfg.get("text_dim", 768)
     max_tokens = text_cfg.get("max_text_tokens", 64)
     while bs >= 1:
         try:
-            x = torch.randn(bs, 3, size, size, device=device)
+            x = torch.randn(bs, in_channels, size, size, device=device)
             t = rand_timesteps(bs, device=device)
             text = torch.randn(bs, max_tokens, text_dim, device=device)
             v = model(x, t, text)
@@ -90,10 +93,10 @@ class Trainer:
         self.cond_drop = model_cfg.cond_dropout
         self.model.to(self.device)
 
-        if train_cfg.compile and not hasattr(torch, "compile"):
+        self.compile_requested = bool(train_cfg.compile)
+        if self.compile_requested and not hasattr(torch, "compile"):
             print("torch.compile unavailable, skipping")
-        elif train_cfg.compile and torch.cuda.is_available():
-            self.model = torch.compile(self.model)
+            self.compile_requested = False
 
         opt_cfg = train_cfg.optimizer
         fused = bool(opt_cfg.get("fused", True)) and torch.cuda.is_available()
@@ -120,45 +123,41 @@ class Trainer:
                 self.scaler = torch.cuda.amp.GradScaler()
 
         self.global_step = 0
+        self.completed_epochs = 0
         self.start_time = time.time()
 
     def _dtype_text(self):
         return torch.float32
 
-    def train_step(self, x, text):
+    def compute_loss(self, x, text):
         b = x.shape[0]
         t = rand_timesteps(b, self.tcfg.flow.get("timestep_sampling", "uniform"), device=x.device)
         xt, z, target = sample_data_noise(x, t)
         drop = 1.0 if text.abs().sum().item() == 0.0 else self.cond_drop
-
-        def run():
-            return self.model(xt, t, text, cond_drop_prob=drop)
-
         if self.autocast is not None:
             with self.autocast:
-                v = run()
-                loss = flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss)
-            if self.scaler is not None:
-                self.scaler.scale(loss).backward()
-                self.scaler.unscale_(self.optimizer)
-                self._grad_clip()
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-            else:
-                loss.backward()
-                self._grad_clip()
-                self.optimizer.step()
+                v = self.model(xt, t, text, cond_drop_prob=drop)
+                return flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss)
+        v = self.model(xt, t, text, cond_drop_prob=drop)
+        return flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss)
+
+    def _optimizer_step(self):
+        if self.scaler is not None:
+            self.scaler.unscale_(self.optimizer)
+            self._grad_clip()
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
         else:
-            v = run()
-            loss = flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss)
-            loss.backward()
             self._grad_clip()
             self.optimizer.step()
         self.scheduler.step()
+        self.optimizer.zero_grad(set_to_none=True)
         self.global_step += 1
         if self.ema is not None:
-            self.ema.step(self.model)
-        return loss.detach().item()
+            self.ema.step(self._checkpoint_model())
+
+    def _checkpoint_model(self):
+        return getattr(self.model, "_orig_mod", self.model)
 
     def _grad_clip(self):
         if self.tcfg.grad_clip is not None:
@@ -168,7 +167,7 @@ class Trainer:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         sd = {
-            "model": self.model.state_dict(),
+            "model": self._checkpoint_model().state_dict(),
             "optimizer": self.optimizer.state_dict(),
             "scheduler": self.scheduler.state_dict(),
             "step": self.global_step,
@@ -177,26 +176,32 @@ class Trainer:
         }
         if self.ema is not None:
             sd["ema"] = self.ema.state_dict()
-        torch.save(sd, str(path))
+        sd["completed_epochs"] = self.completed_epochs
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        torch.save(sd, str(tmp_path))
+        os.replace(tmp_path, path)
         print(f"checkpoint saved: {path}")
 
     def load(self, path):
         sd = torch.load(path, map_location=self.device)
-        self.model.load_state_dict(sd["model"])
+        self._checkpoint_model().load_state_dict(sd["model"])
         self.optimizer.load_state_dict(sd["optimizer"])
         self.scheduler.load_state_dict(sd["scheduler"])
         self.global_step = sd["step"]
+        self.completed_epochs = int(sd.get("completed_epochs", 0))
         if self.ema is not None and "ema" in sd:
             self.ema.load_state_dict(sd["ema"])
-        print(f"resumed from {path} at step {self.global_step}")
+        print(f"resumed from {path} at step {self.global_step}, completed_epochs {self.completed_epochs}")
 
     def train(self, data_cfg_path):
         ds_cfg = load_yaml(data_cfg_path).get("dataset", {})
         text_cfg = {"text_dim": ds_cfg.get("text_dim", 768), "max_text_tokens": ds_cfg.get("max_text_tokens", 64)}
         bs = probe_batch_size(self.model, None, text_cfg, self.tcfg, self.device)
-        if self.tcfg.gradient_accumulation > 1:
-            bs = max(1, bs // self.tcfg.gradient_accumulation)
-        print(f"device={self.device} micro_batch={bs} grad_accum={self.tcfg.gradient_accumulation}")
+        if self.compile_requested and torch.cuda.is_available():
+            print("compiling training graph after batch-size probe")
+            self.model = torch.compile(self.model)
+        accum = max(1, int(self.tcfg.gradient_accumulation))
+        print(f"device={self.device} micro_batch={bs} grad_accum={accum} effective_batch={bs * accum}")
 
         train_ds = build_dataset(data_cfg_path, "train", self.tcfg)
         val_ds = build_dataset(data_cfg_path, "val", self.tcfg)
@@ -213,27 +218,43 @@ class Trainer:
         out_dir = Path(self.tcfg.output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        acc_steps = self.tcfg.gradient_accumulation
         self.optimizer.zero_grad(set_to_none=True)
-        epoch = 0
         while self.global_step < self.tcfg.steps:
             self.model.train()
+            pending = 0
+            last_loss = 0.0
             for x, text in train_loader:
                 x = x.to(self.device, non_blocking=True)
                 text = text.to(self.device, non_blocking=True)
-                loss = self.train_step(x, text)
+                loss = self.compute_loss(x, text)
+                scaled = loss / accum
+                if self.scaler is not None:
+                    self.scaler.scale(scaled).backward()
+                else:
+                    scaled.backward()
+                last_loss = loss.detach().item()
+                pending += 1
+                if pending < accum:
+                    continue
+                pending = 0
+                self._optimizer_step()
                 if self.global_step % self.tcfg.log_every == 0:
                     lr = self.optimizer.param_groups[0]["lr"]
                     el = time.time() - self.start_time
-                    print(f"step {self.global_step}/{self.tcfg.steps} loss {loss:.5f} lr {lr:.2e} elapsed {el:.1f}s")
-                if self.global_step % self.tcfg.save_every == 0:
-                    self.save(out_dir / f"step_{self.global_step:08d}.pt")
+                    print(f"step {self.global_step}/{self.tcfg.steps} loss {last_loss:.5f} lr {lr:.2e} elapsed {el:.1f}s")
+                if self.tcfg.save_every and self.global_step % self.tcfg.save_every == 0:
+                    self.save(out_dir / "latest.pt")
                 if self.global_step >= self.tcfg.steps:
                     break
-            epoch += 1
-            if len(train_loader) > 0:
+            if pending > 0 and self.global_step < self.tcfg.steps:
+                self._optimizer_step()
+                if self.tcfg.save_every and self.global_step % self.tcfg.save_every == 0:
+                    self.save(out_dir / "latest.pt")
+            self.completed_epochs += 1
+            self.save(out_dir / "latest.pt")
+            if len(train_loader) > 0 and self.completed_epochs % self.tcfg.eval_every_epochs == 0:
                 self.val_validate(val_ds, out_dir)
-        self.save(out_dir / "final.pt")
+        self.save(out_dir / "latest.pt")
 
     def val_validate(self, val_ds, out_dir):
         self.model.eval()

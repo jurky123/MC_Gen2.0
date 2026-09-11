@@ -18,6 +18,24 @@ MODULE_FILES = {
     "dedupe": (SRC / "data" / "dedupe.py", ["data/raw/mc/manifest.jsonl", "--out", "data/raw/mc/manifest_deduped.jsonl"]),
     "weak": (SRC / "data" / "weak_labels.py", ["data/raw/mc/extracted", "--out", "data/build/mc_b/weak_labels.jsonl"]),
     "text": (SCRIPTS / "precompute_text.py", []),
+    "stage1": (SRC / "data" / "pixel_training_builder.py", [
+        "data/processed/kenney_components32/manifest.jsonl",
+        "data/processed/itch_components32/manifest.jsonl",
+        "data/processed/kaggle_pixel32/manifest.jsonl",
+        "data/processed/alucard_sprites32/manifest.jsonl",
+        "data/processed/opengameart_2d32/manifest.jsonl",
+        "--dataset", "data/build/mc_text2image32",
+        "--out", "data/build/stage1_32_rgba",
+        "--channels", "4",
+    ]),
+    "stage2": (SRC / "data" / "pixel_training_builder.py", [
+        "--dataset", "data/build/mc_text2image32",
+        "--dataset", "data/build/mc_b16",
+        "--out", "data/build/stage2_32",
+    ]),
+    "modrinth-process": (SRC / "data" / "mc_manifest_processor.py", [
+        "data/raw/mc/weak_labels.jsonl", "--out", "data/processed/modrinth32",
+    ]),
 }
 
 
@@ -39,6 +57,9 @@ def main():
         "dedupe": "Stage B: dedup extraction manifest",
         "weak": "Stage C: build weak labels",
         "text": "Stage C: precompute text embeddings",
+        "stage1": "Build unified pixel assets + all MC pretraining dataset",
+        "stage2": "Build unified weak-labelled MC dataset",
+        "modrinth-process": "Normalize and exactly deduplicate extracted Modrinth textures",
     }
     for name, (_, args) in MODULE_FILES.items():
         sub.add_parser(name, help=help_text.get(name, "run " + name))

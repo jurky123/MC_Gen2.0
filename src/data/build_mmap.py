@@ -82,12 +82,14 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         text_mmap="",
         text_dim=768,
         max_text_tokens=64,
+        channels=3,
     ):
         self.image_size = image_size
         self.toroidal = toroidal
         self.normalize = normalize
         self.text_dim = text_dim
         self.max_text_tokens = max_text_tokens
+        self.channels = channels
 
         with open(splits, "r") as f:
             all_splits = json.load(f)
@@ -98,18 +100,47 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
 
         self.df = pd.read_parquet(metadata)
         self.n = len(self.df)
-        self.images = np.memmap(images, dtype=np.uint8, mode="r", shape=(self.n, image_size, image_size, 3))
+        self.disk_channels = self._infer_disk_channels(images, image_size)
+        self.images = np.memmap(
+            images, dtype=np.uint8, mode="r",
+            shape=(self.n, image_size, image_size, self.disk_channels),
+        )
         self.has_text = bool(text_mmap) and os.path.exists(text_mmap)
         if self.has_text:
             self.text = np.memmap(text_mmap, dtype=np.float32, mode="r", shape=(self.n, max_text_tokens, text_dim))
         self.df = self.df
 
+    def _infer_disk_channels(self, images, image_size):
+        with open(images, "rb") as handle:
+            if handle.read(6) == b"\x93NUMPY":
+                return int(np.load(images, mmap_mode="r").shape[-1])
+        total = os.path.getsize(images)
+        for c in (self.channels, 4, 3, 1):
+            if total == self.n * image_size * image_size * c:
+                return c
+        raise ValueError(
+            f"cannot infer channel count for {images}: {total} bytes, {self.n} rows at {image_size}px"
+        )
+
     def __len__(self):
         return len(self.index)
 
+    def _adapt_channels(self, arr):
+        disk = arr.shape[-1]
+        if disk == self.channels:
+            return arr
+        if disk == 3 and self.channels == 4:
+            alpha = np.full(arr.shape[:2] + (1,), 255, dtype=np.uint8)
+            return np.concatenate([arr, alpha], axis=-1)
+        if disk == 4 and self.channels == 3:
+            rgb = arr[..., :3].astype(np.uint16)
+            a = arr[..., 3:4].astype(np.uint16)
+            return ((rgb * a + 127) // 255).astype(np.uint8)
+        raise ValueError(f"cannot adapt {disk}-channel image to {self.channels} channels")
+
     def __getitem__(self, i):
         idx = self.index[i]
-        arr = np.asarray(self.images[idx])
+        arr = self._adapt_channels(np.asarray(self.images[idx]))
         dy = dx = 0
         if self.toroidal:
             dy = np.random.randint(0, self.image_size)

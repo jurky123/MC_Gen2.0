@@ -2,13 +2,24 @@ stage: mc_domain
 
 build:
   out_dir: data/build/mc_b
-  raw_root: data/raw/mc
+  image_size: 32
+
+  mod_source: ovaware
+  mod_out_dir: data/build/mc_b
+  mod_size: 16
+
+  resourcepack_source: modrinth
   download_dir: data/raw/mc/downloads
   extracted_dir: data/raw/mc/extracted
+  manifest: data/raw/mc/manifest.jsonl
+  deduped_manifest: data/raw/mc/manifest_deduped.jsonl
+  weak_labels: data/build/mc_b/weak_labels.jsonl
+  max_packs: 200
+  categories: [16x, 32x, 64x]
+
   allow_licenses: [cc0-1.0, cc-by-4.0]
-  require_review_licenses: [mit, apache-2.0, gpl-3.0, gpl-2.0]
-  deny_licenses: [arr, custom, licenseRef, no-ai, ai-training-prohibited]
-  target_size: 32
+  review_licenses: [mit, apache-2.0, gpl-3.0, gpl-2.0]
+
   splits:
     train: 0.9
     val: 0.05

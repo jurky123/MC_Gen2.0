@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image
 
 SUPPORTED_SIZES = {16, 32, 64}
-TEXTURE_RE = re.compile(r"^assets/([^/]+)/textures/block/([^/]+\.png)$")
+TEXTURE_RE = re.compile(r"^assets/([^/]+)/textures/blocks?/([^/]+\.png)$")
 
 
 def _iter_zip(path):
@@ -43,11 +43,14 @@ def extract_package(pkg_path, project_id, version, license_id, out_dir, supporte
     iter_fn = _iter_dir if Path(pkg_path).is_dir() else _iter_zip
     for ns, rel, data in iter_fn(pkg_path):
         try:
-            img = Image.open(io.BytesIO(data)).convert("RGB")
+            im = Image.open(io.BytesIO(data))
+            im.load()
         except Exception:
             continue
-        if img.size not in [(s, s) for s in supported]:
+        if im.size not in [(s, s) for s in supported]:
             continue
+        img = Image.new("RGB", im.size)
+        img.paste(im.convert("RGB"))
         dst = out_dir / project_id / ns / "block" / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         img.save(dst)

@@ -1,0 +1,19 @@
+stage: mc_legacy_16
+
+build:
+  out_dir: data/build/mc_b16
+  source: data/raw/mc_gen
+  image_size: 16
+  note: research-only use
+
+dataset:
+  images: data/build/mc_b16/images.uint8.mmap
+  metadata: data/build/mc_b16/metadata.parquet
+  splits: data/build/mc_b16/splits.json
+  image_size: 16
+  toroidal: true
+  normalize: true
+  text_mmap: data/build/mc_b16/text_embeddings.f32.mmap
+  text_dim: 768
+  max_text_tokens: 64
+  caption_col: weak_prompt

@@ -1,8 +1,10 @@
 # Minecraft 低分辨率材质生成模型：完整数据、模型、训练与部署方案
 
-> 版本：v2.0  
-> 日期：2026-09-09  
-> 目标：构建一个用于 Minecraft / voxel-game 方块材质生成的低分辨率文生纹理模型。主模型约 45–50M 参数，训练尽量控制在单卡 8GB 显存以内；数据以通用纹理预训练、像素风域桥接、许可审计后的 MC 纹理域适配、弱标注与 VLM 高质量标注为主；推理采用现代 Flow Matching / Rectified Flow Transformer 范式。
+> 版本：v2.2
+> 日期：2026-09-11
+> 目标：构建 Minecraft / voxel-game 低分辨率文生纹理模型。数据改为像素风素材与真实 MC 纹理；主模型、8GB 显存目标和 Rectified Flow Transformer 范式保持不变。
+
+> **v2.2 路线覆盖说明：** 本节及“0. 最终方案概要”是当前有效方案。后文 MatSynth、ambientCG、Material Maker、pseudo-pixel 和旧 Stage A/A.5/C/D 内容仅作历史参考，不再作为数据获取或训练依据。
 
 ---
 
@@ -11,20 +13,14 @@
 主路线：
 
 ```text
-Stage A：通用材质预训练
-MatSynth CC0 + Material Maker CC0
+Stage 1：全量数据预训练
+Kenney + itch.io free pixel-art assets + NathMen12 MC TextToImage
         ↓
-Stage A.5：像素风域桥接
-pseudo-pixelized materials + Kenney CC0 pixel assets
+Stage 2：Minecraft 弱标注训练
+NathMen12/16xModdedMinecraft-TextToImage + existing MC weak labels
         ↓
-Stage B：Minecraft 域适配
-Audited Modrinth resource packs + open-source mod block textures
-        ↓
-Stage C：结构化弱文本对齐
-filename + model JSON + lang JSON + namespace
-        ↓
-Stage D：高质量 VLM caption
-Qwen3-VL benchmark 后选择 30B-A3B / 235B-A22B
+Stage 3：Minecraft 精标注精调（数据暂不获取）
+curated Minecraft textures + manually/VLM verified captions
         ↓
 MC-FlowDiT-Base
 Pixel-space Rectified Flow Transformer
@@ -33,6 +29,31 @@ Pixel-space Rectified Flow Transformer
         ↓
 可选 4–8 step distillation
 ```
+
+当前数据约定：删除并停用 MatSynth、ambientCG 等真实世界通用材质；Stage 1 使用全部像素素材和全部 MC 数据；Stage 2 以 `NathMen12/16xModdedMinecraft-TextToImage` 的 1,034,057 条图文数据为主，并保留现有 MC 弱标签；Stage 3 只使用精标注 MC 子集且本轮不获取。项目限定为学习研究用途，但仍保存来源 URL、作者、页面标签和许可字段以保证可追溯。
+
+## 0.1 当前数据落盘状态
+
+| 数据 | 当前状态 | 训练用途 |
+|---|---|---|
+| NathMen12 MC TextToImage | 1,034,057 条已完整下载并转换为 32x32 mmap；train/val/test 为 941,104 / 43,184 / 49,769 | Stage 1 + Stage 2 主 MC 数据 |
+| Kenney Pixel Assets | 14 包、2,106 个源图片已处理为 4,312 个去重样本 | Stage 1 |
+| itch.io Free Pixel Art | 原始下载达到 30.022 GiB 硬上限；连通域切分进行中，本次记录点为 557,124 条 manifest | Stage 1 |
+| 精标注 MC 子集 | 本轮不获取 | Stage 3 占位 |
+
+旧 OVAWARE 本地子集和 Modrinth 提取集继续保留作兼容、校验或补充，但不替代 NathMen12 主集。固定网格方式生成的旧 itch 切片为废弃中间产物，不可混入训练。
+
+## 0.2 spritesheet 与独立物件处理规范
+
+像素素材网页中的单张文件经常包含多个透明隔开的角色、道具或 tile，因此原图不能直接当作一个训练样本。当前处理规则如下：
+
+1. 读取 alpha 通道，以非透明像素的二维连通区域定位独立物件并计算包围盒。
+2. 仅当文件名明确标注 8x8、16x16、32x32 等 tile 规格时，允许优先按该显式规格切格；不再猜测固定网格。
+3. 对包围盒内容保持长宽比，使用 nearest-neighbor 降采样或上采样，居中放入 32x32 透明画布。该方式避免双线性插值污染像素边缘，也避免无条件拉伸造成形变。
+4. 跳过空白、近纯色和无法可靠拆分的全不透明大图；按输出内容 SHA 精确去重。
+5. 在 JSONL manifest 中保存源文件、所属素材/压缩包、包围盒、切分方法和输出路径，使筛选与重建可追溯。
+
+处理完成后需进行分层抽样复核，重点检查极端长宽比对象、动画条带、粒子图、字体图、UI atlas 和意外保留的整张场景。通过复核后，才将 Kenney、itch 与全部 MC 样本合并为 Stage 1 mmap。Stage 1 合并构建目前尚未完成。
 
 推荐主模型：
 

@@ -14,7 +14,22 @@ REVIEW = {
     "epl-2.0",
     "artistic-2.0",
 }
-DENY_SUBSTRINGS = ["arr", "no-ai", "ai-training", "prohibited", "custom", "unclear", "mixed", "proprietary"]
+DENY_SUBSTRINGS = [
+    "arr",
+    "all-rights-reserved",
+    "reserved",
+    "no-ai",
+    "ai-training",
+    "prohibited",
+    "custom",
+    "unclear",
+    "mixed",
+    "proprietary",
+    "licenseref",
+    "noncommercial",
+    "non-commercial",
+    "nc-",
+]
 
 
 def classify(license_id, extra="", allow_override=None, review_override=None, deny_override=None):

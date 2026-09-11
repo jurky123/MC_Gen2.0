@@ -1,18 +1,54 @@
+# ── Python ─────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+*.so
 *.egg-info/
+.eggs/
+dist/
+
+# ── Virtual environments ───────────────────────────────
 .venv/
 venv/
+env/
+
+# ── Secrets / environment ─────────────────────────────
+.env
+.env.*
+
+# ── Data (raw downloads & derived datasets are large) ─
+data/raw/
+data/build/
+data/staging/
+data/processed/
+*.mmap
+*.parquet
+*.npy
+*.npz
+*.zarr
+
+# ── Model artifacts / checkpoints ─────────────────────
+checkpoints/*
+!checkpoints/.gitkeep
 *.pt
+*.pth
+*.ckpt
 *.bin
 *.safetensors
-*.mmap
-data/raw/
-data/staging/
-data/build/
-outputs/vis/
-outputs/generated/
-checkpoints/
+*.onnx
+*.engine
+
+# ── Runtime outputs ───────────────────────────────────
+outputs/*
+!outputs/.gitkeep
 *.log
+logs/
+
+# ── IDE / OS ──────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
 .ipynb_checkpoints/
 .pytest_cache/
+.cache/
+.tools/

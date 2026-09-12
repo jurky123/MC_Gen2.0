@@ -10,12 +10,14 @@ def _velocity_at(model, x, t, text, cfg, text_uncond):
 
 
 def euler(model, z, text, steps=20, cfg=0.0, text_uncond=None):
+    # Data lives at t=0 and noise at t=1 (x_t = (1-t)x0 + t z), so generation
+    # integrates the reverse ODE from t=1 down to t=0: x <- x - dt * v.
     x = z
     dt = 1.0 / steps
     for i in range(steps):
         t = torch.full((x.shape[0],), 1.0 - i * dt, device=x.device, dtype=z.dtype)
         v = _velocity_at(model, x, t, text, cfg, text_uncond)
-        x = x + dt * v
+        x = x - dt * v
     return x
 
 
@@ -24,11 +26,12 @@ def heun(model, z, text, steps=20, cfg=0.0, text_uncond=None):
     dt = 1.0 / steps
     for i in range(steps):
         t = torch.full((x.shape[0],), 1.0 - i * dt, device=x.device, dtype=z.dtype)
+        t_next = torch.full((x.shape[0],), max(0.0, 1.0 - (i + 1) * dt),
+                            device=x.device, dtype=z.dtype)
         v = _velocity_at(model, x, t, text, cfg, text_uncond)
-        t_half = t - 0.5 * dt
-        x_e = x + 0.5 * dt * v
-        v2 = _velocity_at(model, x_e, t_half, text, cfg, text_uncond)
-        x = x + dt * v2
+        x_e = x - dt * v
+        v2 = _velocity_at(model, x_e, t_next, text, cfg, text_uncond)
+        x = x - 0.5 * dt * (v + v2)
     return x
 
 

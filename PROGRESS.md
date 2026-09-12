@@ -54,6 +54,7 @@
 - 训练循环每 `save_every` 步滚动保存 `checkpoints/stage_1/latest.pt`，并支持 `--resume`；不再只在 epoch 末保存。
 - 推理端（`src/infer/sample.py`、`api.py`）按 `model.cfg.in_channels` 采样并输出 RGBA。
 - 冒烟配置 `configs/train/smoke_rgba.yaml` 用于快速验证 4 通道 + 梯度累计 + 中间 checkpoint。
+- Stage 1 数据改为**读取时多源混合**：`data/build/stage1_32_rgba`（mmap）+ `data/processed/modrinth32` + `data/processed/minecraft_16x_finetune32`（tile manifest），无需重传或重新合并；Stage 1 只使用图片。多源与权重在 `configs/data/stage_1.yaml` 配置。
 
 ## 文本条件编码器
 

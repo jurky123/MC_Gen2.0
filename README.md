@@ -104,6 +104,12 @@ Key recipe settings (`configs/train/stage_1.yaml`):
 | precision | bf16 + `torch.compile` |
 | checkpoints | `checkpoints/stage_1/latest.pt` every 2,000 steps |
 
+Stage 1 mixes several sources **at read time** (no merged copy and no re-upload
+needed): `data/build/stage1_32_rgba` (mmap) plus `data/processed/modrinth32`
+and `data/processed/minecraft_16x_finetune32` (tile manifests). Sources,
+channels and optional sampling weights live in `configs/data/stage_1.yaml`;
+Stage 1 uses images only.
+
 Resume after interruption:
 
 ```bash

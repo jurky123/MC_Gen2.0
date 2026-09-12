@@ -11,7 +11,7 @@ import yaml
 
 from config import ModelConfig, TrainConfig, load_yaml
 from model.mc_flow_dit import MCFlowDiT
-from data.build_mmap import MmapImageTextDataset
+from data.build_mmap import MmapImageTextDataset, ManifestImageDataset, MixDataset
 from .flow import rand_timesteps, sample_data_noise
 from .losses import flow_tile_loss
 from .ema import EMA
@@ -23,22 +23,46 @@ def _collate(batch):
     return xs, embs
 
 
+def _build_source(src, ds, split):
+    kind = src.get("type", "mmap")
+    image_size = int(ds.get("image_size", 32))
+    normalize = bool(ds.get("normalize", True))
+    text_dim = int(ds.get("text_dim", 768))
+    channels = int(src.get("channels", ds.get("channels", 4)))
+    if kind == "manifest":
+        return ManifestImageDataset(
+            manifest=src["manifest"],
+            image_size=image_size,
+            channels=channels,
+            normalize=normalize,
+            split=split,
+            text_dim=text_dim,
+            toroidal=bool(src.get("toroidal", ds.get("toroidal", False))),
+        )
+    return MmapImageTextDataset(
+        images=src["images"],
+        metadata=src["metadata"],
+        splits=src["splits"],
+        split=split,
+        image_size=image_size,
+        toroidal=bool(src.get("toroidal", ds.get("toroidal", True))),
+        normalize=normalize,
+        text_mmap=src.get("text_mmap", ""),
+        text_dim=text_dim,
+        max_text_tokens=int(ds.get("max_text_tokens", 64)),
+        channels=channels,
+    )
+
+
 def build_dataset(data_cfg_path, split, train_cfg):
     data = load_yaml(data_cfg_path)
     ds = data.get("dataset", {})
-    return MmapImageTextDataset(
-        images=ds["images"],
-        metadata=ds["metadata"],
-        splits=ds["splits"],
-        split=split,
-        image_size=int(ds.get("image_size", 32)),
-        toroidal=bool(ds.get("toroidal", True)),
-        normalize=bool(ds.get("normalize", True)),
-        text_mmap=ds.get("text_mmap", ""),
-        text_dim=int(ds.get("text_dim", 768)),
-        max_text_tokens=int(ds.get("max_text_tokens", 64)),
-        channels=int(ds.get("channels", 3)),
-    )
+    sources = ds.get("sources")
+    if sources:
+        datasets = [_build_source(src, ds, split) for src in sources]
+        weights = [float(src.get("weight", 1.0)) for src in sources]
+        return datasets[0] if len(datasets) == 1 else MixDataset(datasets, weights)
+    return _build_source(ds, ds, split)
 
 
 def get_lr_schedule(optimizer, steps, warmup):
@@ -205,10 +229,12 @@ class Trainer:
 
         train_ds = build_dataset(data_cfg_path, "train", self.tcfg)
         val_ds = build_dataset(data_cfg_path, "val", self.tcfg)
+        sampler = train_ds.make_sampler() if hasattr(train_ds, "make_sampler") else None
         train_loader = torch.utils.data.DataLoader(
             train_ds,
             batch_size=bs,
-            shuffle=True,
+            shuffle=(sampler is None),
+            sampler=sampler,
             num_workers=0,
             pin_memory=True,
             collate_fn=_collate,

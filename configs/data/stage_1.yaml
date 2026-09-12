@@ -1,9 +1,6 @@
 stage: pixel_and_mc_pretraining
 
 dataset:
-  images: data/build/stage1_32_rgba/images.uint8.mmap
-  metadata: data/build/stage1_32_rgba/metadata.parquet
-  splits: data/build/stage1_32_rgba/splits.json
   image_size: 32
   channels: 4
   toroidal: false
@@ -12,3 +9,18 @@ dataset:
   text_dim: 768
   max_text_tokens: 64
   caption_col: weak_prompt
+  sources:
+    - type: mmap
+      images: data/build/stage1_32_rgba/images.uint8.mmap
+      metadata: data/build/stage1_32_rgba/metadata.parquet
+      splits: data/build/stage1_32_rgba/splits.json
+      channels: 4
+      weight: 1.0
+    - type: manifest
+      manifest: data/processed/modrinth32/manifest.jsonl
+      channels: 4
+      weight: 1.0
+    - type: manifest
+      manifest: data/processed/minecraft_16x_finetune32/manifest.jsonl
+      channels: 4
+      weight: 1.0

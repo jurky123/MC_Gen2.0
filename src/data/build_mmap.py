@@ -152,3 +152,111 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         else:
             emb = torch.zeros(1, self.text_dim, dtype=torch.float32)
         return x, emb
+
+
+class ManifestImageDataset(torch.utils.data.Dataset):
+    """In-memory dataset over a processed tile manifest (tiles/ + manifest.jsonl).
+
+    Tiles are decoded once at construction, so this is only suitable for the
+    small processed sets (a few thousand images).
+    """
+
+    _SPLITS = ("train", "val", "test")
+
+    def __init__(self, manifest, image_size=32, channels=3, normalize=True, split="train",
+                 text_dim=768, toroidal=False, val_fraction=0.05, test_fraction=0.05):
+        base = Path(__file__).resolve().parents[2]
+        self.image_size = image_size
+        self.channels = channels
+        self.normalize = normalize
+        self.text_dim = text_dim
+        self.toroidal = toroidal
+
+        records = []
+        with Path(manifest).open(encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if line:
+                    records.append(json.loads(line))
+
+        images = np.zeros((len(records), image_size, image_size, channels), dtype=np.uint8)
+        index = {name: [] for name in self._SPLITS}
+        train_threshold = 100.0 * (1.0 - val_fraction - test_fraction)
+        val_threshold = 100.0 * (1.0 - test_fraction)
+        for i, rec in enumerate(records):
+            rel = str(rec["path"]).replace("\\", "/")
+            path = Path(rel)
+            if not path.is_absolute():
+                path = base / rel
+            image = Image.open(path).convert("RGBA")
+            if image.size != (image_size, image_size):
+                image = image.resize((image_size, image_size), Image.Resampling.NEAREST)
+            if channels == 4:
+                images[i] = np.asarray(image, dtype=np.uint8)
+            else:
+                background = Image.new("RGBA", image.size, (0, 0, 0, 255))
+                background.alpha_composite(image)
+                images[i] = np.asarray(background.convert("RGB"), dtype=np.uint8)
+            name = str(rec.get("split") or "")
+            if name == "validation":
+                name = "val"
+            if name not in self._SPLITS:
+                digest = Path(rel).stem
+                value = int(hashlib.sha1(digest.encode("utf-8")).hexdigest()[:8], 16) % 100
+                name = "train" if value < train_threshold else (
+                    "val" if value < val_threshold else "test")
+            index[name].append(i)
+        self.images = images
+        self.index = list(index.get(split, []))
+
+    def __len__(self):
+        return len(self.index)
+
+    def __getitem__(self, i):
+        arr = self.images[self.index[i]]
+        if self.toroidal:
+            arr = np.roll(arr, (np.random.randint(0, self.image_size),
+                               np.random.randint(0, self.image_size)), axis=(0, 1))
+        x = torch.from_numpy(np.ascontiguousarray(arr)).permute(2, 0, 1).float() / 127.5 - 1.0
+        emb = torch.zeros(1, self.text_dim, dtype=torch.float32)
+        return x, emb
+
+
+class MixDataset(torch.utils.data.Dataset):
+    """Concatenate several datasets; ``make_sampler`` enables weighted sampling."""
+
+    def __init__(self, datasets, weights=None):
+        self.datasets = list(datasets)
+        self.weights = [float(w) for w in (weights or [1.0] * len(self.datasets))]
+        if len(self.weights) != len(self.datasets):
+            raise ValueError("weights length must match datasets")
+        self._ends = []
+        total = 0
+        for dataset in self.datasets:
+            total += len(dataset)
+            self._ends.append(total)
+
+    def __len__(self):
+        return self._ends[-1] if self._ends else 0
+
+    def __getitem__(self, i):
+        if i < 0:
+            i += len(self)
+        for k, end in enumerate(self._ends):
+            if i < end:
+                start = self._ends[k - 1] if k else 0
+                return self.datasets[k][i - start]
+        raise IndexError(i)
+
+    def make_sampler(self, num_samples=None, generator=None):
+        if all(abs(w - 1.0) < 1e-9 for w in self.weights):
+            return None
+        items = []
+        for dataset, weight in zip(self.datasets, self.weights):
+            n = len(dataset)
+            if n:
+                items.append(torch.full((n,), weight / n, dtype=torch.double))
+        if not items:
+            return None
+        return torch.utils.data.WeightedRandomSampler(
+            torch.cat(items), num_samples or len(self), replacement=True, generator=generator)

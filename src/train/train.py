@@ -112,7 +112,7 @@ class Trainer:
         ema_cfg = train_cfg.ema
         self.ema = None
         if ema_cfg.get("enabled", True):
-            self.ema = EMA(self.model, decay=float(ema_cfg.get("decay", 0.9999)), update_every=int(ema_cfg.get("update_every", 8)), device=ema_cfg.get("device", "cpu"))
+            self.ema = EMA(self.model, decay=float(ema_cfg.get("decay", 0.999)), update_every=int(ema_cfg.get("update_every", 1)), device=ema_cfg.get("device", "cpu"))
 
         self.autocast = None
         self.scaler = None

@@ -89,7 +89,7 @@ def write_configs():
             "activation_checkpointing": False,
             "gradient_accumulation": 1,
             "batch": {"auto_probe": False, "preferred_micro_batch": 8, "max_vram_gb": 7.2},
-            "ema": {"enabled": True, "device": "cpu", "decay": 0.9999, "update_every": 8},
+            "ema": {"enabled": True, "device": "cpu", "decay": 0.999, "update_every": 1},
             "flow": {"timestep_sampling": "uniform", "loss": "mse"},
             "tile_loss": {"enabled": True, "weight": 0.03, "max_t": 0.7, "border_width": 2},
             "dataset": str(data_yaml),

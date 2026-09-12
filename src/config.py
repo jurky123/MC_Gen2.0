@@ -86,8 +86,8 @@ class TrainConfig:
     ema: dict = field(default_factory=lambda: {
         "enabled": True,
         "device": "cpu",
-        "decay": 0.9999,
-        "update_every": 8,
+        "decay": 0.999,
+        "update_every": 1,
     })
 
     flow: dict = field(default_factory=lambda: {"timestep_sampling": "uniform", "loss": "mse"})

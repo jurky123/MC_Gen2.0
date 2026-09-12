@@ -34,8 +34,8 @@ train:
   ema:
     enabled: true
     device: cpu
-    decay: 0.9999
-    update_every: 8
+    decay: 0.999
+    update_every: 1
 
   flow:
     timestep_sampling: uniform

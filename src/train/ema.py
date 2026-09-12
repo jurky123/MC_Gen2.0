@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class EMA:
-    def __init__(self, model, decay=0.9999, update_every=8, device="cpu"):
+    def __init__(self, model, decay=0.999, update_every=1, device="cpu"):
         self.decay = decay
         self.update_every = update_every
         self.device = device
@@ -32,7 +32,7 @@ class EMA:
         return {"decay": self.decay, "update_every": self.update_every, "updates": self.updates, "shadow": self.shadow}
 
     def load_state_dict(self, sd):
-        self.decay = sd["decay"]
-        self.update_every = sd["update_every"]
+        # Keep decay / update_every from the current config so that changing
+        # them takes effect on resume; only restore the accumulated state.
         self.updates = sd["updates"]
         self.shadow = sd["shadow"]

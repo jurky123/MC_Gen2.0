@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from config import ModelConfig, load_yaml
 from model.mc_flow_dit import MCFlowDiT
-from data.embed_text import hash_text_embed, siglip2_embed
+from data.embed_text import encode_texts
 from .solver import sample, to_uint8
 
 
@@ -23,14 +23,23 @@ def load_model_from_checkpoint(ckpt_path, device="cuda"):
     return model, mcfg
 
 
-def encode_prompts(prompts, text_dim=768, max_tokens=64, model_name=""):
-    if model_name:
-        return siglip2_embed(prompts, model_name, max_tokens=max_tokens, token_dim=text_dim)
-    return hash_text_embed(prompts, dim=text_dim, max_tokens=max_tokens)
+def encode_prompts(prompts, text_dim=768, max_tokens=64, model_name="", encoder_type="", instruction=""):
+    if not encoder_type:
+        encoder_type = "siglip2" if model_name else "hash"
+    return encode_texts(
+        prompts,
+        encoder_type=encoder_type,
+        model_name=model_name,
+        instruction=instruction,
+        text_dim=text_dim,
+        max_tokens=max_tokens,
+    )
 
 
-def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun", device="cuda", text_dim=768, max_tokens=64, text_encoder=""):
-    embs = torch.from_numpy(encode_prompts(prompts, text_dim=text_dim, max_tokens=max_tokens, model_name=text_encoder)).to(device)
+def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun", device="cuda", text_dim=768, max_tokens=64, text_encoder="", encoder_type="", instruction=""):
+    embs = torch.from_numpy(
+        encode_prompts(prompts, text_dim=text_dim, max_tokens=max_tokens, model_name=text_encoder, encoder_type=encoder_type, instruction=instruction)
+    ).to(device)
     uncond = torch.zeros_like(embs)
     size = model.cfg.image_size
     results = []
@@ -63,6 +72,8 @@ def main():
     ap.add_argument("--seeds", type=int, nargs="*", default=None)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--text-encoder", default="")
+    ap.add_argument("--encoder-type", default="", help="hash | siglip2 | qwen3vl")
+    ap.add_argument("--instruction", default="")
     args = ap.parse_args()
 
     model, mcfg = load_model_from_checkpoint(args.ckpt, args.device)
@@ -77,6 +88,8 @@ def main():
         text_dim=mcfg.text_dim,
         max_tokens=mcfg.max_text_tokens,
         text_encoder=args.text_encoder,
+        encoder_type=args.encoder_type,
+        instruction=args.instruction,
     )
     for i, p in enumerate(args.prompt):
         out = Path(args.out) / f"{i:03d}_{'_'.join(p.split())[:40]}.png"

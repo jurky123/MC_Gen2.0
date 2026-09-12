@@ -1,0 +1,25 @@
+model:
+  name: MCFlowDiTBase
+  image_size: 32
+  in_channels: 4
+  patch_size: 2
+
+  hidden_size: 512
+  num_heads: 8
+  mlp_ratio: 3.0
+  text_mlp_ratio: 1.0
+
+  double_stream_blocks: 3
+  single_stream_blocks: 6
+
+  # Qwen3-VL-Embedding-2B: single pooled, L2-normalized 2048-d token.
+  # Keep in sync with configs/text_encoder.yaml.
+  text_dim: 2048
+  max_text_tokens: 1
+
+  qk_norm: true
+  rope: 2d
+  activation: swiglu
+  bias: false
+
+  cond_dropout: 0.12

@@ -4,6 +4,7 @@ __pycache__/
 *.so
 *.egg-info/
 .eggs/
+build/
 dist/
 
 # ── Virtual environments ───────────────────────────────
@@ -14,17 +15,26 @@ env/
 # ── Secrets / environment ─────────────────────────────
 .env
 .env.*
+.python-version
 
 # ── Data (raw downloads & derived datasets are large) ─
 data/raw/
 data/build/
 data/staging/
 data/processed/
+data/interim/
 *.mmap
 *.parquet
 *.npy
 *.npz
 *.zarr
+
+# ── Download / build temp files ────────────────────────
+*.part
+*.aria2
+*.incomplete
+*.tmp
+*.download
 
 # ── Model artifacts / checkpoints ─────────────────────
 checkpoints/*
@@ -37,11 +47,24 @@ checkpoints/*
 *.onnx
 *.engine
 
+# ── Hugging Face caches (keep model weights out of git) ─
+.hf/
+hf_cache/
+hf_home/
+*.hf
+
 # ── Runtime outputs ───────────────────────────────────
 outputs/*
 !outputs/.gitkeep
 *.log
 logs/
+
+# ── Test / lint caches ────────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # ── IDE / OS ──────────────────────────────────────────
 .idea/
@@ -49,6 +72,5 @@ logs/
 .DS_Store
 Thumbs.db
 .ipynb_checkpoints/
-.pytest_cache/
 .cache/
 .tools/

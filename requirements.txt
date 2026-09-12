@@ -15,3 +15,6 @@ imagehash
 fastapi
 uvicorn
 httpx
+# Frozen text encoder (Qwen3-VL-Embedding), used offline for prompt conditioning
+sentence-transformers>=5.4
+qwen-vl-utils>=0.0.14

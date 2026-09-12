@@ -58,3 +58,157 @@ def siglip2_embed(texts, model_name, max_tokens=64, token_dim=768):
             hidden = model(**enc).last_hidden_state[0].numpy()
             out[i, : hidden.shape[0]] = hidden
     return out
+
+
+_ENCODER_CACHE = {}
+
+_DTYPE_MAP = {"float16": "float16", "fp16": "float16", "bfloat16": "bfloat16", "bf16": "bfloat16",
+              "float32": "float32", "fp32": "float32"}
+
+
+def _normalize_rows(x):
+    x = np.asarray(x, dtype=np.float32)
+    norm = np.linalg.norm(x, axis=-1, keepdims=True)
+    return x / np.clip(norm, 1e-12, None)
+
+
+def _as_tokens(embeddings, text_dim):
+    """Return (N, 1, text_dim) from a pooled (N, D) matrix."""
+    emb = np.asarray(embeddings, dtype=np.float32)
+    if emb.ndim == 1:
+        emb = emb[None, :]
+    if emb.shape[-1] != text_dim:
+        raise ValueError(f"text encoder produced dim {emb.shape[-1]}, expected {text_dim}")
+    return emb[:, None, :]
+
+
+def qwen3vl_embed(
+    texts,
+    model_name="Qwen/Qwen3-VL-Embedding-2B",
+    instruction="Represent the user's input.",
+    text_dim=2048,
+    max_tokens=1,
+    device="cuda",
+    dtype="float16",
+    batch_size=16,
+    normalize=True,
+    revision=None,
+    trust_remote_code=True,
+    max_length=8192,
+):
+    """Frozen Qwen3-VL-Embedding text encoder.
+
+    Returns a single pooled, optionally L2-normalized token per text:
+    shape ``(len(texts), 1, text_dim)`` (fp32). Prefers ``sentence-transformers``
+    (which ships the pooler/normalizer modules); falls back to raw ``transformers``
+    with last-token pooling.
+    """
+    if isinstance(texts, str):
+        texts = [texts]
+    texts = ["" if t is None else str(t) for t in texts]
+
+    try:
+        from sentence_transformers import SentenceTransformer
+    except Exception:
+        SentenceTransformer = None
+
+    if SentenceTransformer is not None:
+        key = ("st", model_name, revision, device)
+        model = _ENCODER_CACHE.get(key)
+        if model is None:
+            kwargs = {"device": device}
+            if revision:
+                kwargs["revision"] = revision
+            if trust_remote_code:
+                kwargs["trust_remote_code"] = True
+            if dtype and dtype != "float32":
+                kwargs["model_kwargs"] = {"torch_dtype": _DTYPE_MAP.get(dtype, dtype)}
+            model = SentenceTransformer(model_name, **kwargs)
+            model.eval()
+            _ENCODER_CACHE[key] = model
+        encode_kwargs = {
+            "batch_size": batch_size,
+            "normalize_embeddings": bool(normalize),
+            "convert_to_numpy": True,
+            "show_progress_bar": False,
+        }
+        if instruction:
+            encode_kwargs["prompt"] = instruction
+        emb = model.encode(texts, **encode_kwargs)
+        emb = np.asarray(emb, dtype=np.float32)
+        if normalize:
+            emb = _normalize_rows(emb)
+        return _as_tokens(emb, text_dim)
+
+    import torch
+    from transformers import AutoModel, AutoTokenizer
+
+    key = ("hf", model_name, revision, device)
+    cached = _ENCODER_CACHE.get(key)
+    if cached is None:
+        torch_dtype = getattr(torch, _DTYPE_MAP.get(dtype, "float16"), torch.float32)
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_name, revision=revision, trust_remote_code=trust_remote_code
+        )
+        model = AutoModel.from_pretrained(
+            model_name, revision=revision, trust_remote_code=trust_remote_code, torch_dtype=torch_dtype
+        ).to(device)
+        model.eval()
+        cached = (tokenizer, model)
+        _ENCODER_CACHE[key] = cached
+    tokenizer, model = cached
+
+    if instruction and getattr(tokenizer, "chat_template", None):
+        prompts = [tokenizer.apply_chat_template(
+            [{"role": "user", "content": [{"type": "text", "text": t}]}],
+            add_generation_prompt=False, tokenize=False,
+        ) for t in texts]
+    else:
+        prompts = texts
+
+    chunks = []
+    with torch.no_grad():
+        for start in range(0, len(prompts), batch_size):
+            batch = prompts[start : start + batch_size]
+            enc = tokenizer(batch, padding=True, truncation=True, max_length=max_length, return_tensors="pt").to(device)
+            out = model(**enc)
+            hidden = out.last_hidden_state
+            mask = enc["attention_mask"]
+            idx = mask.sum(dim=1).clamp(min=1) - 1
+            pooled = hidden[torch.arange(hidden.size(0), device=hidden.device), idx]
+            chunks.append(pooled.float().cpu().numpy())
+    emb = np.concatenate(chunks, axis=0)
+    if normalize:
+        emb = _normalize_rows(emb)
+    return _as_tokens(emb, text_dim)
+
+
+def encode_texts(
+    texts,
+    encoder_type="hash",
+    model_name="",
+    instruction="",
+    text_dim=768,
+    max_tokens=64,
+    device="cuda",
+    dtype="float16",
+    batch_size=16,
+    normalize=True,
+    revision=None,
+):
+    """Route to the configured offline text encoder.
+
+    ``encoder_type`` is one of ``hash`` (deterministic placeholder), ``siglip2``
+    (token-level hidden states) or ``qwen3vl`` (single pooled token).
+    """
+    encoder_type = (encoder_type or "hash").lower()
+    if encoder_type in ("qwen", "qwen3vl", "qwen3-vl", "qwen3vl-embedding"):
+        return qwen3vl_embed(
+            texts, model_name=model_name or "Qwen/Qwen3-VL-Embedding-2B",
+            instruction=instruction or "Represent the user's input.",
+            text_dim=text_dim, max_tokens=max_tokens, device=device, dtype=dtype,
+            batch_size=batch_size, normalize=normalize, revision=revision,
+        )
+    if encoder_type == "siglip2":
+        return siglip2_embed(texts, model_name, max_tokens=max_tokens, token_dim=text_dim)
+    return hash_text_embed(texts, dim=text_dim, max_tokens=max_tokens, token_dim=text_dim)

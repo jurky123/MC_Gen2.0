@@ -2,6 +2,7 @@ import argparse
 import json
 import math
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -300,16 +301,45 @@ class Trainer:
         print(f"[val] step {self.global_step} mse {total / max(n, 1):.5f}")
 
 
+class _Tee:
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, data):
+        for s in self.streams:
+            s.write(data)
+            s.flush()
+        return len(data)
+
+    def flush(self):
+        for s in self.streams:
+            s.flush()
+
+    def isatty(self):
+        return False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="configs/model/base.yaml")
     ap.add_argument("--train", default="configs/train/smoke.yaml")
     ap.add_argument("--resume", default="")
     ap.add_argument("--device", default="")
+    ap.add_argument("--log-file", default="")
     args = ap.parse_args()
 
     mcfg = ModelConfig.from_yaml(args.model)
     tcfg = TrainConfig.from_yaml(args.train)
+
+    log_path = args.log_file or tcfg.log_file or str(Path(tcfg.output_dir) / "train.log")
+    log_file = Path(log_path)
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    log_handle = open(log_file, "a", buffering=1, encoding="utf-8")
+    orig_out, orig_err = sys.stdout, sys.stderr
+    sys.stdout = _Tee(orig_out, log_handle)
+    sys.stderr = _Tee(orig_err, log_handle)
+    print(f"logging to {log_file}")
+
     trainer = Trainer(mcfg, tcfg, device=args.device or None)
     print(f"model={mcfg.name} params={trainer.model.param_count() / 1e6:.2f}M")
     if args.resume:

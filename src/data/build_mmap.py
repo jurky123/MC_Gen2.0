@@ -62,11 +62,10 @@ def build_mmap(out_dir, records, image_size=32, split_by="project_id", splits=No
 
 
 def write_text_mmap(embeddings, out_path):
-    arr = np.asarray(embeddings, dtype=np.float32)
-    mem = np.lib.format.open_memmap(str(out_path), mode="w+", dtype=np.float32, shape=arr.shape)
-    mem[:] = arr
-    mem.flush()
-    del mem
+    # Headerless raw dump so MmapImageTextDataset can read it with np.memmap(shape=...).
+    arr = np.ascontiguousarray(embeddings, dtype=np.float32)
+    with open(out_path, "wb") as handle:
+        arr.tofile(handle)
 
 
 class MmapImageTextDataset(torch.utils.data.Dataset):

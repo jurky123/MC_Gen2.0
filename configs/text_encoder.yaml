@@ -1,0 +1,27 @@
+# Frozen text encoder for prompt conditioning.
+#
+# Single source of truth for Stage 1/2/3 training, offline precompute and
+# inference. To avoid conditioning-space drift, training and inference MUST use
+# the same `name`, `revision`, `instruction`, `text_dim`, `max_text_tokens` and
+# normalization. The encoder is always frozen; MC-FlowDiT never loads its weights.
+
+text_encoder:
+  # hash    -> deterministic offline placeholder (no download, dev only)
+  # siglip2 -> token-level hidden states (legacy 768-d interface)
+  # qwen3vl -> Qwen3-VL-Embedding, single pooled + L2-normalized token
+  type: qwen3vl
+
+  name: Qwen/Qwen3-VL-Embedding-2B
+  revision: ""            # e.g. a commit hash / tag to pin the model
+  instruction: "Represent the user's input."
+  trust_remote_code: true
+
+  # Must match ModelConfig.text_dim / max_text_tokens used by the DiT.
+  text_dim: 2048
+  max_text_tokens: 1
+  normalize: true
+
+  dtype: float16          # float16 | bfloat16 | float32
+  device: cuda
+  batch_size: 32
+  max_length: 8192

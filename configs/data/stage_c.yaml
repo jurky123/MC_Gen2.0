@@ -4,9 +4,10 @@ build:
   out_dir: data/build/mc_c
   mc_build: data/build/mc_b
   weak_labels: data/build/mc_b/weak_labels.jsonl
-  text_encoder: ""
-  text_dim: 768
-  max_text_tokens: 64
+  text_encoder_config: configs/text_encoder.yaml
+  text_encoder: "Qwen/Qwen3-VL-Embedding-2B"
+  text_dim: 2048
+  max_text_tokens: 1
   cond_dropout: 0.12
   seed: 0
 
@@ -19,6 +20,6 @@ dataset:
   normalize: true
   channels: 4
   text_mmap: data/build/mc_c/text_embeddings.f32.mmap
-  text_dim: 768
-  max_text_tokens: 64
+  text_dim: 2048
+  max_text_tokens: 1
   caption_col: weak_prompt

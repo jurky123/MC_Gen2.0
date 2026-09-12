@@ -29,6 +29,8 @@ class GenerateRequest(BaseModel):
     cfg: float = Field(default=2.0, ge=0.0, le=8.0)
     solver: str = "heun"
     text_encoder: str = ""
+    encoder_type: str = ""
+    instruction: str = ""
 
 
 def _load_model():
@@ -62,7 +64,14 @@ def generate(req: GenerateRequest):
     model, cfg = _load_model()
     device = next(model.parameters()).device
     embs = torch.from_numpy(
-        encode_prompts([req.prompt], text_dim=cfg.text_dim, max_tokens=cfg.max_text_tokens, model_name=req.text_encoder)
+        encode_prompts(
+            [req.prompt],
+            text_dim=cfg.text_dim,
+            max_tokens=cfg.max_text_tokens,
+            model_name=req.text_encoder,
+            encoder_type=req.encoder_type,
+            instruction=req.instruction,
+        )
     ).to(device)
     uncond = torch.zeros_like(embs)
     g = torch.Generator(device=device).manual_seed(int(req.seed))

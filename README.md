@@ -173,7 +173,30 @@ python scripts/build_data.py stage1
 
 ---
 
-## 6. Licensing
+## 6. Text encoder (frozen, offline)
+
+Prompt conditioning uses a frozen encoder whose weights are never loaded during
+MC-FlowDiT training. The single source of truth is `configs/text_encoder.yaml`
+(`Qwen/Qwen3-VL-Embedding-2B`, single pooled + L2-normalized 2048-d token).
+
+Precompute the per-sample embeddings used by Stage C/D:
+
+```bash
+python scripts/precompute_text.py --config configs/data/stage_c.yaml
+```
+
+This writes `text_embeddings.f32.mmap` (headerless fp32, shape `(N, 1, 2048)`)
+next to the dataset. Keep `text_dim` / `max_text_tokens` in sync between
+`configs/text_encoder.yaml`, the data config and `configs/model/base_qwen.yaml`
+(Stage 1 uses the unconditional `base.yaml` and needs no text).
+
+At inference the same encoder is selected with `--encoder-type qwen3vl`
+(`--instruction` overrides the default prompt); the API accepts the matching
+`encoder_type` / `instruction` fields.
+
+---
+
+## 7. Licensing
 
 Research and study only. The datasets aggregate third-party game assets under
 mixed licenses (CC0, CC-BY, OGA-BY and others); per-sample provenance is kept

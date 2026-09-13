@@ -29,8 +29,8 @@ train:
 
   batch:
     auto_probe: true
-    preferred_micro_batch: 256
-    max_vram_gb: 76
+    preferred_micro_batch: 384
+    max_vram_gb: 80
 
   ema:
     enabled: true

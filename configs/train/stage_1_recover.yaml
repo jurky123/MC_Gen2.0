@@ -1,0 +1,55 @@
+train:
+  precision: bf16
+  compile: true
+
+  seed: 0
+  # Recovery fine-tune from the (overfit) Stage 1 checkpoint at low LR with
+  # toroidal augmentation. Run ~20k steps (~7 epochs at batch 1024); the best
+  # val checkpoint is written to checkpoints/stage_1_recover/best.pt.
+  steps: 313818
+  log_every: 25
+  save_every: 2000
+  eval_every_epochs: 1          # validate every epoch so best.pt is tracked
+  save_best: true
+  output_dir: checkpoints/stage_1_recover
+  log_file: checkpoints/stage_1_recover/train.log
+
+  optimizer:
+    name: adamw
+    fused: true
+    lr: 3.0e-5                  # low LR to recover without further overfitting
+    betas: [0.9, 0.95]
+    weight_decay: 0.03
+
+  scheduler:
+    type: cosine
+    warmup_steps: 200
+    reset_on_resume: true       # fresh warmup+cosine over the remaining steps
+
+  grad_clip: 1.0
+  activation_checkpointing: false
+  gradient_accumulation: 1
+
+  batch:
+    auto_probe: false
+    preferred_micro_batch: 1024
+    max_vram_gb: 74
+
+  ema:
+    enabled: true
+    device: cpu
+    decay: 0.999
+    update_every: 1
+
+  flow:
+    timestep_sampling: uniform
+    loss: mse
+
+  tile_loss:
+    enabled: true
+    weight: 0.03
+    max_t: 0.7
+    border_width: 2
+
+  dataset: configs/data/stage_1.yaml
+  text_mmap: ""

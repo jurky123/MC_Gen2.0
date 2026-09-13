@@ -38,7 +38,7 @@ def _build_source(src, ds, split):
             normalize=normalize,
             split=split,
             text_dim=text_dim,
-            toroidal=bool(src.get("toroidal", ds.get("toroidal", False))),
+            toroidal=split == "train" and bool(src.get("toroidal", ds.get("toroidal", False))),
         )
     return MmapImageTextDataset(
         images=src["images"],
@@ -46,7 +46,7 @@ def _build_source(src, ds, split):
         splits=src["splits"],
         split=split,
         image_size=image_size,
-        toroidal=bool(src.get("toroidal", ds.get("toroidal", True))),
+        toroidal=split == "train" and bool(src.get("toroidal", ds.get("toroidal", True))),
         normalize=normalize,
         text_mmap=src.get("text_mmap", ""),
         text_dim=text_dim,
@@ -216,6 +216,11 @@ class Trainer:
         self.completed_epochs = int(sd.get("completed_epochs", 0))
         if self.ema is not None and "ema" in sd:
             self.ema.load_state_dict(sd["ema"])
+        if self.tcfg.scheduler.get("reset_on_resume", False):
+            remaining = max(1, int(self.tcfg.steps) - self.global_step)
+            warmup = min(int(self.tcfg.scheduler.get("warmup_steps", 0)), remaining)
+            self.scheduler = get_lr_schedule(self.optimizer, remaining, warmup)
+            print(f"scheduler reset on resume: {remaining} remaining steps, warmup {warmup}")
         print(f"resumed from {path} at step {self.global_step}, completed_epochs {self.completed_epochs}")
 
     def train(self, data_cfg_path):
@@ -246,6 +251,7 @@ class Trainer:
         out_dir.mkdir(parents=True, exist_ok=True)
 
         self.optimizer.zero_grad(set_to_none=True)
+        best_val = float("inf")
         while self.global_step < self.tcfg.steps:
             self.model.train()
             pending = 0
@@ -280,7 +286,11 @@ class Trainer:
             self.completed_epochs += 1
             self.save(out_dir / "latest.pt")
             if len(train_loader) > 0 and self.completed_epochs % self.tcfg.eval_every_epochs == 0:
-                self.val_validate(val_ds, out_dir)
+                mse = self.val_validate(val_ds, out_dir)
+                if self.tcfg.save_best and mse < best_val:
+                    best_val = mse
+                    self.save(out_dir / "best.pt")
+                    print(f"new best val mse {mse:.5f} -> {out_dir / 'best.pt'}")
         self.save(out_dir / "latest.pt")
 
     def val_validate(self, val_ds, out_dir):
@@ -298,7 +308,9 @@ class Trainer:
                 v = self.model(xt, t, text)
                 total += F.mse_loss(v, target).item() * b
                 n += b
-        print(f"[val] step {self.global_step} mse {total / max(n, 1):.5f}")
+        mse = total / max(n, 1)
+        print(f"[val] step {self.global_step} mse {mse:.5f}")
+        return mse
 
 
 class _Tee:

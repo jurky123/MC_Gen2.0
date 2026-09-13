@@ -101,6 +101,8 @@ class TrainConfig:
     dataset: str = "configs/data/stage_a.yaml"
     text_mmap: str = ""
     log_file: str = ""
+    # Save ``<output_dir>/best.pt`` whenever validation MSE improves.
+    save_best: bool = False
 
     @classmethod
     def from_dict(cls, d):

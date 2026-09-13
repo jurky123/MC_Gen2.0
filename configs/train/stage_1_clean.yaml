@@ -3,15 +3,16 @@ train:
   compile: true
 
   seed: 0
-  # Target: 40 epochs on the multi-source Stage 1 mixture.
-  # First run: 234,710 steps x 256 = 60.1M samples (~20 epochs).
-  # Remaining ~60.5M samples at effective batch 1024 = ~59,108 steps.
-  steps: 293818
+  # Clean Stage 1 run from scratch with toroidal roll augmentation on the train
+  # split (~20 epochs at effective batch 1024). Validate every epoch and keep
+  # the best-val checkpoint in checkpoints/stage_1_clean/best.pt.
+  steps: 58893
   log_every: 25
   save_every: 2000
-  eval_every_epochs: 10
-  output_dir: checkpoints/stage_1
-  log_file: checkpoints/stage_1/train.log
+  eval_every_epochs: 1
+  save_best: true
+  output_dir: checkpoints/stage_1_clean
+  log_file: checkpoints/stage_1_clean/train.log
 
   optimizer:
     name: adamw
@@ -23,17 +24,12 @@ train:
   scheduler:
     type: cosine
     warmup_steps: 1000
-    # On --resume, restart a fresh warmup+cosine over the remaining steps so the
-    # extra run trains at a healthy LR instead of the tail of the old schedule.
-    reset_on_resume: true
 
   grad_clip: 1.0
   activation_checkpointing: false
   gradient_accumulation: 1
 
   batch:
-    # 80 GB A100: compiled training peaks ~60 GB at micro-batch 1024; probe is
-    # eager and would OOM there, so pin the batch and skip auto-probe.
     auto_probe: false
     preferred_micro_batch: 1024
     max_vram_gb: 74
@@ -55,3 +51,4 @@ train:
     border_width: 2
 
   dataset: configs/data/stage_1.yaml
+  text_mmap: ""

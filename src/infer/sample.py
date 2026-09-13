@@ -14,11 +14,16 @@ from data.embed_text import encode_texts
 from .solver import sample, to_uint8
 
 
-def load_model_from_checkpoint(ckpt_path, device="cuda"):
+def load_model_from_checkpoint(ckpt_path, device="cuda", use_ema=False):
     sd = torch.load(ckpt_path, map_location="cpu")
     mcfg = ModelConfig.from_dict(sd["model_cfg"])
     model = MCFlowDiT(mcfg)
     model.load_state_dict(sd["model"])
+    if use_ema and "ema" in sd:
+        msd = model.state_dict()
+        for k, v in sd["ema"]["shadow"].items():
+            msd[k].copy_(v.to(dtype=msd[k].dtype))
+        print("using EMA weights")
     model.to(device).eval()
     return model, mcfg
 
@@ -78,9 +83,10 @@ def main():
     ap.add_argument("--text-encoder", default="")
     ap.add_argument("--encoder-type", default="", help="hash | siglip2 | qwen3vl")
     ap.add_argument("--instruction", default="")
+    ap.add_argument("--use-ema", action="store_true")
     args = ap.parse_args()
 
-    model, mcfg = load_model_from_checkpoint(args.ckpt, args.device)
+    model, mcfg = load_model_from_checkpoint(args.ckpt, args.device, use_ema=args.use_ema)
     imgs = sample_textures(
         model,
         args.prompt,

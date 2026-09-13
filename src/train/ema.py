@@ -19,7 +19,7 @@ class EMA:
         with torch.no_grad():
             sd = model.state_dict()
             for k in self.shadow:
-                t = sd[k].detach().float().cpu()
+                t = sd[k].detach().float().to(self.shadow[k].device)
                 self.shadow[k].mul_(self.decay).add_(t, alpha=1.0 - self.decay)
         return True
 
@@ -35,4 +35,7 @@ class EMA:
         # Keep decay / update_every from the current config so that changing
         # them takes effect on resume; only restore the accumulated state.
         self.updates = sd["updates"]
-        self.shadow = sd["shadow"]
+        # ``torch.load(map_location=...)`` may have moved the shadow (saved on
+        # CPU) onto the training device; pin it back to the EMA device so the
+        # running update stays on a single device.
+        self.shadow = {k: v.detach().float().to(self.device) for k, v in sd["shadow"].items()}

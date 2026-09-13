@@ -149,6 +149,8 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         if self.has_text:
             emb = torch.from_numpy(np.asarray(self.text[idx]).copy()).float()
         else:
+            # Unconditional: a single null token (must match inference, which
+            # also feeds one null token for the placeholder/hash encoder).
             emb = torch.zeros(1, self.text_dim, dtype=torch.float32)
         return x, emb
 

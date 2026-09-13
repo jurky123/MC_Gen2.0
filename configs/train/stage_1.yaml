@@ -3,9 +3,9 @@ train:
   compile: true
 
   seed: 0
-  # 3,004,255 train samples / (micro-batch 16 x grad_accum 8 = 128) = 23,471 steps per epoch.
-  # Ten full epochs ensure the epoch-10 evaluation is executed.
-  steps: 234710
+  # 3,015,301 train samples / (micro-batch 256 x grad_accum 1 = 256) = 11,779 steps per epoch.
+  # 40 full epochs on the multi-source Stage 1 mixture.
+  steps: 471141
   log_every: 25
   save_every: 2000
   eval_every_epochs: 10

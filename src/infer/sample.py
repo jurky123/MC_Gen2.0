@@ -26,13 +26,17 @@ def load_model_from_checkpoint(ckpt_path, device="cuda"):
 def encode_prompts(prompts, text_dim=768, max_tokens=64, model_name="", encoder_type="", instruction=""):
     if not encoder_type:
         encoder_type = "siglip2" if model_name else "hash"
+    # Unconditional / placeholder conditioning is trained with a single null
+    # token (see MmapImageTextDataset), so ignore max_tokens here. Real text
+    # encoders keep their configured token count.
+    tokens = 1 if encoder_type == "hash" else max_tokens
     return encode_texts(
         prompts,
         encoder_type=encoder_type,
         model_name=model_name,
         instruction=instruction,
         text_dim=text_dim,
-        max_tokens=max_tokens,
+        max_tokens=tokens,
     )
 
 

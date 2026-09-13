@@ -7,7 +7,7 @@ dataset:
   normalize: true
   text_mmap: ""
   text_dim: 768
-  max_text_tokens: 64
+  max_text_tokens: 1
   caption_col: weak_prompt
   sources:
     - type: mmap

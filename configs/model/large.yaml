@@ -13,7 +13,7 @@ model:
   single_stream_blocks: 8
 
   text_dim: 768
-  max_text_tokens: 64
+  max_text_tokens: 1
 
   qk_norm: true
   rope: 2d

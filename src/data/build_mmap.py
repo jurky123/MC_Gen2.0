@@ -82,6 +82,7 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         text_dim=768,
         max_text_tokens=64,
         channels=3,
+        text_views=0,
     ):
         self.image_size = image_size
         self.toroidal = toroidal
@@ -89,6 +90,10 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         self.text_dim = text_dim
         self.max_text_tokens = max_text_tokens
         self.channels = channels
+        # Number of pooled conditioning views per sample (0 = legacy: use
+        # max_text_tokens as the middle mmap dim). When > 1 the loader returns
+        # one randomly chosen view so the same image sees different prompts.
+        self.text_views = int(text_views) if text_views else 0
 
         with open(splits, "r") as f:
             all_splits = json.load(f)
@@ -105,8 +110,12 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
             shape=(self.n, image_size, image_size, self.disk_channels),
         )
         self.has_text = bool(text_mmap) and os.path.exists(text_mmap)
+        self.text_middle = self.text_views if self.text_views > 0 else max_text_tokens
         if self.has_text:
-            self.text = np.memmap(text_mmap, dtype=np.float32, mode="r", shape=(self.n, max_text_tokens, text_dim))
+            self.text = np.memmap(
+                text_mmap, dtype=np.float32, mode="r",
+                shape=(self.n, self.text_middle, text_dim),
+            )
         self.df = self.df
 
     def _infer_disk_channels(self, images, image_size):
@@ -147,7 +156,11 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
             arr = np.roll(arr, (dy, dx), axis=(0, 1))
         x = torch.from_numpy(arr).permute(2, 0, 1).contiguous().float() / 127.5 - 1.0
         if self.has_text:
-            emb = torch.from_numpy(np.asarray(self.text[idx]).copy()).float()
+            if self.text_views > 1:
+                view = np.random.randint(0, self.text_views)
+                emb = torch.from_numpy(np.asarray(self.text[idx, view]).copy()).float()[None, :]
+            else:
+                emb = torch.from_numpy(np.asarray(self.text[idx]).copy()).float()
         else:
             # Unconditional: a single null token (must match inference, which
             # also feeds one null token for the placeholder/hash encoder).

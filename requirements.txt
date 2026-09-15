@@ -18,3 +18,7 @@ httpx
 # Frozen text encoder (Qwen3-VL-Embedding), used offline for prompt conditioning
 sentence-transformers>=5.4
 qwen-vl-utils>=0.0.14
+
+# Local VLM annotator server (optional): scripts/serve_vlm.py
+# The annotator itself only needs httpx (above) when using the http backend.
+# vllm

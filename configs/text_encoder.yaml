@@ -11,13 +11,13 @@ text_encoder:
   # qwen3vl -> Qwen3-VL-Embedding, single pooled + L2-normalized token
   type: qwen3vl
 
-  name: Qwen/Qwen3-VL-Embedding-2B
+  name: Qwen/Qwen3-VL-Embedding-8B
   revision: ""            # e.g. a commit hash / tag to pin the model
   instruction: "Represent the user's input."
   trust_remote_code: true
 
   # Must match ModelConfig.text_dim / max_text_tokens used by the DiT.
-  text_dim: 2048
+  text_dim: 4096
   max_text_tokens: 1
   normalize: true
 

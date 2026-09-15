@@ -57,11 +57,11 @@ Pixel-space Rectified Flow Transformer
 
 ## 0.3 文本条件编码器定案
 
-文本条件编码器固定为 `Qwen/Qwen3-VL-Embedding-2B`。选择 2B 而不是 8B，是因为编码质量足以覆盖短纹理描述和细粒度属性，同时离线编码成本、下载体积和本地运行门槛更低。其原生 embedding 为 2048 维，并支持 instruction-aware 表示；本项目首版保留原生 2048 维，不额外训练降维器。
+文本条件编码器固定为 `Qwen/Qwen3-VL-Embedding-8B`。选择 8B 是因为其语义质量更好，能更充分地覆盖短纹理描述和细粒度属性，且本项目可本地离线编码，成本可接受。其原生 embedding 为 4096 维，并支持 instruction-aware 表示；本项目首版保留原生 4096 维，不额外训练降维器。
 
 必须严格遵守以下用途边界：
 
-- Qwen3-VL-Embedding-2B **只用于文本条件注入**。
+- Qwen3-VL-Embedding-8B **只用于文本条件注入**。
 - 输入始终是 prompt 文本；不向它输入训练图片或图文混合内容。
 - 不用它做图片去重、相似检索、数据筛选、caption 生成、caption 评分或质量检查。
 - 数据去重继续使用确定性的内容 SHA/像素规则，数据处理与文本编码保持解耦。
@@ -71,13 +71,13 @@ Pixel-space Rectified Flow Transformer
 ```text
 canonical prompt text
         ↓
-frozen Qwen3-VL-Embedding-2B（text-only）
+frozen Qwen3-VL-Embedding-8B（text-only）
         ↓
-L2-normalized pooled embedding [2048]
+L2-normalized pooled embedding [4096]
         ↓
-offline FP16 mmap [N, 1, 2048]
+offline FP16 mmap [N, 1, 4096]
         ↓
-MC-FlowDiT text projection 2048 → hidden_size
+MC-FlowDiT text projection 4096 → hidden_size
 ```
 
 编码 instruction 固定为：
@@ -104,7 +104,7 @@ double_stream_blocks: 3
 single_stream_blocks: 6
 mlp_ratio: 3.0
 
-text_dim: 2048
+text_dim: 4096
 max_text_tokens: 1
 position_encoding: 2D RoPE
 qk_norm: RMSNorm
@@ -1621,7 +1621,7 @@ dataset annotation
 生成模型的 text condition 固定使用：
 
 \[
-\boxed{\text{Qwen3-VL-Embedding-2B（text-only）}}
+\boxed{\text{Qwen3-VL-Embedding-8B（text-only）}}
 \]
 
 。
@@ -1631,11 +1631,11 @@ dataset annotation
 ```text
 canonical prompt text
   ↓
-frozen Qwen3-VL-Embedding-2B（禁止输入图片）
+frozen Qwen3-VL-Embedding-8B（禁止输入图片）
   ↓
-L2-normalized pooled embedding [2048]
-  ↓
-offline FP16 mmap [N,1,2048]
+L2-normalized pooled embedding [4096]
+        ↓
+offline FP16 mmap [N,1,4096]
 ```
 
 训练时：
@@ -2257,9 +2257,9 @@ User Prompt
     ↓
 Text normalization
     ↓
-Qwen3-VL-Embedding-2B text-only encoder
+Qwen3-VL-Embedding-8B text-only encoder
     ↓
-2048-d pooled condition token
+4096-d pooled condition token
     ↓
 Gaussian noise [3,H,W]
     ↓
@@ -2584,8 +2584,8 @@ model:
   double_stream_blocks: 3
   single_stream_blocks: 6
 
-  text_dim: 768
-  max_text_tokens: 64
+  text_dim: 4096
+  max_text_tokens: 1
 
   qk_norm: rmsnorm
   rope: 2d
@@ -3015,7 +3015,7 @@ coherent texture pack generation
 
 文本 / VLM：
 
-- Qwen3-VL-Embedding-2B（仅 text-only 条件注入）
+- Qwen3-VL-Embedding-8B（仅 text-only 条件注入）
 
 训练 Infra：
 

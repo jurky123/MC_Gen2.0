@@ -32,7 +32,8 @@ def _manifest_records(manifests):
             for line_number, line in enumerate(handle, 1):
                 try:
                     rec = json.loads(line)
-                    digest = Path(rec["path"]).stem
+                    rel = str(rec["path"]).replace("\\", "/")
+                    digest = Path(rel).stem
                 except (json.JSONDecodeError, KeyError) as exc:
                     raise ValueError(f"invalid record in {manifest}:{line_number}") from exc
                 if digest in seen:
@@ -194,7 +195,10 @@ def build(manifests, datasets, out, size=32, chunk_size=8192, channels=4):
 
         pixel_batch = []
         for rec in _manifest_records(manifests):
-            path = Path(rec["path"])
+            rel = str(rec["path"]).replace("\\", "/")
+            path = Path(rel)
+            if not path.is_absolute():
+                path = Path.cwd() / rel
             if not path.is_file():
                 raise FileNotFoundError(path)
             with Image.open(path) as image:

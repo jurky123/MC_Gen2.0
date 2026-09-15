@@ -61,6 +61,7 @@ def siglip2_embed(texts, model_name, max_tokens=64, token_dim=768):
 
 
 _ENCODER_CACHE = {}
+_POOL_CACHE = {}
 
 _DTYPE_MAP = {"float16": "float16", "fp16": "float16", "bfloat16": "bfloat16", "bf16": "bfloat16",
               "float32": "float32", "fp32": "float32"}
@@ -89,12 +90,14 @@ def qwen3vl_embed(
     text_dim=2048,
     max_tokens=1,
     device="cuda",
+    devices=None,
     dtype="float16",
     batch_size=16,
     normalize=True,
     revision=None,
     trust_remote_code=True,
     max_length=8192,
+    chunk_size=0,
 ):
     """Frozen Qwen3-VL-Embedding text encoder.
 
@@ -113,10 +116,13 @@ def qwen3vl_embed(
         SentenceTransformer = None
 
     if SentenceTransformer is not None:
-        key = ("st", model_name, revision, device)
+        multi_device = len([d for d in (devices or []) if d]) > 1
+        target_devices = [d for d in (devices or []) if d]
+        load_device = "cpu" if multi_device else device
+        key = ("st", model_name, revision, load_device, tuple(target_devices))
         model = _ENCODER_CACHE.get(key)
         if model is None:
-            kwargs = {"device": device}
+            kwargs = {"device": load_device}
             if revision:
                 kwargs["revision"] = revision
             if trust_remote_code:
@@ -126,6 +132,25 @@ def qwen3vl_embed(
             model = SentenceTransformer(model_name, **kwargs)
             model.eval()
             _ENCODER_CACHE[key] = model
+
+        if multi_device:
+            # Process pool + chunked map = dynamic work queue across GPUs: a
+            # faster card pulls more chunks, so both finish together instead of
+            # one idling after its static half is done.
+            pool = _POOL_CACHE.get(key)
+            if pool is None:
+                pool = model.start_multi_process_pool(target_devices=target_devices)
+                _POOL_CACHE[key] = pool
+            emb = model.encode_multi_process(
+                texts, pool,
+                prompt=instruction or None,
+                batch_size=batch_size,
+                chunk_size=int(chunk_size) if chunk_size else max(batch_size * 16, 256),
+                normalize_embeddings=bool(normalize),
+                show_progress_bar=False,
+            )
+            return _as_tokens(np.asarray(emb, dtype=np.float32), text_dim)
+
         encode_kwargs = {
             "batch_size": batch_size,
             "normalize_embeddings": bool(normalize),
@@ -191,10 +216,12 @@ def encode_texts(
     text_dim=768,
     max_tokens=64,
     device="cuda",
+    devices=None,
     dtype="float16",
     batch_size=16,
     normalize=True,
     revision=None,
+    chunk_size=0,
 ):
     """Route to the configured offline text encoder.
 
@@ -206,8 +233,9 @@ def encode_texts(
         return qwen3vl_embed(
             texts, model_name=model_name or "Qwen/Qwen3-VL-Embedding-2B",
             instruction=instruction or "Represent the user's input.",
-            text_dim=text_dim, max_tokens=max_tokens, device=device, dtype=dtype,
-            batch_size=batch_size, normalize=normalize, revision=revision,
+            text_dim=text_dim, max_tokens=max_tokens, device=device, devices=devices,
+            dtype=dtype, batch_size=batch_size, normalize=normalize, revision=revision,
+            chunk_size=chunk_size,
         )
     if encoder_type == "siglip2":
         return siglip2_embed(texts, model_name, max_tokens=max_tokens, token_dim=text_dim)

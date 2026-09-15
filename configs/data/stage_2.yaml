@@ -8,7 +8,7 @@ dataset:
   toroidal: true
   normalize: true
   channels: 4
-  text_mmap: ""
-  text_dim: 768
+  text_mmap: data/build/stage2_32/text_embeddings.f32.mmap
+  text_dim: 4096
   max_text_tokens: 1
   caption_col: weak_prompt

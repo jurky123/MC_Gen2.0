@@ -24,6 +24,14 @@ def _collate(batch):
     return xs, embs
 
 
+def _worker_init(worker_id):
+    # Seed numpy per worker so toroidal rolls / text-view sampling differ
+    # between DataLoader workers (forked workers otherwise share RNG state).
+    import numpy as _np
+
+    _np.random.seed((torch.initial_seed() + worker_id) % (2 ** 32))
+
+
 def _build_source(src, ds, split):
     kind = src.get("type", "mmap")
     image_size = int(ds.get("image_size", 32))
@@ -52,6 +60,7 @@ def _build_source(src, ds, split):
         text_dim=text_dim,
         max_text_tokens=int(ds.get("max_text_tokens", 64)),
         channels=channels,
+        text_views=int(src.get("text_views", ds.get("text_views", 0))),
     )
 
 
@@ -207,6 +216,28 @@ class Trainer:
         os.replace(tmp_path, path)
         print(f"checkpoint saved: {path}")
 
+    def init_from(self, path, use_ema=False):
+        """Initialise model weights from another checkpoint without resuming.
+
+        Tensors whose name+shape match are copied; new or shape-mismatched ones
+        (e.g. ``text_proj`` when switching to a new text dimension) stay at their
+        fresh init. Optimizer / scheduler / step are *not* restored.
+        """
+        sd = torch.load(path, map_location="cpu")
+        src = sd["ema"]["shadow"] if use_ema and "ema" in sd else sd["model"]
+        dst = self._checkpoint_model().state_dict()
+        copied, skipped = 0, []
+        for k, v in src.items():
+            if k in dst and dst[k].shape == v.shape:
+                dst[k].copy_(v.to(dtype=dst[k].dtype))
+                copied += 1
+            else:
+                skipped.append(k)
+        print(f"init-from {path} ({'ema' if use_ema else 'model'}): copied {copied} tensors"
+              f", skipped {len(skipped)}")
+        if skipped:
+            print("  skipped:", skipped)
+
     def load(self, path):
         sd = torch.load(path, map_location=self.device)
         self._checkpoint_model().load_state_dict(sd["model"])
@@ -236,16 +267,23 @@ class Trainer:
         train_ds = build_dataset(data_cfg_path, "train", self.tcfg)
         val_ds = build_dataset(data_cfg_path, "val", self.tcfg)
         sampler = train_ds.make_sampler() if hasattr(train_ds, "make_sampler") else None
-        train_loader = torch.utils.data.DataLoader(
-            train_ds,
+        num_workers = int(self.tcfg.batch.get("num_workers", 8))
+        loader_kwargs = dict(
+            dataset=train_ds,
             batch_size=bs,
             shuffle=(sampler is None),
             sampler=sampler,
-            num_workers=0,
+            num_workers=num_workers,
             pin_memory=True,
             collate_fn=_collate,
         )
-        print(f"train samples={len(train_ds)} val samples={len(val_ds)}")
+        if num_workers > 0:
+            loader_kwargs["persistent_workers"] = True
+            loader_kwargs["prefetch_factor"] = int(self.tcfg.batch.get("prefetch_factor", 4))
+            loader_kwargs["worker_init_fn"] = _worker_init
+        train_loader = torch.utils.data.DataLoader(**loader_kwargs)
+        print(f"train samples={len(train_ds)} val samples={len(val_ds)} "
+              f"dataloader_workers={num_workers}")
 
         out_dir = Path(self.tcfg.output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -336,6 +374,8 @@ def main():
     ap.add_argument("--model", default="configs/model/base.yaml")
     ap.add_argument("--train", default="configs/train/smoke.yaml")
     ap.add_argument("--resume", default="")
+    ap.add_argument("--init-from", default="", help="initialise weights from a checkpoint (no optimizer state)")
+    ap.add_argument("--init-from-ema", action="store_true", help="use EMA shadow weights for --init-from")
     ap.add_argument("--device", default="")
     ap.add_argument("--log-file", default="")
     args = ap.parse_args()
@@ -356,6 +396,8 @@ def main():
     print(f"model={mcfg.name} params={trainer.model.param_count() / 1e6:.2f}M")
     if args.resume:
         trainer.load(args.resume)
+    elif args.init_from:
+        trainer.init_from(args.init_from, use_ema=args.init_from_ema)
     trainer.train(tcfg.dataset)
 
 

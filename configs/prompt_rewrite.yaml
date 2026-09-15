@@ -1,0 +1,91 @@
+# Prompt diversification via LLM rewrite (text-only).
+#
+# Reads the coarse/fine VLM annotations together with the cleaned source label
+# and asks a text LLM to write K prompts per texture at different abstraction
+# levels. Domain boilerplate ("pixel art", "minecraft", "texture", ...) is
+# removed so training does not depend on it. See design notes in PROGRESS.md.
+#
+# Input to the LLM: structured fields + cleaned source label + initial captions.
+# Output: JSON with one key per style (K=4).
+
+rewriter:
+  model: Qwen/Qwen3-VL-8B-Instruct   # any OpenAI-compatible text endpoint works
+  backend: http
+  endpoint: http://127.0.0.1:8000/v1/chat/completions
+  api_key: EMPTY
+  served_model_name: ""
+
+  # Higher temperature for lexical diversity across the K views.
+  temperature: 0.9
+  top_p: 0.95
+  max_tokens: 260
+  seed: 0
+  chat_template_kwargs:
+    enable_thinking: false
+  response_format:
+    type: json_object
+
+  # Four abstraction levels; lowercased plain text, no trailing punctuation.
+  styles: [factual, evocative, thematic, descriptive]
+
+  # Post-process safety net: strip residual domain boilerplate from every view
+  # (the task prompt already tells the model not to use it).
+  strip_phrases:
+    - pixel art
+    - pixel-art
+    - pixelated
+    - pixel style
+    - pixel
+    - minecraft
+    - voxel
+    - high quality
+    - game sprite
+    - game asset
+    - sprite
+    - seamless
+    - tileable
+    - low-resolution
+    - low resolution
+    - block texture
+    - item texture
+    - texture
+    - "16x16"
+    - "32x32"
+    - "64x64"
+
+  max_retries: 3
+  retry_backoff: 2.0
+  timeout: 120.0
+  concurrency: 256
+
+  system_prompt: |
+    You name textures for a Minecraft-like voxel game.
+    You receive structured attributes of one block or item texture plus a source
+    label, and you write 4 short English prompts describing the SAME texture at
+    different abstraction levels.
+
+    Hard rules:
+    - Never mention pixel art, pixelated, pixels, sprite, Minecraft, voxel,
+      resolution such as 16x16/32x32, "texture", "seamless" or "game asset".
+      The art style is implied and must not be stated.
+    - Stay faithful: only use the given material, form, state, colours, pattern
+      and surface. Do not invent another material, creature, character, brand or
+      lore. Every prompt must still describe this exact texture.
+    - Lowercase plain text, no trailing punctuation.
+
+    Write exactly these 4 prompts:
+    - "factual": a precise 2-5 word material phrase, e.g. "mossy deepslate bricks".
+    - "evocative": a memorable game-item-style name, 1-3 words, mildly poetic but
+      readable, e.g. "lava lace", "star blade", "ember ore".
+    - "thematic": a short name evoking setting or purpose, 2-4 words, e.g.
+      "nether forge casing", "ruin masonry".
+    - "descriptive": one natural sentence, at most 18 words, plainly describing
+      the texture.
+
+    Return valid JSON only with exactly the keys factual, evocative, thematic,
+    descriptive.
+
+  task_description: |
+    Here are the attributes of one 16x16/32x32 block or item texture. Write the
+    4 prompts described in the system message. Treat the source label as a hint,
+    but keep every prompt consistent with the structured attributes and captions.

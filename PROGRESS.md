@@ -1,6 +1,6 @@
 # MC-Gen2.0 项目进度
 
-> 更新日期：2026-09-11；当前方案：v2.3（数据处理与条件编码定型）
+> 更新日期：2026-09-15；当前方案：v2.3（数据处理与条件编码定型）
 
 ## 新训练课程
 
@@ -58,17 +58,56 @@
 
 ## 文本条件编码器
 
-- 正式选择 `Qwen/Qwen3-VL-Embedding-2B`，不选 8B 版本，以兼顾语义质量、离线编码速度和本地资源占用。
+- 正式选择 `Qwen/Qwen3-VL-Embedding-8B`（原生 4096 维），以更好的语义质量覆盖短纹理描述和细粒度属性；本地离线编码成本可接受。
 - 该模型在本项目中只作为 prompt 的文本编码器：只输入文本，只输出生成模型需要的文本条件。
 - 明确不使用它处理图片，也不用于去重、检索、筛选、标注生成或数据质检。
-- 编码器全程冻结；训练前离线预计算 L2-normalized 2048 维 pooled embedding，以 FP16 保存为每样本一个条件 token。训练 MC-FlowDiT 时不加载 Qwen 权重。
+- 编码器全程冻结；训练前离线预计算 L2-normalized 4096 维 pooled embedding，以 FP16 保存为每样本一个条件 token。训练 MC-FlowDiT 时不加载 Qwen 权重。
 - Stage 1、Stage 2、Stage 3 和推理端使用同一模型、同一 instruction 与同一规范化方式，避免条件空间漂移。
-- 当前代码仍是 768 维 SigLIP2/占位编码接口，迁移到 Qwen3-VL-Embedding-2B 尚待实现和冒烟验证。
+- 代码已提供 `qwen3vl` 编码接口（`src/data/embed_text.py`），`configs/text_encoder.yaml` 固定为 8B / 4096 / 单 pooled token；离线编码与 K 视图预计算（`scripts/precompute_text.py --views-parquet`）已就绪。
+
+## 本地 VLM 标注与 caption benchmark
+
+- 精标注/粗标注使用本地 `Qwen/Qwen3.8-27B`（2026-08-13 发布的原生多模态 dense 27B；hybrid attention + vision tower + MTP；原生 262K context；Apache-2.0）。它是**数据标注器**，与冻结的文本条件编码器 `Qwen3-VL-Embedding` 相互独立，两套用途不混用。
+- 部署：`scripts/serve_vlm.py` 用 vLLM 起 OpenAI 兼容服务（`--max-model-len 8192`、`--limit-mm-per-prompt image=2`、`enable_thinking=false`）。注意 vLLM recipe 要求 `transformers>=5.8.0`，架构为 `Qwen3_5ForConditionalGeneration`；A100 80GB 也可直接用官方 `Qwen/Qwen3.8-27B-FP8`。
+- 标注流水线：`src/data/vlm_caption.py` + `scripts/annotate_textures.py`。按计划 §23 生成 nearest-neighbour 的单图与 4x4 tiling 两个 512 视图；把文件名、弱标签、资源包 metadata 作为 ground-truth 提示写入 prompt，并单列“reference label”区块；固定 system prompt、`temperature=0`、仅输出 JSON，支持重试与断点续跑。
+- profile：`fine`（双视图、256 token，Stage 3）与 `coarse`（单视图、160 token、concurrency 16，Stage 1/2 全量）。两者共用同一 JSON schema：`material / form / state / dominant_colors / pattern / surface / directionality / details / emissive / tileability / short_caption / detailed_caption / uncertainty`。
+- 直接标注 mmap：`scripts/make_annotation_manifest.py` 把 Stage 1/2 的 `images.uint8.mmap`（headerless uint8 `(N,H,W,C)`）转成带 `mmap`+`index`+`shape` 的 JSONL，标注时按索引读取，避免导出上百万张 PNG。
+- 首版粗标注目标：`data/build/stage2_32`（1,044,875 条，含 `mc_text2image32_wl` 1,034,057 + modrinth32 10,818）。同一流程可直接扩展到 Stage 1 的 `stage1_32_rgba`（3,185,719 条）以及 `mc_text2image32_wl`。
+- CaptionBench：`scripts/build_caption_bench.py` 分层采样（默认 James-A 1,498 条，按 block/item 类别均衡）→ 模型标注 → 导出 `review.csv`（模型输出预填进 `gold_*`，人工只改错项并填评分/幻觉标记）→ `scripts/score_caption_bench.py` 计算标量准确率、集合 F1、caption token F1、attribute macro F1、JSON exact、延迟/吞吐，以及人工评分和幻觉率（`report.json` + `report.md`）。
+- 上述流程已用 mock OpenAI 服务端端到端验证：HTTP 并发、mmap 读取、profile 切换、断点续跑、复核表导出与评分全部通过。
+
+## 提示词多样化（LLM 重写）
+
+- 动机：coarse 标注偏客观且充斥 `pixel art / pixelated / minecraft / texture` 等域冗余词，缺少人类命名式的抽象表达，导致条件分布过窄。
+- 方案：LLM 重写。输入结构化字段 + 清洗后的原始标签 + 初步 short/detailed caption，输出 K=4 个风格视图：`factual`、`evocative`（游戏物品命名风格，如 lava lace / star blade）、`thematic`、`descriptive`。域冗余词全部去除（system 指令 + 后处理双保险），并约束必须忠于图像属性。
+- 实现：`configs/prompt_rewrite.yaml`、`src/data/prompt_diversify.py`、`scripts/rewrite_prompts.py`（支持断点续跑、分片、日志）。
+- 队列与多卡：`scripts/queue_rewrite.sh`（重写）与 `scripts/queue_finish.sh`（merge + precompute）后台接力。标注/重写支持 `--endpoints a b ...` 共享任务队列（谁空谁取，避免快卡先空转后闲置）；`precompute_text.py --devices cuda:0,cuda:1` 用 sentence-transformers 进程池（`encode_multi_process`，chunk 动态分发）做多卡动态编码，另有 `--num-shards/--init` 供进程级静态分片。
+- 训练侧：`MmapImageTextDataset(text_views=K)` 读取 `(N,K,text_dim)` 并每步随机取一个视图；`scripts/merge_prompt_views.py` 对齐生成 `prompt_views.parquet`，`scripts/precompute_text.py --views-parquet` 写出 `(N,K,4096)`。
+- 实测重写速度：双卡独占约 31–34 条/秒/卡（合计 ~65/s）；抢 GPU 时单卡约 11.9 条/秒。注意：本次重写用静态分片启动，A100-SXM 先跑完后短暂空转；后续批量任务改用 `--endpoints` 共享队列即可同时收尾。
+
+## Stage 2 标注与 K 视图条件（已完成）
+
+- 数据源：`data/build/mc_text2image32_wl`（Modrinth mod 爬取，13,053 个 mod，1,034,057 条）。筛选保留 block+item、不按 license 过滤、不剔近纯色，仅去掉 gui/font/entity/particle 文件名 → 1,031,063 条。
+- 粗标注：本地 `Qwen/Qwen3-VL-8B-Instruct`（vLLM BF16，coarse profile 单视图），两卡数据并行，约 1.5–2h 完成 1,031,063 条，失败 0，产物 `coarse_annotations.shard0{0,1}.jsonl`；实测单卡约 10 img/s。
+- 提示词多样化：同一 8B 文本-only 重写，K=4（factual/evocative/thematic/descriptive），全部去域词，产物 `prompt_views.shard0{0,1}.jsonl`；原 VLM caption 仅作重写输入，不单独保留为视图。
+- 对齐与编码：`scripts/merge_prompt_views.py` → `prompt_views.parquet`（1,031,063 覆盖 / 1,034,057 行，未覆盖行回退清洗弱标签）；`precompute_text.py --views-parquet --devices cuda:0,cuda:1` 用 `Qwen3-VL-Embedding-8B` 双卡动态进程池编码 → `text_embeddings.f32.mmap`，形状 `(1,034,057, 4, 4096)` fp32 = 67,767,959,552 字节，约 2h、约 546 embedding/s。
+- 训练数据配置 `configs/data/stage_2_annotated.yaml`：`channels: 4`（磁盘 RGB，loader 自动补不透明 alpha）、`text_dim: 4096`、`text_views: 4`。
+- 说明：批量粗标选择 8B 是速度权衡（27B 单卡仅约 2.8 img/s，全量需数天）；27B 仍保留用于精标 / CaptionBench。
+- Stage 2 训练已启动：`configs/train/stage_2_annotated.yaml`（9,190 步，eff. batch 1024，从 `checkpoints/stage_1_clean/best.pt` 初始化，文本投影按 4096 维重初始化）。修复了 `num_workers=0` 与 EMA `update_every=1` 造成的主机空档：DataLoader 改为 8 worker + prefetch/persistent 并为每个 worker 单独 seed numpy；EMA 改为 `update_every=8`。GPU 利用率由 34–100% 抖动变为稳定 98–100%，step 时间 0.71s → 0.56s。
 
 ## 下一步
 
-- 对 Stage 1 统一训练集做分来源随机抽样质检，重点检查极端长宽比、动画帧和残留整图。
-- 完成像素素材的来源清单与许可元数据校验。
-- 使用全部 MC 加弱标注构建 Stage 2。
-- 为 James-A 精标注字段生成稳定的短描述/详细描述两种文本视图，并构建 Stage 3 数据集。
-- 将文本条件流水线从 768 维 SigLIP2/占位实现迁移为冻结的 Qwen3-VL-Embedding-2B（2048 维单 token、离线 FP16）。
+- 启动 Stage 2 训练（从 Stage 1 权重初始化，`text_proj/text_null` 按 4096 维重初始化）：
+
+  ```bash
+  CUDA_VISIBLE_DEVICES=0 python scripts/train.py \
+    --model configs/model/base_qwen.yaml \
+    --train configs/train/stage_2_annotated.yaml \
+    --init-from checkpoints/stage_1_clean/best.pt
+  ```
+
+  9,190 步（约 10 epoch，train 941,104 / batch 1024），输出 `checkpoints/stage_2_annotated/`。
+- Stage 2 稳定后评估：creative prompt 泛化、seam score、diversity、prompt alignment。
+- 把「粗标注 → K 视图重写 → 多卡编码」扩展到 Stage 1 全量（3,185,719 条）及其他来源。
+- 用 CaptionBench 抽样复核 8B 粗标注的准确率与幻觉率。
+- 为 James-A 精标字段生成短/详细两种文本视图，构建 Stage 3 数据集。

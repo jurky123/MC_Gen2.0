@@ -1,0 +1,105 @@
+# Local VLM annotator for Stage 2 / Stage 3 fine labelling.
+#
+# This is the *annotator* (image -> structured JSON caption). It is NOT the
+# frozen text encoder used for prompt conditioning (`configs/text_encoder.yaml`).
+# See mc_texture_generation_complete_plan_v2.md sections 19-29.
+#
+# `model` must be a real Hugging Face repo id. Any Qwen3-VL / Qwen2.5-VL
+# checkpoint supported by vLLM works; adjust to the exact id you downloaded.
+
+annotator:
+  model: Qwen/Qwen3.8-27B
+  revision: ""                 # pin a commit hash / tag for reproducibility
+
+  # http         -> OpenAI-compatible endpoint (vLLM; scripts/serve_vlm.py)
+  # transformers -> load the model in-process (single GPU, no server)
+  backend: http
+  endpoint: http://127.0.0.1:8000/v1/chat/completions
+  api_key: EMPTY
+  served_model_name: ""        # set if the server renames the model
+
+  # Decoding: plan section 26 -> consistency > creativity.
+  temperature: 0.0
+  top_p: 1.0
+  max_tokens: 384
+  seed: 0
+  # Qwen3.x hybrid reasoning models: turn thinking off for fast JSON labelling.
+  chat_template_kwargs:
+    enable_thinking: false
+  # vLLM guided decoding: guarantee syntactically valid JSON on bulk runs.
+  response_format:
+    type: json_object
+
+  # Plan section 23: never feed the raw 16x16 PNG; build two nearest-neighbour
+  # views (single upscaled + 4x4 tiled) and forbid bilinear/bicubic.
+  image:
+    target: 512
+    repeat: 4
+    mode: nearest
+    views: [single, tiled]
+
+  max_retries: 3
+  retry_backoff: 2.0
+  timeout: 120.0
+  concurrency: 8
+
+  # Active profile; override per run with `--profile coarse|fine`.
+  profile: fine
+
+  # Task description injected at the top of the user prompt (plan sections
+  # 24-26). Keep it explicit: say what the data is and what the model must do.
+  task_description: |
+    Task: annotate a single low-resolution Minecraft / mod block texture for a
+    text-to-texture generator. The images show one 16x16 or 32x32 tile. Fill in
+    the JSON by describing only what is visible. The supplied metadata and the
+    source label are hints extracted from filenames/resource packs; they may be
+    incomplete or wrong, so verify them against the image. If a field cannot be
+    determined from the image, use "unknown" rather than guessing.
+
+  # Fine labelling (Stage 3): two views, more detail.
+  # Coarse labelling (bulk Stage 1/2 coverage): one view, shorter output,
+  # higher concurrency. Both keep the same JSON schema so labels are reusable.
+  profiles:
+    fine:
+      image:
+        views: [single, tiled]
+      max_tokens: 384
+    coarse:
+      image:
+        views: [single]
+      max_tokens: 192
+      concurrency: 16
+      # Compact schema: drop detailed_caption/details/directionality to roughly
+      # halve decode time (decoding is the throughput bottleneck on one A100).
+      output_fields:
+        - material
+        - form
+        - state
+        - dominant_colors
+        - pattern
+        - surface
+        - emissive
+        - tileability
+        - short_caption
+        - uncertainty
+      task_description: |
+        Task: produce a COARSE, dataset-wide label for one low-resolution
+        Minecraft / mod block texture, used to pre-train a text-to-texture
+        generator. This is a bulk pass: be fast and decisive. Give the single
+        most likely material, form, dominant colours and pattern. Do not hedge.
+        Keep both captions to at most 20 words. The source label below is a hint
+        extracted from the filename/resource pack and is often noisy -- trust
+        the image and correct it when they disagree. Use "unknown" only when the
+        image truly gives no signal.
+
+  # Plan section 26: fixed system prompt. Do not let the VLM guess known facts.
+  system_prompt: |
+    You are annotating low-resolution voxel-game block textures.
+
+    Use supplied metadata as ground truth when available.
+    Describe only visually observable properties.
+    Do not invent a Minecraft item or block name.
+    If the material cannot be determined, output "unknown".
+    Do not infer gameplay function, lore, rarity or provenance.
+    Preserve uncertainty.
+    Return valid JSON only.

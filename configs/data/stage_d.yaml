@@ -5,8 +5,8 @@ build:
   mc_build: data/build/mc_b
   captions: data/build/mc_d/detailed_captions.jsonl
   text_encoder_config: configs/text_encoder.yaml
-  text_encoder: "Qwen/Qwen3-VL-Embedding-2B"
-  text_dim: 2048
+  text_encoder: "Qwen/Qwen3-VL-Embedding-8B"
+  text_dim: 4096
   max_text_tokens: 1
   cond_dropout: 0.12
   seed: 0
@@ -20,6 +20,6 @@ dataset:
   normalize: true
   channels: 4
   text_mmap: data/build/mc_d/text_embeddings.f32.mmap
-  text_dim: 2048
+  text_dim: 4096
   max_text_tokens: 1
   caption_col: detailed_caption

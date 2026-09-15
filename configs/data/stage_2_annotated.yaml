@@ -1,0 +1,21 @@
+# Stage 2 dataset: Modrinth mod textures annotated by Qwen3.8-27B (coarse),
+# diversified into K=4 prompt views, encoded with Qwen3-VL-Embedding-8B (4096-d).
+#
+# Disk images are RGB (3ch); the loader adds an opaque alpha channel because the
+# model config uses in_channels: 4.
+stage: mc_modrinth_annotated
+
+dataset:
+  images: data/build/mc_text2image32_wl/images.uint8.mmap
+  metadata: data/build/mc_text2image32_wl/metadata.parquet
+  splits: data/build/mc_text2image32_wl/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  channels: 4
+  text_mmap: data/build/mc_text2image32_wl/text_embeddings.f32.mmap
+  text_dim: 4096
+  max_text_tokens: 1
+  # K views per image (factual / evocative / thematic / descriptive); the loader
+  # samples one at random every step.
+  text_views: 4

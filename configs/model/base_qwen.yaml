@@ -12,9 +12,9 @@ model:
   double_stream_blocks: 3
   single_stream_blocks: 6
 
-  # Qwen3-VL-Embedding-2B: single pooled, L2-normalized 2048-d token.
+  # Qwen3-VL-Embedding-8B: single pooled, L2-normalized 4096-d token.
   # Keep in sync with configs/text_encoder.yaml.
-  text_dim: 2048
+  text_dim: 4096
   max_text_tokens: 1
 
   qk_norm: true

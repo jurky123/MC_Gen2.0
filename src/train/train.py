@@ -20,6 +20,8 @@ from .ema import EMA
 
 def _collate(batch):
     xs = torch.stack([b[0] for b in batch], dim=0)
+    if isinstance(batch[0][1], str):
+        return xs, [b[1] for b in batch]
     embs = torch.stack([b[1] for b in batch], dim=0)
     return xs, embs
 
@@ -61,6 +63,8 @@ def _build_source(src, ds, split):
         max_text_tokens=int(ds.get("max_text_tokens", 64)),
         channels=channels,
         text_views=int(src.get("text_views", ds.get("text_views", 0))),
+        prompt_views=src.get("prompt_views", "") or ds.get("prompt_views", ""),
+        prompt_cols=src.get("prompt_cols", None) or ds.get("prompt_cols", None),
     )
 
 
@@ -127,6 +131,24 @@ class Trainer:
         self.cond_drop = model_cfg.cond_dropout
         self.model.to(self.device)
 
+        # Dynamic token-level text tower for cross-attention conditioning.
+        self.text_encoder = None
+        if getattr(model_cfg, "text_injection", "joint") == "cross_attn":
+            from data.text_tower import get_text_encoder
+
+            tower = train_cfg.text_tower or {}
+            tower_device = tower.get("device") or self.device
+            self.text_encoder = get_text_encoder(
+                tower.get("model_name", ""),
+                device=tower_device,
+                dtype=tower.get("dtype", "bfloat16"),
+                max_length=int(tower.get("max_length", model_cfg.max_text_tokens)),
+                revision=tower.get("revision") or None,
+                instruction=tower.get("instruction", ""),
+            )
+            print(f"text tower={tower.get('model_name')} dim={self.text_encoder.dim} "
+                  f"len={self.text_encoder.max_length} device={tower_device}")
+
         self.compile_requested = bool(train_cfg.compile)
         if self.compile_requested and not hasattr(torch, "compile"):
             print("torch.compile unavailable, skipping")
@@ -163,16 +185,23 @@ class Trainer:
     def _dtype_text(self):
         return torch.float32
 
-    def compute_loss(self, x, text):
+    def compute_loss(self, x, text, text_mask=None):
         b = x.shape[0]
         t = rand_timesteps(b, self.tcfg.flow.get("timestep_sampling", "uniform"), device=x.device)
         xt, z, target = sample_data_noise(x, t)
-        drop = 1.0 if text.abs().sum().item() == 0.0 else self.cond_drop
+        if isinstance(text, (list, tuple)):
+            text, text_mask = self.text_encoder.encode(list(text))
+            text = text.to(self.device)
+            text_mask = text_mask.to(self.device)
+        if isinstance(text, torch.Tensor) and text.abs().sum().item() == 0.0:
+            drop = 1.0
+        else:
+            drop = self.cond_drop
         if self.autocast is not None:
             with self.autocast:
-                v = self.model(xt, t, text, cond_drop_prob=drop)
+                v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop)
                 return flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss)
-        v = self.model(xt, t, text, cond_drop_prob=drop)
+        v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop)
         return flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss)
 
     def _optimizer_step(self):
@@ -296,7 +325,8 @@ class Trainer:
             last_loss = 0.0
             for x, text in train_loader:
                 x = x.to(self.device, non_blocking=True)
-                text = text.to(self.device, non_blocking=True)
+                if isinstance(text, torch.Tensor):
+                    text = text.to(self.device, non_blocking=True)
                 loss = self.compute_loss(x, text)
                 scaled = loss / accum
                 if self.scaler is not None:
@@ -335,15 +365,21 @@ class Trainer:
         self.model.eval()
         total = 0.0
         n = 0
-        loader = torch.utils.data.DataLoader(val_ds, batch_size=16, shuffle=False, collate_fn=_collate)
+        loader = torch.utils.data.DataLoader(val_ds, batch_size=64, shuffle=False, collate_fn=_collate)
         with torch.no_grad():
             for x, text in loader:
                 x = x.to(self.device)
-                text = text.to(self.device)
+                text_mask = None
+                if isinstance(text, (list, tuple)):
+                    text, text_mask = self.text_encoder.encode(list(text))
+                    text = text.to(self.device)
+                    text_mask = text_mask.to(self.device)
+                else:
+                    text = text.to(self.device)
                 b = x.shape[0]
                 t = rand_timesteps(b, "uniform", device=self.device)
                 xt, z, target = sample_data_noise(x, t)
-                v = self.model(xt, t, text)
+                v = self.model(xt, t, text, text_mask=text_mask)
                 total += F.mse_loss(v, target).item() * b
                 n += b
         mse = total / max(n, 1)

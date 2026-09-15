@@ -45,28 +45,40 @@ def encode_prompts(prompts, text_dim=768, max_tokens=64, model_name="", encoder_
     )
 
 
-def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun", device="cuda", text_dim=768, max_tokens=64, text_encoder="", encoder_type="", instruction=""):
-    embs = torch.from_numpy(
-        encode_prompts(prompts, text_dim=text_dim, max_tokens=max_tokens, model_name=text_encoder, encoder_type=encoder_type, instruction=instruction)
-    ).to(device)
-    # Training drops the condition with the learned ``text_null`` parameter, so
-    # CFG at inference must use the same null embedding (not zeros) to stay
-    # consistent between train and inference.
-    text_null = getattr(model, "text_null", None)
-    if text_null is not None:
-        uncond = (text_null.detach().to(device=embs.device, dtype=embs.dtype)
-                  .view(1, 1, -1).expand(embs.shape[0], 1, -1).contiguous())
+def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun", device="cuda", text_dim=768, max_tokens=64, text_encoder="", encoder_type="", instruction="", text_tower=None):
+    cross = getattr(model, "text_injection", "joint") == "cross_attn"
+    if cross:
+        if text_tower is None:
+            raise SystemExit("cross_attn model requires a text tower (--text-tower)")
+        hidden, mask = text_tower.encode(prompts)
+        text_all = hidden.to(device)
+        mask_all = mask.to(device)
+        uncond = torch.zeros_like(text_all)
+        uncond_mask = torch.zeros_like(mask_all)
     else:
-        uncond = torch.zeros_like(embs)
+        embs = torch.from_numpy(
+            encode_prompts(prompts, text_dim=text_dim, max_tokens=max_tokens, model_name=text_encoder, encoder_type=encoder_type, instruction=instruction)
+        ).to(device)
+        # Training drops the condition with the learned ``text_null`` parameter,
+        # so CFG at inference must use the same null embedding (not zeros).
+        text_null = getattr(model, "text_null", None)
+        if text_null is not None:
+            uncond = (text_null.detach().to(device=embs.device, dtype=embs.dtype)
+                      .view(1, 1, -1).expand(embs.shape[0], 1, -1).contiguous())
+        else:
+            uncond = torch.zeros_like(embs)
     size = model.cfg.image_size
     results = []
     for i, p in enumerate(prompts):
         seed = seeds[i] if seeds is not None else 0
         g = torch.Generator(device=device).manual_seed(int(seed))
         z = torch.randn(1, model.cfg.in_channels, size, size, generator=g, device=device)
-        text = embs[i : i + 1]
-        u = uncond[i : i + 1]
-        x = sample(model, z, text, steps=steps, cfg=cfg, text_uncond=u, solver=solver)
+        if cross:
+            x = sample(model, z, text_all[i:i + 1], steps=steps, cfg=cfg,
+                       text_uncond=uncond[i:i + 1], solver=solver,
+                       text_mask=mask_all[i:i + 1], text_uncond_mask=uncond_mask[i:i + 1])
+        else:
+            x = sample(model, z, embs[i:i + 1], steps=steps, cfg=cfg, text_uncond=uncond[i:i + 1], solver=solver)
         results.append(to_uint8(x[0]))
     return results
 
@@ -92,9 +104,17 @@ def main():
     ap.add_argument("--encoder-type", default="", help="hash | siglip2 | qwen3vl")
     ap.add_argument("--instruction", default="")
     ap.add_argument("--use-ema", action="store_true")
+    ap.add_argument("--text-tower", default="google/t5-v1_1-base",
+                    help="HF token-level text encoder for cross_attn models")
+    ap.add_argument("--text-max-length", type=int, default=128)
     args = ap.parse_args()
 
     model, mcfg = load_model_from_checkpoint(args.ckpt, args.device, use_ema=args.use_ema)
+    text_tower = None
+    if getattr(mcfg, "text_injection", "joint") == "cross_attn":
+        from data.text_tower import get_text_encoder
+        text_tower = get_text_encoder(args.text_tower, device=args.device,
+                                      max_length=args.text_max_length)
     imgs = sample_textures(
         model,
         args.prompt,
@@ -108,6 +128,7 @@ def main():
         text_encoder=args.text_encoder,
         encoder_type=args.encoder_type,
         instruction=args.instruction,
+        text_tower=text_tower,
     )
     for i, p in enumerate(args.prompt):
         out = Path(args.out) / f"{i:03d}_{'_'.join(p.split())[:40]}.png"

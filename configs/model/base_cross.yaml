@@ -1,0 +1,26 @@
+model:
+  name: MCFlowDiTBaseCross
+  image_size: 32
+  in_channels: 4
+  patch_size: 2
+
+  hidden_size: 512
+  num_heads: 8
+  mlp_ratio: 3.0
+  text_mlp_ratio: 1.0
+
+  double_stream_blocks: 3
+  single_stream_blocks: 6
+
+  # Qwen3-VL-Embedding-8B text hidden states (4096-d), injected via cross-attn.
+  text_dim: 4096
+  max_text_tokens: 128
+  text_injection: cross_attn
+  cross_attn_blocks: 4
+
+  qk_norm: true
+  rope: 2d
+  activation: swiglu
+  bias: false
+
+  cond_dropout: 0.12

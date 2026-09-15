@@ -1,0 +1,17 @@
+# Stage 2 with cross-attention text conditioning: prompts are read as strings
+# from prompt_views.parquet and encoded on the fly by the frozen 8B text tower
+# (no precomputed embeddings).
+stage: mc_modrinth_cross_attn
+
+dataset:
+  images: data/build/mc_text2image32_wl/images.uint8.mmap
+  metadata: data/build/mc_text2image32_wl/metadata.parquet
+  splits: data/build/mc_text2image32_wl/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  channels: 4
+  prompt_views: data/build/mc_text2image32_wl/prompt_views.parquet
+  prompt_cols: [prompt_0, prompt_1, prompt_2, prompt_3]
+  text_dim: 4096
+  max_text_tokens: 128

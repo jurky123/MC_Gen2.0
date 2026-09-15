@@ -27,6 +27,14 @@ class ModelConfig:
     text_dim: int = 768
     max_text_tokens: int = 64
 
+    # Text conditioning style:
+    #   "joint"      -> text tokens are projected and mixed into the MMDiT
+    #                   image/text streams (original behaviour).
+    #   "cross_attn" -> the image stream keeps a learned register token and the
+    #                   real text tokens are injected via cross-attention.
+    text_injection: str = "joint"
+    cross_attn_blocks: int = 0
+
     qk_norm: bool = True
     rope: str = "2d"
     activation: str = "swiglu"
@@ -100,6 +108,14 @@ class TrainConfig:
 
     dataset: str = "configs/data/stage_a.yaml"
     text_mmap: str = ""
+    # Frozen token-level text tower for cross-attention conditioning
+    # (used only when the model's text_injection == "cross_attn").
+    text_tower: dict = field(default_factory=lambda: {
+        "model_name": "google/t5-v1_1-base",
+        "max_length": 128,
+        "dtype": "bfloat16",
+        "revision": "",
+    })
     log_file: str = ""
     # Save ``<output_dir>/best.pt`` whenever validation MSE improves.
     save_best: bool = False

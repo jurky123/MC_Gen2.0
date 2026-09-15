@@ -83,6 +83,8 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         max_text_tokens=64,
         channels=3,
         text_views=0,
+        prompt_views="",
+        prompt_cols=None,
     ):
         self.image_size = image_size
         self.toroidal = toroidal
@@ -117,6 +119,21 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
                 shape=(self.n, self.text_middle, text_dim),
             )
         self.df = self.df
+
+        # Dynamic (on-the-fly) prompt strings for cross-attention conditioning.
+        # When set, __getitem__ returns a text string instead of a text embedding.
+        self.prompt_cols = list(prompt_cols or [])
+        self.has_prompts = bool(prompt_views) and os.path.exists(prompt_views) and bool(self.prompt_cols)
+        if self.has_prompts:
+            import pandas as pd
+
+            pv = pd.read_parquet(prompt_views)
+            missing = [c for c in self.prompt_cols if c not in pv.columns]
+            if missing:
+                raise ValueError(f"prompt_views missing columns: {missing}")
+            self.prompts = pv[self.prompt_cols].fillna("").astype(str).to_numpy()
+            if len(self.prompts) != self.n:
+                raise ValueError(f"prompt_views has {len(self.prompts)} rows, dataset has {self.n}")
 
     def _infer_disk_channels(self, images, image_size):
         with open(images, "rb") as handle:
@@ -155,6 +172,9 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
             dx = np.random.randint(0, self.image_size)
             arr = np.roll(arr, (dy, dx), axis=(0, 1))
         x = torch.from_numpy(arr).permute(2, 0, 1).contiguous().float() / 127.5 - 1.0
+        if self.has_prompts:
+            view = np.random.randint(0, len(self.prompt_cols))
+            return x, str(self.prompts[idx, view])
         if self.has_text:
             if self.text_views > 1:
                 view = np.random.randint(0, self.text_views)

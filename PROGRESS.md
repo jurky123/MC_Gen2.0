@@ -95,6 +95,14 @@
 - 说明：批量粗标选择 8B 是速度权衡（27B 单卡仅约 2.8 img/s，全量需数天）；27B 仍保留用于精标 / CaptionBench。
 - Stage 2 训练已启动：`configs/train/stage_2_annotated.yaml`（9,190 步，eff. batch 1024，从 `checkpoints/stage_1_clean/best.pt` 初始化，文本投影按 4096 维重初始化）。修复了 `num_workers=0` 与 EMA `update_every=1` 造成的主机空档：DataLoader 改为 8 worker + prefetch/persistent 并为每个 worker 单独 seed numpy；EMA 改为 `update_every=8`。GPU 利用率由 34–100% 抖动变为稳定 98–100%，step 时间 0.71s → 0.56s。
 
+## Stage 2 数据修正：MC 恢复 alpha（RGBA）
+
+- 问题：`mc_text2image32` / `mc_text2image32_wl` 最初用 `channels=3` 构建，透明 PNG 被合成到黑底、alpha 丢失（item 纹理平均 ~67% 纯黑像素；`stage1_32_rgba` 中 MC 子集 alpha 也全为 255）。HuggingFace 上的 `Risposta/MC_Gen` 同样是 3 通道，确认此前没有任何带透明的 MC 数据。
+- 来源核对：NathMen12 原始图像多为 RGBA（抽样 200 张中 182 张 RGBA），带 alpha 的平均透明像素约 5.8%。
+- 修正：从原始 parquet 用 `src/data/mc_text2image_builder.py --channels 4` 重建 `data/build/mc_text2image32_wl/images.uint8.mmap`（4,235,497,472 B，alpha 0–255，约 24.7% 像素半透明）。重建后的 `file_name` / `project_id` 序列与旧数据逐行一致，因此 `prompt_views.parquet` 与 `text_embeddings.f32.mmap` 无需重算，配置 `channels: 4` 不用改。
+- 推理修正：`src/infer/sample.py` 的 CFG 空条件改用训练时学习的 `model.text_null`（此前用全零，与训练不一致）。
+- 待办：重启 Stage 2 训练以使用 RGBA 数据（旧的 3 通道数据已从 `_wl` 移除）。
+
 ## 下一步
 
 - 启动 Stage 2 训练（从 Stage 1 权重初始化，`text_proj/text_null` 按 4096 维重初始化）：

@@ -49,7 +49,15 @@ def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun"
     embs = torch.from_numpy(
         encode_prompts(prompts, text_dim=text_dim, max_tokens=max_tokens, model_name=text_encoder, encoder_type=encoder_type, instruction=instruction)
     ).to(device)
-    uncond = torch.zeros_like(embs)
+    # Training drops the condition with the learned ``text_null`` parameter, so
+    # CFG at inference must use the same null embedding (not zeros) to stay
+    # consistent between train and inference.
+    text_null = getattr(model, "text_null", None)
+    if text_null is not None:
+        uncond = (text_null.detach().to(device=embs.device, dtype=embs.dtype)
+                  .view(1, 1, -1).expand(embs.shape[0], 1, -1).contiguous())
+    else:
+        uncond = torch.zeros_like(embs)
     size = model.cfg.image_size
     results = []
     for i, p in enumerate(prompts):

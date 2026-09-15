@@ -41,6 +41,10 @@ Preserve uncertainty.
 Return valid JSON only.
 """
 
+# Background used when flattening RGBA tiles for annotation views / VLM input.
+# White (not black) so dropped alpha is not described as part of the texture.
+ANNOTATION_BG = (255, 255, 255, 255)
+
 _ANNOTATION_KEYS = [
     "material", "form", "state", "dominant_colors", "pattern", "surface",
     "directionality", "details", "emissive", "tileability",
@@ -83,7 +87,13 @@ def resolve_image_path(record, root=None):
 
 
 def load_image(path) -> Image.Image:
-    return Image.open(path).convert("RGB")
+    image = Image.open(path)
+    if image.mode in ("RGBA", "LA", "P"):
+        image = image.convert("RGBA")
+        background = Image.new("RGBA", image.size, ANNOTATION_BG)
+        background.alpha_composite(image)
+        image = background
+    return image.convert("RGB")
 
 
 def record_has_mmap(record) -> bool:
@@ -119,7 +129,14 @@ def load_record_image(record, root=None) -> Image.Image:
         array = np.memmap(path, dtype=np.uint8, mode="r", shape=(count,) + shape)
         tile = np.asarray(array[index])
         mode = "RGBA" if shape[-1] == 4 else "RGB"
-        return Image.fromarray(tile, mode=mode).convert("RGB")
+        image = Image.fromarray(tile, mode=mode)
+        if image.mode == "RGBA":
+            # Composite transparent pixels onto a neutral background so the VLM
+            # does not mistake dropped alpha (black) for part of the texture.
+            background = Image.new("RGBA", image.size, ANNOTATION_BG)
+            background.alpha_composite(image)
+            image = background
+        return image.convert("RGB")
     path = resolve_image_path(record, root=root)
     return load_image(path)
 

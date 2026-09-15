@@ -101,6 +101,7 @@
 - 来源核对：NathMen12 原始图像多为 RGBA（抽样 200 张中 182 张 RGBA），带 alpha 的平均透明像素约 5.8%。
 - 修正：从原始 parquet 用 `src/data/mc_text2image_builder.py --channels 4` 重建 `data/build/mc_text2image32_wl/images.uint8.mmap`（4,235,497,472 B，alpha 0–255，约 24.7% 像素半透明）。重建后的 `file_name` / `project_id` 序列与旧数据逐行一致，因此 `prompt_views.parquet` 与 `text_embeddings.f32.mmap` 无需重算，配置 `channels: 4` 不用改。
 - 推理修正：`src/infer/sample.py` 的 CFG 空条件改用训练时学习的 `model.text_null`（此前用全零，与训练不一致）。
+- 标注偏差：现有 coarse 标注是在旧的黑底 RGB 视图上做的，抽样 3 万条中 8.5% 提到 `black`、1.4% 提到 `background`。已把标注视图改为把 alpha 合成到白底（`ANNOTATION_BG`），并在 system prompt 中明确“背景不属于纹理、不要描述背景/透明”。因此**建议在 RGBA 数据上重新走一遍 标注 → 重写 → 编码 → 训练**。
 - 待办：重启 Stage 2 训练以使用 RGBA 数据（旧的 3 通道数据已从 `_wl` 移除）。
 
 ## 下一步

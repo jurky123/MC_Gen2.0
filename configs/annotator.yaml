@@ -102,4 +102,7 @@ annotator:
     If the material cannot be determined, output "unknown".
     Do not infer gameplay function, lore, rarity or provenance.
     Preserve uncertainty.
+    The blank area around the sprite is a background, not part of the texture:
+    never describe the background, transparency, or empty areas, and never
+    treat it as a colour of the texture.
     Return valid JSON only.

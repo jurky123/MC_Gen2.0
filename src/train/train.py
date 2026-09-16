@@ -379,8 +379,12 @@ class Trainer:
                 b = x.shape[0]
                 t = rand_timesteps(b, "uniform", device=self.device)
                 xt, z, target = sample_data_noise(x, t)
-                v = self.model(xt, t, text, text_mask=text_mask)
-                total += F.mse_loss(v, target).item() * b
+                if self.autocast is not None:
+                    with self.autocast:
+                        v = self.model(xt, t, text, text_mask=text_mask)
+                else:
+                    v = self.model(xt, t, text, text_mask=text_mask)
+                total += F.mse_loss(v.float(), target).item() * b
                 n += b
         mse = total / max(n, 1)
         print(f"[val] step {self.global_step} mse {mse:.5f}")

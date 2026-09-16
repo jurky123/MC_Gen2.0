@@ -28,11 +28,11 @@ train:
 
   grad_clip: 1.0
   activation_checkpointing: false
-  gradient_accumulation: 2
+  gradient_accumulation: 4
 
   batch:
     auto_probe: false
-    preferred_micro_batch: 512
+    preferred_micro_batch: 256
     max_vram_gb: 74
     # num_workers=0 stalls the GPU between steps; overlap data prep instead.
     num_workers: 8

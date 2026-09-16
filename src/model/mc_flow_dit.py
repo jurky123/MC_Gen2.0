@@ -116,6 +116,9 @@ class MCFlowDiT(nn.Module):
 
             key_mask = None
             if text is not None:
+                # Match the parameter dtype so the model also works outside an
+                # autocast context (e.g. validation / eager sampling).
+                text = text.to(dtype=self.patch_embed.weight.dtype)
                 if text_mask is None:
                     key_mask = torch.ones(text.shape[:2], dtype=torch.bool, device=x.device)
                 else:

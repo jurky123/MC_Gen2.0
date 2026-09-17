@@ -106,15 +106,18 @@ def main():
     ap.add_argument("--use-ema", action="store_true")
     ap.add_argument("--text-tower", default="google/t5-v1_1-base",
                     help="HF token-level text encoder for cross_attn models")
-    ap.add_argument("--text-max-length", type=int, default=128)
+    ap.add_argument("--text-max-length", type=int, default=512)
+    ap.add_argument("--text-layers", default="",
+                    help="comma list of hidden layers to concatenate, e.g. 9,18,27")
     args = ap.parse_args()
 
     model, mcfg = load_model_from_checkpoint(args.ckpt, args.device, use_ema=args.use_ema)
     text_tower = None
     if getattr(mcfg, "text_injection", "joint") == "cross_attn":
         from data.text_tower import get_text_encoder
+        layers = [int(x) for x in args.text_layers.split(",") if x.strip()] if args.text_layers else None
         text_tower = get_text_encoder(args.text_tower, device=args.device,
-                                      max_length=args.text_max_length)
+                                      max_length=args.text_max_length, layers=layers)
     imgs = sample_textures(
         model,
         args.prompt,

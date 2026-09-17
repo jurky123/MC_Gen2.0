@@ -1,0 +1,26 @@
+model:
+  name: MCFlowDiTBaseFlux2Klein
+  image_size: 32
+  in_channels: 4
+  patch_size: 2
+
+  hidden_size: 512
+  num_heads: 8
+  mlp_ratio: 3.0
+  text_mlp_ratio: 1.0
+
+  double_stream_blocks: 3
+  single_stream_blocks: 6
+
+  # FLUX.2 [klein] style: Qwen3-8B hidden states from layers 9/18/27 concatenated
+  # -> 3 x 4096 = 12288. Token sequence, injected via cross-attention.
+  text_dim: 12288
+  max_text_tokens: 512
+  text_injection: cross_attn
+  cross_attn_blocks: 4
+
+  qk_norm: true
+  rope: 2d
+  activation: swiglu
+  bias: false
+  cond_dropout: 0.12

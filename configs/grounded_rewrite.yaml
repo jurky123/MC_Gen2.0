@@ -1,0 +1,22 @@
+# Grounded label -> prompt rewrite (text-only, strict label preservation).
+rewriter:
+  model: qwen3-vl-8b
+  backend: http
+  endpoint: http://127.0.0.1:8000/v1/chat/completions
+  endpoints: []
+  api_key: EMPTY
+  served_model_name: ""
+
+  temperature: 0.3
+  top_p: 0.95
+  max_tokens: 96
+  seed: 0
+  chat_template_kwargs:
+    enable_thinking: false
+  response_format:
+    type: json_object
+
+  max_retries: 3
+  retry_backoff: 2.0
+  timeout: 120.0
+  concurrency: 256

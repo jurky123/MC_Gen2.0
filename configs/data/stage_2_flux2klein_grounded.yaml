@@ -1,0 +1,17 @@
+# Stage 2 grounded text supervision: only the factual (prompt_0) and
+# descriptive (prompt_3) views, dropping the vague evocative/thematic views so
+# the image-text signal is not diluted. Cross-attention, dynamic 8B encoding.
+stage: mc_modrinth_flux2klein_grounded
+
+dataset:
+  images: data/build/mc_text2image32_wl/images.uint8.mmap
+  metadata: data/build/mc_text2image32_wl/metadata.parquet
+  splits: data/build/mc_text2image32_wl/splits.json
+  image_size: 32
+  toroidal: true
+  normalize: true
+  channels: 4
+  prompt_views: data/build/mc_text2image32_wl/prompt_views.parquet
+  prompt_cols: [prompt_0, prompt_3]
+  text_dim: 12288
+  max_text_tokens: 512

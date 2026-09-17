@@ -145,9 +145,11 @@ class Trainer:
                 max_length=int(tower.get("max_length", model_cfg.max_text_tokens)),
                 revision=tower.get("revision") or None,
                 instruction=tower.get("instruction", ""),
+                layers=tower.get("layers"),
             )
             print(f"text tower={tower.get('model_name')} dim={self.text_encoder.dim} "
-                  f"len={self.text_encoder.max_length} device={tower_device}")
+                  f"layers={self.text_encoder.layers} len={self.text_encoder.max_length} "
+                  f"device={tower_device}")
 
         self.compile_requested = bool(train_cfg.compile)
         if self.compile_requested and not hasattr(torch, "compile"):

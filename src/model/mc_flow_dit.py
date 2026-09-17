@@ -79,7 +79,8 @@ class MCFlowDiT(nn.Module):
         B, N, d = tokens.shape
         p = self.patch_size
         C = self.in_channels
-        tokens = tokens.view(B, C * p * p, N)
+        # (B, N, C*p*p) -> (B, C*p*p, N): transpose token/channel axes, then fold.
+        tokens = tokens.transpose(1, 2).reshape(B, C * p * p, N)
         return F.fold(tokens, output_size=(H, W), kernel_size=p, stride=p)
 
     def _drop_text(self, text_emb, cond_drop_prob):

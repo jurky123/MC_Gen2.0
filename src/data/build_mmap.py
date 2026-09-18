@@ -85,6 +85,8 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         text_views=0,
         prompt_views="",
         prompt_cols=None,
+        toroidal_col="",
+        toroidal_values=None,
     ):
         self.image_size = image_size
         self.toroidal = toroidal
@@ -106,6 +108,13 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
 
         self.df = pd.read_parquet(metadata)
         self.n = len(self.df)
+        # Toroidal roll augmentation is only valid for tileable textures; apply
+        # it to rows selected by (toroidal_col in toroidal_values). Empty values
+        # => every row (legacy behaviour).
+        self.tileable = None
+        if toroidal and toroidal_col and toroidal_col in self.df.columns:
+            vals = list(toroidal_values or [])
+            self.tileable = self.df[toroidal_col].astype(str).isin(vals).to_numpy()
         self.disk_channels = self._infer_disk_channels(images, image_size)
         self.images = np.memmap(
             images, dtype=np.uint8, mode="r",
@@ -167,7 +176,8 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         idx = self.index[i]
         arr = self._adapt_channels(np.asarray(self.images[idx]))
         dy = dx = 0
-        if self.toroidal:
+        do_roll = self.toroidal and (self.tileable is None or bool(self.tileable[idx]))
+        if do_roll:
             dy = np.random.randint(0, self.image_size)
             dx = np.random.randint(0, self.image_size)
             arr = np.roll(arr, (dy, dx), axis=(0, 1))

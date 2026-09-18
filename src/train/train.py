@@ -65,6 +65,8 @@ def _build_source(src, ds, split):
         text_views=int(src.get("text_views", ds.get("text_views", 0))),
         prompt_views=src.get("prompt_views", "") or ds.get("prompt_views", ""),
         prompt_cols=src.get("prompt_cols", None) or ds.get("prompt_cols", None),
+        toroidal_col=src.get("toroidal_col", "") or ds.get("toroidal_col", ""),
+        toroidal_values=src.get("toroidal_values", None) or ds.get("toroidal_values", None),
     )
 
 

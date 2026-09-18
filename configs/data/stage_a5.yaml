@@ -24,7 +24,7 @@ dataset:
   metadata: data/build/pixel_a5/metadata.parquet
   splits: data/build/pixel_a5/splits.json
   image_size: 32
-  toroidal: true
+  toroidal: false
   normalize: true
   channels: 4
   text_mmap: ""

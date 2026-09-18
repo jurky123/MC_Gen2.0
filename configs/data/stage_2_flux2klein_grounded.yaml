@@ -8,7 +8,7 @@ dataset:
   metadata: data/build/mc_text2image32_wl/metadata.parquet
   splits: data/build/mc_text2image32_wl/splits.json
   image_size: 32
-  toroidal: true
+  toroidal: false
   normalize: true
   channels: 4
   prompt_views: data/build/mc_text2image32_wl/prompt_views.parquet

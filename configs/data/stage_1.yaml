@@ -3,7 +3,7 @@ stage: pixel_and_mc_pretraining
 dataset:
   image_size: 32
   channels: 4
-  toroidal: true
+  toroidal: false
   normalize: true
   text_mmap: ""
   text_dim: 768

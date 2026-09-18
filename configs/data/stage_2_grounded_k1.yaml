@@ -8,11 +8,9 @@ dataset:
   metadata: data/build/mc_text2image32_wl/metadata.parquet
   splits: data/build/mc_text2image32_wl/splits.json
   image_size: 32
-  toroidal: true
-  # Toroidal roll is only valid for tileable textures: apply to blocks, not to
-  # (centred, non-tileable) item sprites.
-  toroidal_col: type
-  toroidal_values: [block]
+  # No toroidal roll at all: it corrupts non-tileable sprites and is disabled
+  # project-wide.
+  toroidal: false
   normalize: true
   channels: 4
   prompt_views: data/build/mc_text2image32_wl/grounded_prompts.parquet

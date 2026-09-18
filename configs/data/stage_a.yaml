@@ -15,7 +15,7 @@ dataset:
   metadata: data/build/generic/metadata.parquet
   splits: data/build/generic/splits.json
   image_size: 32
-  toroidal: true
+  toroidal: false
   normalize: true
   channels: 4
   text_mmap: ""

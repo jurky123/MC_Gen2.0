@@ -16,7 +16,7 @@ dataset:
   metadata: data/build/mc_c/metadata.parquet
   splits: data/build/mc_c/splits.json
   image_size: 32
-  toroidal: true
+  toroidal: false
   normalize: true
   channels: 4
   text_mmap: data/build/mc_c/text_embeddings.f32.mmap

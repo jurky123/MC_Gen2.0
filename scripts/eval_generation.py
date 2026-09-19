@@ -93,6 +93,8 @@ def main():
     ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stage_2_grounded_k1/best.pt"))
     ap.add_argument("--model", default=str(ROOT / "configs/model/base_flux2klein.yaml"))
     ap.add_argument("--build", default=str(ROOT / "data/build/mc_text2image32_wl"))
+    ap.add_argument("--splits", default="", help="splits json (default <build>/splits.json)")
+    ap.add_argument("--prompts", default="", help="prompt parquet (default <build>/grounded_prompts.parquet)")
     ap.add_argument("--text-tower", default="/home/iflab/models/Qwen3-8B")
     ap.add_argument("--vlm", default="/home/iflab/models/Qwen3-VL-8B-Instruct")
     ap.add_argument("--n", type=int, default=64)
@@ -106,9 +108,9 @@ def main():
     model, step = load_model(args.ckpt, device)
     enc = FrozenTextEncoder(args.text_tower, device=device, dtype="bfloat16",
                             max_length=512, layers=[9, 18, 27])
-    gp = pd.read_parquet(build / "grounded_prompts.parquet")
+    gp = pd.read_parquet(Path(args.prompts) if args.prompts else build / "grounded_prompts.parquet")
     meta = pd.read_parquet(build / "metadata.parquet", columns=["type"])
-    splits = json.load(open(build / "splits.json"))
+    splits = json.load(open(Path(args.splits) if args.splits else build / "splits.json"))
     N = len(meta)
     img = np.memmap(build / "images.uint8.mmap", dtype=np.uint8, mode="r",
                     shape=(N, 32, 32, 4))
@@ -220,6 +222,7 @@ def main():
     text_effect = None
     try:
         from train.flow import rand_timesteps, sample_data_noise
+        torch.manual_seed(1234)  # deterministic timestep/noise for the comparison
         v_picks = (blocks + items)
         random.Random(2).shuffle(v_picks)
         v_picks = v_picks[:256]

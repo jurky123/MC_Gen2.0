@@ -1,22 +1,42 @@
-# Stage 2 v2 with grounded prompts, rebuilt after the repository rectification:
+# Stage 2 v2 with grounded prompts AND the Stage-3 fine-annotated subset mixed
+# in, rebuilt after the repository rectification:
 #  * premultiplied RGBA training representation (transparent regions have a
 #    deterministic RGB of 0),
 #  * structured aux batch (per-sample tileable mask for the masked tile loss),
-#  * the global splits.json remains the single project-grouped holdout.
-stage: mc_modrinth_grounded_k1_v2
+#  * the global splits.json remains the single project-grouped holdout;
+#    the main source uses replay_splits.json so stage3 val/test stay clean,
+#  * source B injects the 27B fine annotations (stage3 train rows only) at a
+#    modest weight so fine prompts get ~5x per-row exposure vs grounded rows
+#    without dominating the distribution.
+stage: mc_modrinth_grounded_k1_v2_finemix
 
 dataset:
-  images: data/build/mc_text2image32_wl/images.uint8.mmap
-  metadata: data/build/mc_text2image32_wl/metadata.parquet
-  splits: data/build/mc_text2image32_wl/splits.json
   image_size: 32
-  toroidal: false
-  normalize: true
   channels: 4
   rgba_mode: premultiplied
   return_aux: true
   tileable_col: tileable
-  prompt_views: data/build/mc_text2image32_wl/grounded_prompts.parquet
-  prompt_cols: [prompt_0]
+  toroidal: false
+  normalize: true
   text_dim: 12288
   max_text_tokens: 512
+  sources:
+    # A) all global-train rows EXCLUDING stage3 val/test (+ pixel dups):
+    #    grounded prompts from source filename labels
+    - type: mmap
+      images: data/build/mc_text2image32_wl/images.uint8.mmap
+      metadata: data/build/mc_text2image32_wl/metadata.parquet
+      splits: data/build/mc_text2image32_wl/replay_splits.json
+      channels: 4
+      prompt_views: data/build/mc_text2image32_wl/grounded_prompts.parquet
+      prompt_cols: [prompt_0]
+      weight: 1.0
+    # B) Stage-3 fine-annotated subset (stage3 train rows, leak-free splits)
+    - type: mmap
+      images: data/build/mc_text2image32_wl/images.uint8.mmap
+      metadata: data/build/mc_text2image32_wl/metadata.parquet
+      splits: data/build/mc_text2image32_wl/stage3_splits.json
+      channels: 4
+      prompt_views: data/build/mc_text2image32_wl/stage3_prompts.parquet
+      prompt_cols: [prompt_0]
+      weight: 0.1

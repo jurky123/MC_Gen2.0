@@ -84,6 +84,9 @@ class TrainConfig:
     grad_clip: float = 1.0
     activation_checkpointing: bool = False
     gradient_accumulation: int = 1
+    # Anti-forgetting: freeze the image backbone and train only the conditioning
+    # path (text projection, register, cross-attention, head, timestep embedder).
+    freeze_backbone: bool = False
 
     batch: dict = field(default_factory=lambda: {
         "auto_probe": True,

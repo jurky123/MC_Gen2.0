@@ -1,0 +1,31 @@
+# Stage 3: fine-tune on the 27B-annotated curated subset, with Stage-2 replay to
+# prevent catastrophic forgetting. Multi-source read-time mixing (see
+# src/train/train.py MixDataset): 75% fine subset + 25% Stage-2 replay.
+stage: mc_fine_tune_replay
+
+dataset:
+  image_size: 32
+  channels: 4
+  toroidal: false
+  normalize: true
+  text_dim: 12288
+  max_text_tokens: 512
+  sources:
+    # A) curated, 27B fine-annotated subset (stage3_prompts.parquet)
+    - type: mmap
+      images: data/build/mc_text2image32_wl/images.uint8.mmap
+      metadata: data/build/mc_text2image32_wl/metadata.parquet
+      splits: data/build/mc_text2image32_wl/stage3_splits.json
+      channels: 4
+      prompt_views: data/build/mc_text2image32_wl/stage3_prompts.parquet
+      prompt_cols: [prompt_0]
+      weight: 0.75
+    # B) replay from the full Stage-2 grounded prompts (anti-forgetting)
+    - type: mmap
+      images: data/build/mc_text2image32_wl/images.uint8.mmap
+      metadata: data/build/mc_text2image32_wl/metadata.parquet
+      splits: data/build/mc_text2image32_wl/splits.json
+      channels: 4
+      prompt_views: data/build/mc_text2image32_wl/grounded_prompts.parquet
+      prompt_cols: [prompt_0]
+      weight: 0.25

@@ -1,0 +1,71 @@
+train:
+  precision: bf16
+  compile: false
+
+  seed: 0
+  # Stage 2: Modrinth mod textures with Qwen3.8-27B coarse annotations rewritten
+  # into K=4 prompt views. train split 941,104 / batch 1024 = 919 steps/epoch;
+  # 10 epochs = 9,190 steps. Init weights from the Stage 1 checkpoint with
+  # --init-from (text projection is re-initialised because Stage 1 was 768-d).
+  steps: 400
+  log_every: 25
+  save_every: 1000
+  eval_every_epochs: 1
+  save_best: true
+  output_dir: checkpoints/stage_3
+  log_file: checkpoints/stage_3/train.log
+
+  optimizer:
+    name: adamw
+    fused: true
+    lr: 3.0e-5
+    betas: [0.9, 0.95]
+    weight_decay: 0.03
+
+  scheduler:
+    type: cosine
+    warmup_steps: 100
+
+  grad_clip: 1.0
+  activation_checkpointing: false
+  gradient_accumulation: 4
+
+  batch:
+    auto_probe: false
+    preferred_micro_batch: 256
+    max_vram_gb: 74
+    # num_workers=0 stalls the GPU between steps; overlap data prep instead.
+    num_workers: 8
+    prefetch_factor: 4
+
+  ema:
+    enabled: true
+    device: cpu
+    decay: 0.999
+    # Every step copies ~230MB GPU->CPU and stalls the pipeline; amortise it.
+    update_every: 8
+
+  flow:
+    timestep_sampling: uniform
+    loss: mse
+
+  tile_loss:
+    enabled: true
+    weight: 0.03
+    max_t: 0.7
+    border_width: 2
+
+  dataset: configs/data/stage_3.yaml
+
+  # Frozen 8B text tower, computed on the fly (no precompute). Runs on a second
+  # GPU so it does not compete with the DiT for VRAM.
+  text_tower:
+    model_name: /home/iflab/models/Qwen3-8B
+    max_length: 512
+    dtype: bfloat16
+    device: cuda:1
+    layers: [9, 18, 27]
+    instruction: ""
+    add_generation_prompt: true
+    enable_thinking: false
+    revision: ""

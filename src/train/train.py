@@ -133,6 +133,17 @@ class Trainer:
         self.cond_drop = model_cfg.cond_dropout
         self.model.to(self.device)
 
+        if getattr(train_cfg, "freeze_backbone", False):
+            trainable_prefixes = ("text_proj", "text_null", "cross_blocks",
+                                  "head", "head_norm", "t_embedder")
+            frozen = trainable = 0
+            for name, param in self.model.named_parameters():
+                if name.startswith(trainable_prefixes):
+                    param.requires_grad_(True); trainable += param.numel()
+                else:
+                    param.requires_grad_(False); frozen += param.numel()
+            print(f"freeze_backbone: trainable {trainable/1e6:.2f}M, frozen {frozen/1e6:.2f}M")
+
         # Dynamic token-level text tower for cross-attention conditioning.
         self.text_encoder = None
         if getattr(model_cfg, "text_injection", "joint") == "cross_attn":

@@ -1,0 +1,24 @@
+# Stage-3 fine annotation of the curated subset with the local 27B VLM.
+annotator:
+  model: qwen3.8-27b
+  backend: http
+  endpoint: http://127.0.0.1:8000/v1/chat/completions
+  endpoints: []
+  api_key: EMPTY
+  served_model_name: ""
+
+  temperature: 0.0
+  top_p: 1.0
+  max_tokens: 320
+  seed: 0
+  chat_template_kwargs:
+    enable_thinking: false
+  response_format:
+    type: json_object
+
+  target: 512
+  repeat: 4
+  max_retries: 3
+  retry_backoff: 2.0
+  timeout: 180.0
+  concurrency: 64

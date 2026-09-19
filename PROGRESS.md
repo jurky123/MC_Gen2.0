@@ -1,6 +1,6 @@
 # MC-Gen2.0 项目进度
 
-> 更新日期：2026-09-15；当前方案：v2.3（数据处理与条件编码定型）
+> 更新日期：2026-09-19；当前方案：v2.3（数据处理与条件编码定型）
 
 ## 新训练课程
 
@@ -104,19 +104,54 @@
 - 标注偏差：现有 coarse 标注是在旧的黑底 RGB 视图上做的，抽样 3 万条中 8.5% 提到 `black`、1.4% 提到 `background`。已把标注视图改为把 alpha 合成到白底（`ANNOTATION_BG`），并在 system prompt 中明确“背景不属于纹理、不要描述背景/透明”。因此**建议在 RGBA 数据上重新走一遍 标注 → 重写 → 编码 → 训练**。
 - 待办：重启 Stage 2 训练以使用 RGBA 数据（旧的 3 通道数据已从 `_wl` 移除）。
 
+## grounded 提示词（从原始标签重建）
+
+- 动机：coarse 标注偏客观、含域冗余词，且 material unknown 14.6%；改用**原始文件名标签**作为权威来源。
+- `src/data/filename_prompts.py`：切词 → 去方位/动画/通用/数字/mod 噪声 → 保留标签词（可配置是否保留方位词）；提供 `validate_prompt`（词边界 + 复数）与 `fallback_prompt`。
+- 产物 `data/build/mc_text2image32_wl/grounded_prompts.parquet`：每条 1 个 prompt（K=1），统计覆盖 stone 3.6%、lava 2.0%、sword 1.2% 等；`lace` 仅 0.005%（确认此前"lava lace"类测试不公平）。
+- 另一版 LLM grounded 重写：`configs/grounded_rewrite.yaml` + `src/data/grounded_rewrite.py` + `scripts/rewrite_grounded.py`，严格要求保留全部标签词与 block/item，双卡 27B/8B 分片，产物 `grounded_prompts`（LLM 句更自然，~94% 通过校验，其余回退规则拼接）。
+
+## 走向 cross-attention + 动态文本塔
+
+- 文本条件从"1 个池化 token"升级为 **token 序列 + cross-attention**（Q=图像 token，K/V=文本 token，带 padding mask，输出零初始化）。
+- 文本塔动态计算（不预计算）：`Qwen3-8B` causal LM，取**第 9/18/27 层 hidden states 拼接**（FLUX.2-klein 取法，4096×3 = 12288 维），`enable_thinking=False`，冻结，训练时跑在第二张卡上。
+- 模型 `text_injection: cross_attn`：图像主干保留学习到的 register token（与 Stage 1 的常量 `text_null` 语义一致）以复用 Stage 1 权重；`cross_attn_blocks: 4`。
+- 相关文件：`src/model/cross_attention.py`、`src/data/text_tower.py`、`configs/model/base_flux2klein.yaml`、`configs/data/stage_2_grounded_k1.yaml`、`configs/train/stage_2_grounded_k1.yaml`（文本塔 `device: cuda:1`）。
+
+## 关键 bug 修复（生成空间伪影）
+
+- **`_depatchify` 转置错误**（`96b90f4`）：`tokens.view(B, C*p*p, N)` 把 token 维与 channel 维错误重排，`patchify→depatchify` 往返误差 0.99（修复后 0.0），与 2D RoPE 位置假设冲突，导致生成内容被挤到某侧、中心空洞。修复为 `tokens.transpose(1,2).reshape(B, C*p*p, N)` 再 `F.fold`。
+- **toroidal roll 误用**（`7c2b14a`，后于 `11975a0` 全面关闭）：随机环形平移对可平铺纹理无损，但会把居中 sprite 移到任意位置/跨边界绕回，模型只能学出"位置随机的平均 sprite"。对照实验：同一稀疏 item，训练**加 roll** → 生成散碎（loss 0.138）；**不加 roll** → 完美还原（agreement 1.0）。现已全局 `toroidal: false`。
+- 结论：以上两 bug + 训练量不足是此前"边缘碎块/中心空洞/不成形"的全部主因。
+
+## 评测套件与 Stage 2 结果
+
+- `scripts/eval_generation.py`：真实/生成对照图 + 概念召回（全词/常用词、词边界）+ 颜色命中 + 真实-生成保真（RGB L2 / 直方图余弦）+ seam（与真实 baseline 对比）+ 多样性 + 检索准确率 + 文本有效性（val MSE 真实 vs 空，固定种子）。
+- Stage 2（`checkpoints/stage_2_grounded_k1/best.pt`，10 epoch，修复后 + 无 roll，val mse 0.0747）：
+  - 文本有效性 ~13.6%（固定种子，早期未固定时的 20.7% 为噪声）；常用概念召回 block 0.385 / item 0.361；颜色 0.70；检索 0.125（随机 0.016）；seam 11.8（真实 27.1）。
+  - 生成 item 墨水中心占比 0.89（数据 0.76），空间伪影消失；可辨认西瓜/宝石环/南瓜/剑等。
+
+## Stage 3：子集筛选 + 27B 精标 + 防遗忘微调
+
+- **词表统计**（全量 246 万 token）：形容词 30 颜色 + 48 状态；名词 63 form + 59 material；其余为方位/部件/mod 噪声。
+- **子集筛选** `scripts/select_stage3_subset.py`：按 (type×form)、(type×material)、(type×colour)、(type×state) 及组合键多轮分层，每 project ≤25；产出 `stage3_subset.jsonl` **20,000 条**（block 10,004 / item 9,996；form 63/63、material 61/61、colour 30/30、state 48/49 覆盖，4,274 项目）。
+- **27B 精标** `src/data/stage3_annotate.py` + `scripts/annotate_stage3.py`（`configs/stage3_annotator.yaml`）：双视图（single + 4×4 tiling、白底合成）、严格保留全部标签词与 block/item、15 个字段（material/form/state/colours/pattern/surface/shape/symmetry/tileable/emissive/transparency/short+detailed_prompt/uncertainty）、词边界校验 + 回退；双卡 2 个 27B replica（`:8000/:8001`）约 1.8h 完成 20,000 条，失败 0。
+- merge → `stage3_prompts.parquet`（20,000 覆盖）+ `stage3_splits.json`（train/val/test 15,948 / 2,047 / 2,005）。
+- **防遗忘微调** `configs/data/stage_3.yaml` + `configs/train/stage_3.yaml` / `stage_3_frozen.yaml`：75% 精标子集 + 25% Stage-2 replay 多源混训；lr 3e-5、warmup 100、steps 400；新增 `train.freeze_backbone`（只训练 `text_proj/register/cross_attn/head/t_embedder`）。
+- frozen 结果（`checkpoints/stage_3_frozen/best.pt`，可训练 74.9M / 冻结 55.1M，~33 分钟）：Stage-2 val 文本有效性 13.6% → 12.9%（固定种子，**无实质遗忘**），保真/直方图/检索/block 召回略升；Stage-3 val 颜色 0.825、item 概念召回 0.468、检索 0.188、与真实图 L2 57.7。
+- 观察：27B 精标仍会**漏细节/误判**（如红裤子护甲被标 molten/green、头盔细节缺失），且小模型对长尾细节**拟合不足**；两份对比图见 `outputs/eval_s3_stage3/real_vs_generated.png`、`/tmp/opencode/compare_s2_s3.png`。
+
+## 新方向：图生图 / HD→MC 风格化（设计阶段）
+
+- 完整设计见 `docs/IMG2IMG_DESIGN.md`：引入参考图条件（HD→MC 风格化），构建 `(HD, MC)` 配对数据，训练图生图模型，再用其合成高质量像素数据反哺文生图（数据飞轮）。
+- 关键决策点在文档 §11（外部高清模型选型与许可、Path A/B 优先级、独立 vs 统一模型、参考条件实现、分辨率、闭环配比、golden 集、是否用 HD 参考辅助标注）。**暂不实现，待细化。**
+
 ## 下一步
 
-- 启动 Stage 2 训练（从 Stage 1 权重初始化，`text_proj/text_null` 按 4096 维重初始化）：
+- **细化并评审 `docs/IMG2IMG_DESIGN.md`**，确定 §11 的决策点（外部高清模型、配对路线、模型形态、分辨率）。
+- Phase 0 原型：外部高清生成器 + 确定性 MC-ify（Path B）构建 1 万级 `(HD, MC)` 配对，人工抽查。
+- 图生图模型（独立风格化器）：在 MC-FlowDiT 上加参考条件（优先通道拼接），配对评测。
+- 用图生图/HD 参考**辅助校正标注**（缓解精标漏细节）。
+- 可选：跑 Stage 3 完整低 LR 变体（`configs/train/stage_3.yaml`，不冻结、带 replay）对比。
+- 可选：用修复后的代码重跑 Stage 1 得到干净基座。
 
-  ```bash
-  CUDA_VISIBLE_DEVICES=0 python scripts/train.py \
-    --model configs/model/base_qwen.yaml \
-    --train configs/train/stage_2_annotated.yaml \
-    --init-from checkpoints/stage_1_clean/best.pt
-  ```
-
-  9,190 步（约 10 epoch，train 941,104 / batch 1024），输出 `checkpoints/stage_2_annotated/`。
-- Stage 2 稳定后评估：creative prompt 泛化、seam score、diversity、prompt alignment。
-- 把「粗标注 → K 视图重写 → 多卡编码」扩展到 Stage 1 全量（3,185,719 条）及其他来源。
-- 用 CaptionBench 抽样复核 8B 粗标注的准确率与幻觉率。
-- 为 James-A 精标字段生成短/详细两种文本视图，构建 Stage 3 数据集。

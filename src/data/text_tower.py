@@ -18,12 +18,13 @@ _ENC_CACHE = {}
 class FrozenTextEncoder:
     def __init__(self, model_name, device="cuda", dtype="bfloat16", max_length=512,
                  revision=None, trust_remote_code=True, instruction="", layers=None,
-                 add_generation_prompt=True, enable_thinking=False):
+                 add_generation_prompt=True, enable_thinking=False, pad_bucket=0):
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         self.model_name = model_name
         self.device = device
         self.max_length = int(max_length)
+        self.pad_bucket = int(pad_bucket or 0)
         self.instruction = instruction or ""
         self.layers = [int(x) for x in (layers or [])]
         self.add_generation_prompt = bool(add_generation_prompt)
@@ -38,6 +39,21 @@ class FrozenTextEncoder:
         ).to(device).eval()
         for p in self.model.parameters():
             p.requires_grad_(False)
+        # Only the transformer trunk is needed: running the inner backbone
+        # avoids materialising (B, L, vocab) logits, which OOMs for large
+        # encode batches (27+ GiB spikes on Qwen3-8B's 151k vocab).
+        self.backbone = self.model.model
+        self._hook_states = {}
+        for layer_idx in self.layers:
+            # hidden_states[k] == output of backbone.layers[k-1] (index 0 is the
+            # embedding output), so hook one layer earlier.
+            hooked = layer_idx - 1
+            assert hooked >= 0, f"layer {layer_idx} maps to embedding output; not supported"
+            def make_hook(idx):
+                def hook(module, inputs, output):
+                    self._hook_states[idx] = output[0] if isinstance(output, tuple) else output
+                return hook
+            self.backbone.layers[hooked].register_forward_hook(make_hook(layer_idx))
         cfg = self.model.config
         base_dim = int(getattr(cfg, "hidden_size", None) or getattr(cfg, "d_model", 0))
         self.base_dim = base_dim
@@ -62,35 +78,51 @@ class FrozenTextEncoder:
         return out
 
     def encode(self, texts):
-        """Return (hidden (B, L, dim), mask (B, L) bool) on ``self.device``."""
+        """Return (hidden (B, L, dim), mask (B, L) bool) on ``self.device``.
+
+        ``pad_bucket`` rounds the padded sequence length up to a multiple so
+        downstream compiled models see few distinct shapes instead of one per
+        batch-longest-prompt.
+        """
         if isinstance(texts, str):
             texts = [texts]
         prompts = self._prompts(texts)
-        enc = self.tokenizer(prompts, padding=True, truncation=True,
-                             max_length=self.max_length, return_tensors="pt")
+        pad_to = None
+        if getattr(self, "pad_bucket", 0):
+            tok = self.tokenizer
+            longest = max(len(tok.encode(p, add_special_tokens=False)) for p in prompts)
+            pad_to = min(self.max_length,
+                         int(-(-longest // self.pad_bucket) * self.pad_bucket))
+        if pad_to:
+            enc = self.tokenizer(prompts, padding="max_length", truncation=True,
+                                 max_length=pad_to, return_tensors="pt")
+        else:
+            enc = self.tokenizer(prompts, padding=True, truncation=True,
+                                 max_length=self.max_length, return_tensors="pt")
         input_ids = enc["input_ids"].to(self.device)
         mask = enc["attention_mask"].to(self.device).bool()
         with torch.no_grad():
-            out = self.model(input_ids=input_ids, attention_mask=mask,
-                             output_hidden_states=True, use_cache=False)
+            self.backbone(input_ids=input_ids, attention_mask=mask, use_cache=False)
         if self.layers:
-            hidden_states = out.hidden_states
-            stacked = torch.stack([hidden_states[i] for i in self.layers], dim=1)  # (B, C, L, d)
-            hidden = stacked.permute(0, 2, 1, 3).reshape(input_ids.shape[0], input_ids.shape[1], -1)
+            if len(self._hook_states) != len(self.layers):
+                missing = [li for li in self.layers if li not in self._hook_states]
+                raise RuntimeError(f"tower hooks missing layers: {missing}")
+            hidden = torch.cat([self._hook_states[li] for li in self.layers], dim=-1)
+            self._hook_states.clear()
         else:
-            hidden = getattr(out, "last_hidden_state", None)
-            if hidden is None:
-                hidden = out.hidden_states[-1]
+            hidden = self.backbone(input_ids=input_ids, attention_mask=mask,
+                                   use_cache=False).last_hidden_state
         return hidden, mask
 
 
 def get_text_encoder(model_name, device="cuda", dtype="bfloat16", max_length=512,
-                     revision=None, instruction="", layers=None):
-    key = (model_name, revision, max_length, device, tuple(layers or ()))
+                     revision=None, instruction="", layers=None, pad_bucket=0):
+    key = (model_name, revision, max_length, device, tuple(layers or ()), int(pad_bucket or 0))
     encoder = _ENC_CACHE.get(key)
     if encoder is None:
-        encoder = FrozenTextEncoder(model_name, device=device, dtype=dtype,
+        encoder = FrozenTextEncoder(model_name=model_name, device=device, dtype=dtype,
                                     max_length=max_length, revision=revision,
-                                    instruction=instruction, layers=layers)
+                                    instruction=instruction, layers=layers,
+                                    pad_bucket=pad_bucket)
         _ENC_CACHE[key] = encoder
     return encoder

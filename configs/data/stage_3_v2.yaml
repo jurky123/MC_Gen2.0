@@ -1,0 +1,33 @@
+# Stage 3 v2: fine-tune on the leak-free stage3_splits (subset rows inside the
+# global train split, project-grouped) + replay from replay_splits (global train
+# minus stage3 val/test rows and their pixel duplicates). See scripts/rebuild_splits.py.
+stage: mc_fine_tune_replay_v2
+dataset:
+  image_size: 32
+  channels: 4
+  toroidal: false
+  normalize: true
+  text_dim: 12288
+  max_text_tokens: 512
+  sources:
+  - type: mmap
+    images: data/build/mc_text2image32_wl/images.uint8.mmap
+    metadata: data/build/mc_text2image32_wl/metadata.parquet
+    splits: data/build/mc_text2image32_wl/stage3_splits.json
+    channels: 4
+    prompt_views: data/build/mc_text2image32_wl/stage3_prompts.parquet
+    prompt_cols:
+    - prompt_0
+    weight: 0.75
+  - type: mmap
+    images: data/build/mc_text2image32_wl/images.uint8.mmap
+    metadata: data/build/mc_text2image32_wl/metadata.parquet
+    splits: data/build/mc_text2image32_wl/replay_splits.json
+    channels: 4
+    prompt_views: data/build/mc_text2image32_wl/grounded_prompts.parquet
+    prompt_cols:
+    - prompt_0
+    weight: 0.25
+  rgba_mode: premultiplied
+  return_aux: true
+  tileable_col: tileable

@@ -52,5 +52,11 @@ def sample(model, z, text, steps=20, cfg=0.0, text_uncond=None, solver="heun",
     return x.clamp(-1.0, 1.0)
 
 
-def to_uint8(x):
-    return ((x.clamp(-1.0, 1.0) + 1.0) * 127.5).to(torch.uint8)
+def to_uint8(x, premultiplied=False):
+    """[-1, 1] tensor -> uint8 image channels; unpremultiplies RGBA if needed."""
+    x = x.clamp(-1.0, 1.0)
+    if premultiplied and x.shape[0] == 4:
+        from data.rgba import unpremultiply_rgba_torch
+
+        x = unpremultiply_rgba_torch(x[None])[0]
+    return ((x + 1.0) * 127.5).to(torch.uint8)

@@ -51,10 +51,11 @@ def load_model(ckpt, device="cuda"):
     sd = torch.load(ckpt, map_location="cpu")
     model = MCFlowDiT(ModelConfig.from_dict(sd["model_cfg"]))
     model.load_state_dict(sd["model"])
-    return model.eval().to(device), sd.get("step")
+    premultiplied = bool(sd.get("conditioning", {}).get("rgba_mode") == "premultiplied")
+    return model.eval().to(device), sd.get("step"), premultiplied
 
 
-def generate(model, enc, prompts, device="cuda", steps=24, cfg=2.5, seeds=(0,)):
+def generate(model, enc, prompts, device="cuda", steps=24, cfg=2.5, seeds=(0,), premultiplied=False):
     h, mask = enc.encode(prompts)
     null_h = torch.zeros_like(h[:1])
     null_m = torch.zeros_like(mask[:1])
@@ -69,7 +70,7 @@ def generate(model, enc, prompts, device="cuda", steps=24, cfg=2.5, seeds=(0,)):
                 x = sample(model, z, h[i:i + 1], steps=steps, cfg=cfg,
                            text_uncond=null_h, solver="heun",
                            text_mask=mask[i:i + 1], text_uncond_mask=null_m)
-            per_seed.append(to_uint8(x[0]).permute(1, 2, 0).cpu().numpy())
+            per_seed.append(to_uint8(x[0], premultiplied=premultiplied).permute(1, 2, 0).cpu().numpy())
         outs.append(per_seed)
     return outs
 
@@ -105,7 +106,7 @@ def main():
     build = Path(args.build)
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
     device = "cuda"
-    model, step = load_model(args.ckpt, device)
+    model, step, premultiplied = load_model(args.ckpt, device)
     enc = FrozenTextEncoder(args.text_tower, device=device, dtype="bfloat16",
                             max_length=512, layers=[9, 18, 27])
     gp = pd.read_parquet(Path(args.prompts) if args.prompts else build / "grounded_prompts.parquet")
@@ -122,7 +123,7 @@ def main():
     prompts = [str(gp["prompt_0"].iloc[i]) for i in picks]
     print(f"ckpt step={step} samples={len(picks)}")
 
-    outs = generate(model, enc, prompts, device)
+    outs = generate(model, enc, prompts, device, premultiplied=premultiplied)
 
     # ---- real vs generated sheet (first 8 block + 8 item) ----
     S, gap = 160, 6

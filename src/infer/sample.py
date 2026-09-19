@@ -25,7 +25,10 @@ def load_model_from_checkpoint(ckpt_path, device="cuda", use_ema=False):
             msd[k].copy_(v.to(dtype=msd[k].dtype))
         print("using EMA weights")
     model.to(device).eval()
-    return model, mcfg
+    manifest = sd.get("conditioning", {})
+    if manifest:
+        print("conditioning:", {k: manifest[k] for k in sorted(manifest)})
+    return model, mcfg, manifest
 
 
 def encode_prompts(prompts, text_dim=768, max_tokens=64, model_name="", encoder_type="", instruction=""):
@@ -45,7 +48,7 @@ def encode_prompts(prompts, text_dim=768, max_tokens=64, model_name="", encoder_
     )
 
 
-def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun", device="cuda", text_dim=768, max_tokens=64, text_encoder="", encoder_type="", instruction="", text_tower=None):
+def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun", device="cuda", text_dim=768, max_tokens=64, text_encoder="", encoder_type="", instruction="", text_tower=None, premultiplied=False):
     cross = getattr(model, "text_injection", "joint") == "cross_attn"
     if cross:
         if text_tower is None:
@@ -79,7 +82,7 @@ def sample_textures(model, prompts, seeds=None, steps=20, cfg=2.0, solver="heun"
                        text_mask=mask_all[i:i + 1], text_uncond_mask=uncond_mask[i:i + 1])
         else:
             x = sample(model, z, embs[i:i + 1], steps=steps, cfg=cfg, text_uncond=uncond[i:i + 1], solver=solver)
-        results.append(to_uint8(x[0]))
+        results.append(to_uint8(x[0], premultiplied=premultiplied))
     return results
 
 
@@ -111,7 +114,8 @@ def main():
                     help="comma list of hidden layers to concatenate, e.g. 9,18,27")
     args = ap.parse_args()
 
-    model, mcfg = load_model_from_checkpoint(args.ckpt, args.device, use_ema=args.use_ema)
+    model, mcfg, manifest = load_model_from_checkpoint(args.ckpt, args.device, use_ema=args.use_ema)
+    premultiplied = bool(manifest.get("rgba_mode") == "premultiplied") if manifest else False
     text_tower = None
     if getattr(mcfg, "text_injection", "joint") == "cross_attn":
         from data.text_tower import get_text_encoder
@@ -132,6 +136,7 @@ def main():
         encoder_type=args.encoder_type,
         instruction=args.instruction,
         text_tower=text_tower,
+        premultiplied=premultiplied,
     )
     for i, p in enumerate(args.prompt):
         out = Path(args.out) / f"{i:03d}_{'_'.join(p.split())[:40]}.png"

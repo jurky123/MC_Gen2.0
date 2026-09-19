@@ -19,6 +19,14 @@ from .ema import EMA
 
 
 def _collate(batch):
+    if len(batch[0]) == 3:
+        xs = torch.stack([b[0] for b in batch], dim=0)
+        if isinstance(batch[0][1], str):
+            text = [b[1] for b in batch]
+        else:
+            text = torch.stack([b[1] for b in batch], dim=0)
+        aux = {k: torch.stack([b[2][k] for b in batch], dim=0) for k in batch[0][2]}
+        return xs, text, aux
     xs = torch.stack([b[0] for b in batch], dim=0)
     if isinstance(batch[0][1], str):
         return xs, [b[1] for b in batch]
@@ -67,6 +75,9 @@ def _build_source(src, ds, split):
         prompt_cols=src.get("prompt_cols", None) or ds.get("prompt_cols", None),
         toroidal_col=src.get("toroidal_col", "") or ds.get("toroidal_col", ""),
         toroidal_values=src.get("toroidal_values", None) or ds.get("toroidal_values", None),
+        rgba_mode=src.get("rgba_mode", ds.get("rgba_mode", "straight")),
+        return_aux=bool(src.get("return_aux", ds.get("return_aux", False))),
+        tileable_col=src.get("tileable_col", ds.get("tileable_col", "tileable")),
     )
 
 
@@ -159,6 +170,7 @@ class Trainer:
                 revision=tower.get("revision") or None,
                 instruction=tower.get("instruction", ""),
                 layers=tower.get("layers"),
+                pad_bucket=tower.get("pad_bucket", 0),
             )
             print(f"text tower={tower.get('model_name')} dim={self.text_encoder.dim} "
                   f"layers={self.text_encoder.layers} len={self.text_encoder.max_length} "
@@ -200,11 +212,14 @@ class Trainer:
     def _dtype_text(self):
         return torch.float32
 
-    def compute_loss(self, x, text, text_mask=None):
+    def compute_loss(self, x, text, aux=None, text_pair=None):
         b = x.shape[0]
         t = rand_timesteps(b, self.tcfg.flow.get("timestep_sampling", "uniform"), device=x.device)
         xt, z, target = sample_data_noise(x, t)
-        if isinstance(text, (list, tuple)):
+        text_mask = None
+        if text_pair is not None:
+            text, text_mask = text_pair
+        elif isinstance(text, (list, tuple)):
             text, text_mask = self.text_encoder.encode(list(text))
             text = text.to(self.device)
             text_mask = text_mask.to(self.device)
@@ -212,14 +227,24 @@ class Trainer:
             drop = 1.0
         else:
             drop = self.cond_drop
+        tileable_mask = aux.get("tileable") if isinstance(aux, dict) else None
         if self.autocast is not None:
             with self.autocast:
                 v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop)
-                return flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss)
+                return flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss,
+                                      tileable_mask=tileable_mask)
         v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop)
-        return flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss)
+        return flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss,
+                              tileable_mask=tileable_mask)
 
-    def _optimizer_step(self):
+    def _optimizer_step(self, tail_scale=1.0):
+        # `tail_scale` > 1 compensates an epoch-tail step whose window holds
+        # fewer than `accum` batches, so its gradient magnitude matches a full
+        # accumulation window (P2-2) instead of being silently underweighted.
+        if tail_scale != 1.0:
+            for p in self._checkpoint_model().parameters():
+                if p.grad is not None:
+                    p.grad.mul_(tail_scale)
         if self.scaler is not None:
             self.scaler.unscale_(self.optimizer)
             self._grad_clip()
@@ -241,6 +266,36 @@ class Trainer:
         if self.tcfg.grad_clip is not None:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), float(self.tcfg.grad_clip))
 
+    def _conditioning_manifest(self):
+        """Snapshot of everything that defines the conditioning pathway (P1-3)."""
+        tower = self.tcfg.text_tower or {}
+        manifest = {
+            "text_injection": getattr(self.mcfg, "text_injection", "joint"),
+            "text_dim": int(self.mcfg.text_dim),
+            "max_text_tokens": int(self.mcfg.max_text_tokens),
+            "cond_dropout": float(self.mcfg.cond_dropout),
+            "channels": int(self.mcfg.in_channels),
+            "image_size": int(self.mcfg.image_size),
+            "rgba_mode": getattr(self, "rgba_mode", "") or "straight",
+            "text_encoder": tower.get("model_name", ""),
+            "text_encoder_revision": tower.get("revision") or "",
+            "text_layers": list(tower.get("layers") or []),
+            "text_instruction": tower.get("instruction", ""),
+            "text_max_length": int(tower.get("max_length", self.mcfg.max_text_tokens)),
+            "text_dtype": tower.get("dtype", "bfloat16"),
+        }
+        return manifest
+
+    @staticmethod
+    def _check_manifest(loaded, current, path):
+        if not loaded:
+            return
+        diffs = {k: (loaded.get(k), current.get(k)) for k in current
+                 if loaded.get(k) != current.get(k)}
+        if diffs:
+            raise ValueError(
+                f"conditioning manifest mismatch vs {path}: {diffs}")
+
     def save(self, path):
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -251,6 +306,7 @@ class Trainer:
             "step": self.global_step,
             "model_cfg": self.mcfg.to_dict(),
             "train_cfg": self.tcfg.to_dict(),
+            "conditioning": self._conditioning_manifest(),
         }
         if self.ema is not None:
             sd["ema"] = self.ema.state_dict()
@@ -284,6 +340,7 @@ class Trainer:
 
     def load(self, path):
         sd = torch.load(path, map_location=self.device)
+        self._check_manifest(sd.get("conditioning"), self._conditioning_manifest(), path)
         self._checkpoint_model().load_state_dict(sd["model"])
         self.optimizer.load_state_dict(sd["optimizer"])
         self.scheduler.load_state_dict(sd["scheduler"])
@@ -300,6 +357,8 @@ class Trainer:
 
     def train(self, data_cfg_path):
         ds_cfg = load_yaml(data_cfg_path).get("dataset", {})
+        self.data_cfg_path = data_cfg_path
+        self.rgba_mode = str(ds_cfg.get("rgba_mode", "straight"))
         text_cfg = {"text_dim": ds_cfg.get("text_dim", 768), "max_text_tokens": ds_cfg.get("max_text_tokens", 64)}
         bs = probe_batch_size(self.model, None, text_cfg, self.tcfg, self.device)
         if self.compile_requested and torch.cuda.is_available():
@@ -334,46 +393,78 @@ class Trainer:
 
         self.optimizer.zero_grad(set_to_none=True)
         best_val = float("inf")
+        chunked = getattr(self.tcfg, "pipeline_encode", True) and self.text_encoder is not None
+        if chunked:
+            from .pipeline import ChunkedEncodedLoader
+
+            tower_dev = (self.tcfg.text_tower or {}).get("device") or self.device
+            pipeline = ChunkedEncodedLoader(
+                train_loader, self.text_encoder, accum,
+                tower_device=tower_dev, main_device=self.device)
+            print("text-encode pipeline: ON "
+                  f"(chunk={accum} micro-batches, tower={tower_dev})")
         while self.global_step < self.tcfg.steps:
             self.model.train()
             pending = 0
-            last_loss = 0.0
-            for x, text in train_loader:
-                x = x.to(self.device, non_blocking=True)
-                if isinstance(text, torch.Tensor):
-                    text = text.to(self.device, non_blocking=True)
-                loss = self.compute_loss(x, text)
-                scaled = loss / accum
-                if self.scaler is not None:
-                    self.scaler.scale(scaled).backward()
+            pending_loss = 0.0
+            source = pipeline if chunked else train_loader
+            for item in source:
+                if chunked:
+                    items = item  # chunk: list of (x, text_pair, aux)
                 else:
-                    scaled.backward()
-                last_loss = loss.detach().item()
-                pending += 1
-                if pending < accum:
-                    continue
-                pending = 0
-                self._optimizer_step()
-                if self.global_step % self.tcfg.log_every == 0:
-                    lr = self.optimizer.param_groups[0]["lr"]
-                    el = time.time() - self.start_time
-                    print(f"step {self.global_step}/{self.tcfg.steps} loss {last_loss:.5f} lr {lr:.2e} elapsed {el:.1f}s")
-                if self.tcfg.save_every and self.global_step % self.tcfg.save_every == 0:
-                    self.save(out_dir / "latest.pt")
+                    items = [item]  # single micro-batch
+                for batch in items:
+                    if chunked:
+                        x, text_pair, aux = batch
+                        text = None
+                    else:
+                        x, text = batch[0], batch[1]
+                        aux = batch[2] if len(batch) > 2 else None
+                        text_pair = None
+                        if isinstance(text, torch.Tensor):
+                            text = text.to(self.device, non_blocking=True)
+                    x = x.to(self.device, non_blocking=True)
+                    if isinstance(aux, dict):
+                        aux = {k: v.to(self.device, non_blocking=True) for k, v in aux.items()}
+                    loss = self.compute_loss(x, text, aux=aux, text_pair=text_pair)
+                    scaled = loss / accum
+                    if self.scaler is not None:
+                        self.scaler.scale(scaled).backward()
+                    else:
+                        scaled.backward()
+                    pending_loss += loss.detach().item()
+                    pending += 1
+                    if pending < accum:
+                        continue
+                    last_loss = pending_loss / pending
+                    pending = 0
+                    pending_loss = 0.0
+                    self._optimizer_step()
+                    if self.global_step % self.tcfg.log_every == 0:
+                        lr = self.optimizer.param_groups[0]["lr"]
+                        el = time.time() - self.start_time
+                        print(f"step {self.global_step}/{self.tcfg.steps} loss {last_loss:.5f} lr {lr:.2e} elapsed {el:.1f}s")
+                    if self.tcfg.save_every and self.global_step % self.tcfg.save_every == 0:
+                        self.save(out_dir / "latest.pt")
+                    if self.global_step >= self.tcfg.steps:
+                        break
                 if self.global_step >= self.tcfg.steps:
                     break
+            if chunked:
+                pipeline.close()
             if pending > 0 and self.global_step < self.tcfg.steps:
-                self._optimizer_step()
+                self._optimizer_step(tail_scale=accum / pending)
                 if self.tcfg.save_every and self.global_step % self.tcfg.save_every == 0:
                     self.save(out_dir / "latest.pt")
             self.completed_epochs += 1
             self.save(out_dir / "latest.pt")
             if len(train_loader) > 0 and self.completed_epochs % self.tcfg.eval_every_epochs == 0:
-                mse = self.val_validate(val_ds, out_dir)
-                if self.tcfg.save_best and mse < best_val:
-                    best_val = mse
+                metrics = self.val_validate(val_ds, out_dir)
+                score = metrics.get(self.tcfg.select_metric or "flow_mse", metrics.get("flow_mse"))
+                if self.tcfg.save_best and score < best_val:
+                    best_val = score
                     self.save(out_dir / "best.pt")
-                    print(f"new best val mse {mse:.5f} -> {out_dir / 'best.pt'}")
+                    print(f"new best val {self.tcfg.select_metric or 'flow_mse'} {score:.5f} -> {out_dir / 'best.pt'}")
         self.save(out_dir / "latest.pt")
 
     def val_validate(self, val_ds, out_dir):
@@ -382,7 +473,8 @@ class Trainer:
         n = 0
         loader = torch.utils.data.DataLoader(val_ds, batch_size=64, shuffle=False, collate_fn=_collate)
         with torch.no_grad():
-            for x, text in loader:
+            for batch in loader:
+                x, text = batch[0], batch[1]
                 x = x.to(self.device)
                 text_mask = None
                 if isinstance(text, (list, tuple)):
@@ -403,7 +495,7 @@ class Trainer:
                 n += b
         mse = total / max(n, 1)
         print(f"[val] step {self.global_step} mse {mse:.5f}")
-        return mse
+        return {"flow_mse": mse}
 
 
 class _Tee:

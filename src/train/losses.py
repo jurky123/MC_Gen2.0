@@ -21,7 +21,13 @@ def tile_loss(x0_hat, border_width=2):
     return 0.5 * (e1 + e2)
 
 
-def flow_tile_loss(v_pred, xt, t, target, tile_cfg):
+def flow_tile_loss(v_pred, xt, t, target, tile_cfg, tileable_mask=None):
+    """Flow MSE + optional per-sample masked seam/tile loss.
+
+    ``tileable_mask`` (bool tensor, per sample) restricts the tile loss to
+    tileable textures (P1-1): items/tools/armor must not be pushed toward
+    edge-matching. When None, the legacy all-sample behaviour is kept.
+    """
     loss = flow_mse(v_pred, target)
     if not tile_cfg.get("enabled", True):
         return loss
@@ -31,6 +37,8 @@ def flow_tile_loss(v_pred, xt, t, target, tile_cfg):
     if weight <= 0.0:
         return loss
     keep = t < max_t
+    if tileable_mask is not None:
+        keep = keep & tileable_mask.to(keep.device)
     if keep.any():
         x0 = reconstruct_x0(xt, t, v_pred)
         tile = tile_loss(x0[keep], border_width=bw)

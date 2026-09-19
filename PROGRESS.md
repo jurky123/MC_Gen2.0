@@ -143,15 +143,38 @@
 
 ## 新方向：图生图 / HD→MC 风格化（设计阶段）
 
-- 完整设计见 `docs/IMG2IMG_DESIGN.md`：引入参考图条件（HD→MC 风格化），构建 `(HD, MC)` 配对数据，训练图生图模型，再用其合成高质量像素数据反哺文生图（数据飞轮）。
-- 关键决策点在文档 §11（外部高清模型选型与许可、Path A/B 优先级、独立 vs 统一模型、参考条件实现、分辨率、闭环配比、golden 集、是否用 HD 参考辅助标注）。**暂不实现，待细化。**
+- 完整设计见 `docs/IMG2IMG_DESIGN.md` 与最终版 `docs/MC-Gen2_HD-to-MC_Design_v1.0.md`（设计评审稿，作为实施依据）。
+- 核心路线：真实 MC 为唯一 target → 现有 MC→HD 模型（外部黑盒，选型 FLUX2，先小样本调参再量产）造锚定配对 `(HD_ref, MC_target)` → 从 Stage-3 初始化、只训零初始化 spatial adapter 的 HD→MC Stylizer → 通过 Gate 后用"结构化 prompt→HD→Stylizer→MC"开放环造 `(prompt, MC)` 反哺 t2i（10–20% 起步）。
+- 外部模型：MC→HD 用 FLUX2；首批范围 = Stage-3 精标子集（20k）；Img2Img Golden Set 512 条人工审核可接受。
+- 决策点与验收门槛见设计文档 §6/§12。**暂不实现，先完成仓库整改。**
+
+## 仓库整改（2026-09-19，按设计文档 §9）
+
+依据 `docs/MC-Gen2_HD-to-MC_Design_v1.0.md` §9/§13，全部修复并配套测试（`tests/test_rectification.py`，14 项全过）：
+
+- **P0-1 mmap 统一**：新增 `src/data/mmap_io.py`（headerless 原始 mmap 原子写入 + `schema.json` + 形状校验 + 行数推断），`build_mmap` 弃用 `np.lib.format.open_memmap`（其 NPY header 与 reader 的 headerless 假设不一致）。现有 `images.uint8.mmap` 本身是 headerless 的（大小精确匹配），未受影响，隐患已消除。
+- **P0-2 group split 实现**：新增 `src/data/lineage_split.py`（`group_split` 按 project_id 确定性哈希整组划分 + `check_disjoint`/`audit_no_leakage` 审计工具）；`build_mmap` 现在真正按组切分并写 `split_audit.json`。
+- **P0-3 全局 holdout 与泄漏修复**（`scripts/rebuild_splits.py`）：
+  - 旧 stage3_splits 独立随机生成 → stage3 val/test 有 3,641 行落在 replay train（泄漏确认）。
+  - 新规则：stage3 子集**只取全局 train 行**（20,000 → 17,990 可用，1,799 条位于全局 val/test 的行弃用），再按 project 哈希 90/5/5 重切 → `stage3_splits.json` v2（train 16,132 / val 953 / test 905），完全继承全局 split。
+  - 新增 `replay_splits.json`：全局 train 减去 stage3 val/test 行，并**移除 5,572 行与 holdout 像素级完全相同的重复行**（跨 source 实际存在的第二种泄漏）。
+  - 子集数据量复核（`stage3_subset_audit.json`）：block 10,004 / item 9,996；form 62/63、material 61/61、colour 30/30、state 47/49 覆盖（丢的 1 form + 2 states 只被被排除的 2,010 行覆盖）；每 project ≤25、3,528 项目；约 20% 透明像素。
+- **P1-1 结构化 batch + masked tile loss**：dataset 可返回 aux（`tileable` 布尔、`asset_type`），`flow_tile_loss` 接收 per-sample `tileable` mask（block→可平铺，item→否；门的类结构词例外），tile loss 只施加于可平铺样本。
+- **P1-5 premultiplied RGBA**：新增 `src/data/rgba.py`（torch/np premultiply/unpremultiply + round-trip 测试）；数据配置 `rgba_mode: premultiplied`；推理保存时自动 unpremultiply（`solver.to_uint8`，rgba_mode 从 checkpoint manifest 读取）。premultiplied 下透明区域 RGB 确定为 0。
+- **P1-3 conditioning manifest**：checkpoint 写入 `conditioning`（text tower 名称/层数/长度/dtype、text_dim、max_text_tokens、cond_dropout、channels、rgba_mode 等），`Trainer.load` 强校验；sample/eval 打印并按其选择 RGBA 转换。
+- **P2-1 attributes 分类器**：标签经 `base.index[i]` 解析（shuffle 不再错位），输入通道数跟随数据配置。
+- **P2-2 梯度累计尾 batch**：固定 `loss/accum`，尾步按 `accum/pending` 补偿缩放梯度。
+- **附带发现与修复**：训练日志 `pending_loss` 从不重置 → loss 日志为累积和（看似发散，训练实际正常）；已修。
+- **文本塔推理路径**：`FrozenTextEncoder` 改为只跑 backbone（不再算 151k 词表 logits，此前 1024 提示 encode 会 OOM 27+ GiB），用 forward hook 抓层 9/18/27（与 hidden_states 索引语义一致，同 shape 下逐位一致）；新增 `pad_bucket`（按桶填充，控制编译形状数，当前训练置 0）。
+- **训练吞吐**：新增 `src/train/pipeline.py`（`ChunkedEncodedLoader`）——把一个梯度累计窗口的全部提示合并为一次文本塔前向，并在后台线程与 DiT 计算重叠；步时 ~5.2s → ~3.7s。`train.pipeline_encode: true` 默认开启（可在 `Trainer.compute_loss` 传入预编码 `text_pair`）。torch.compile 尝试过（DiT 0.49→0.19s/micro）但与变长文本序列的 recompile 成本不匹配，暂不启用。
+- **重训（v2 链，已启动）**：Stage 2 v2（premultiplied + 结构化 batch，9,190 步，从 stage_1_clean 初始化，输出 `checkpoints/stage_2_grounded_k1_v2/`）→ Stage 3 v2（frozen，干净 split，`scripts/run_stage_v2_chain.sh` 自动接力）→ 双评测（Stage-2 val 无遗忘 + Stage-3 val 干净指标）。
 
 ## 下一步
 
-- **细化并评审 `docs/IMG2IMG_DESIGN.md`**，确定 §11 的决策点（外部高清模型、配对路线、模型形态、分辨率）。
-- Phase 0 原型：外部高清生成器 + 确定性 MC-ify（Path B）构建 1 万级 `(HD, MC)` 配对，人工抽查。
-- 图生图模型（独立风格化器）：在 MC-FlowDiT 上加参考条件（优先通道拼接），配对评测。
+- 等 v2 重训链完成（Stage 2 v2 → Stage 3 v2 → 双评测），对比 v1/v2 指标（同 seed、同 val 集；注意表示切换为 premultiplied，指标含义随之更新）。
+- FLUX2 MC→HD 小样本调参（Phase 0 原型）：少量 Stage-3 子集 target 各生成 2–4 个 HD reference，结构过滤 + 人工抽查，淘汰高漂移参数配置。
+- 调好后对 Stage-3 子集（20k target）批量生成锚定配对，按 lineage split 入 `pairs/`。
+- Phase 1：reference encoder（64×64→16×16 token 网格）+ 零初始化 spatial adapter，只训 adapter，Gate 1（paired test 显著优于确定性像素化基线 + reference shuffle 掉点验证）。
+- 建立 512 条 Img2Img Golden Set 与 `eval_img2img.py`。
 - 用图生图/HD 参考**辅助校正标注**（缓解精标漏细节）。
-- 可选：跑 Stage 3 完整低 LR 变体（`configs/train/stage_3.yaml`，不冻结、带 replay）对比。
-- 可选：用修复后的代码重跑 Stage 1 得到干净基座。
 

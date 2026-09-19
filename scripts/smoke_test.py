@@ -109,7 +109,7 @@ def main():
     trainer.train(str(data_yaml))
 
     ckpt = ROOT / "checkpoints" / "smoke" / "latest.pt"
-    model, mcfg2 = load_model_from_checkpoint(ckpt, "cpu")
+    model, mcfg2, _ = load_model_from_checkpoint(ckpt, "cpu")
     prompts = ["mossy stone bricks", "oak planks with cracks"]
     imgs = sample_textures(model, prompts, seeds=[1, 2], steps=8, cfg=2.0, device="cpu", text_dim=mcfg2.text_dim, max_tokens=mcfg2.max_text_tokens)
     out = ROOT / "outputs" / "smoke"

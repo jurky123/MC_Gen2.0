@@ -87,6 +87,9 @@ class TrainConfig:
     # Anti-forgetting: freeze the image backbone and train only the conditioning
     # path (text projection, register, cross-attention, head, timestep embedder).
     freeze_backbone: bool = False
+    # Batch the accumulation window's prompts into one tower forward and run it
+    # on a background thread while the DiT trains (see train/pipeline.py).
+    pipeline_encode: bool = True
 
     batch: dict = field(default_factory=lambda: {
         "auto_probe": True,
@@ -120,8 +123,10 @@ class TrainConfig:
         "revision": "",
     })
     log_file: str = ""
-    # Save ``<output_dir>/best.pt`` whenever validation MSE improves.
+    # Save ``<output_dir>/best.pt`` whenever validation improves.
     save_best: bool = False
+    # Which key of the val_validate() metrics dict drives checkpoint selection.
+    select_metric: str = "flow_mse"
 
     @classmethod
     def from_dict(cls, d):

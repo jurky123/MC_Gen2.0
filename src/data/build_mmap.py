@@ -8,6 +8,9 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 
+from data import mmap_io
+from data.rgba import premultiply_rgba_np
+
 
 def _crop_resize(image, crop_size, target_size, rng):
     w, h = image.size
@@ -24,20 +27,32 @@ def _to_rgb_uint8(image, target_size):
     return image.convert("RGB").resize((target_size, target_size), Image.Resampling.NEAREST)
 
 
-def build_mmap(out_dir, records, image_size=32, split_by="project_id", splits=None, seed=0):
+def build_mmap(out_dir, records, image_size=32, split_by="project_id", splits=None, seed=0,
+               channels=4, group_split_seed=0, fracs=(0.9, 0.05, 0.05)):
+    """Build a headerless images.uint8.mmap + metadata.parquet + splits.json.
+
+    ``split_by`` names metadata column(s) whose joint value defines a split
+    group (e.g. project_id): every row of the same group lands in the same
+    split (P0-2). Splits are deterministic given the seed.
+    """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     n = len(records)
-    images = np.lib.format.open_memmap(
-        str(out_dir / "images.uint8.mmap"), mode="w+", dtype=np.uint8, shape=(n, image_size, image_size, 3)
-    )
+    images = np.empty((n, image_size, image_size, channels), dtype=np.uint8)
     for i, rec in enumerate(records):
-        img = Image.open(rec["path"]).convert("RGB")
-        images[i] = np.asarray(_to_rgb_uint8(img, image_size), dtype=np.uint8)
+        img = Image.open(rec["path"]).convert("RGBA")
+        tile = img.resize((image_size, image_size), Image.Resampling.NEAREST)
+        if channels == 4:
+            images[i] = np.asarray(tile, dtype=np.uint8)
+        else:
+            bg = Image.new("RGBA", tile.size, (0, 0, 0, 255))
+            bg.alpha_composite(tile)
+            images[i] = np.asarray(bg.convert("RGB"), dtype=np.uint8)
         if (i + 1) % 2000 == 0:
             print(f"  wrote {i + 1}/{n}")
-    images.flush()
-    del images
+    mmap_io.write_raw_mmap(images, out_dir / "images.uint8.mmap")
+    mmap_io.write_schema(out_dir, "images.uint8.mmap", images.shape, np.uint8,
+                         extra={"image_size": image_size, "channels": channels})
 
     import pandas as pd
 
@@ -45,27 +60,24 @@ def build_mmap(out_dir, records, image_size=32, split_by="project_id", splits=No
     df = df.drop(columns=["path"], errors="ignore")
     df.to_parquet(out_dir / "metadata.parquet", index=False)
 
-    ids = list(df.index)
-    if splits is None:
-        rng = np.random.RandomState(seed)
-        ids = rng.permutation(ids)
-        n_train = int(len(ids) * 0.9)
-        n_val = int(len(ids) * 0.05)
-        splits = {
-            "train": [int(i) for i in ids[:n_train]],
-            "val": [int(i) for i in ids[n_train : n_train + n_val]],
-            "test": [int(i) for i in ids[n_train + n_val :]],
-        }
+    from data.lineage_split import group_split
+
+    roles, audit = group_split(df.to_dict("records"), group_keys=split_by,
+                               seed=group_split_seed, fracs=fracs)
+    splits = {role: [i for i, r in sorted(roles.items()) if r == role] for role in ("train", "val", "test")}
+    (out_dir / "split_audit.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
     with open(out_dir / "splits.json", "w") as f:
         json.dump(splits, f)
+    print(f"splits (group={split_by}): {audit['split_sizes']} groups={audit['n_groups']}")
     return out_dir
 
 
-def write_text_mmap(embeddings, out_path):
+def write_text_mmap(embeddings, out_path, out_dir=None, name=None):
     # Headerless raw dump so MmapImageTextDataset can read it with np.memmap(shape=...).
     arr = np.ascontiguousarray(embeddings, dtype=np.float32)
-    with open(out_path, "wb") as handle:
-        arr.tofile(handle)
+    mmap_io.write_raw_mmap(arr, out_path)
+    if out_dir is not None:
+        mmap_io.write_schema(out_dir, name or Path(out_path).name, arr.shape, np.float32)
 
 
 class MmapImageTextDataset(torch.utils.data.Dataset):
@@ -87,13 +99,19 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         prompt_cols=None,
         toroidal_col="",
         toroidal_values=None,
+        rgba_mode="straight",
+        return_aux=False,
+        tileable_col="tileable",
     ):
+        assert rgba_mode in ("straight", "premultiplied")
         self.image_size = image_size
         self.toroidal = toroidal
         self.normalize = normalize
         self.text_dim = text_dim
         self.max_text_tokens = max_text_tokens
         self.channels = channels
+        self.rgba_mode = rgba_mode
+        self.return_aux = return_aux
         # Number of pooled conditioning views per sample (0 = legacy: use
         # max_text_tokens as the middle mmap dim). When > 1 the loader returns
         # one randomly chosen view so the same image sees different prompts.
@@ -115,6 +133,14 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         if toroidal and toroidal_col and toroidal_col in self.df.columns:
             vals = list(toroidal_values or [])
             self.tileable = self.df[toroidal_col].astype(str).isin(vals).to_numpy()
+        # Per-sample tileability used for masked seam/tile loss. Explicit
+        # metadata column wins; otherwise fall back to asset_type heuristic.
+        self.sample_tileable = None
+        if tileable_col and tileable_col in self.df.columns:
+            self.sample_tileable = self.df[tileable_col].astype(str).str.lower().isin(
+                ("true", "1", "yes")).to_numpy()
+        elif "type" in self.df.columns:
+            self.sample_tileable = (self.df["type"].astype(str) == "block").to_numpy()
         self.disk_channels = self._infer_disk_channels(images, image_size)
         self.images = np.memmap(
             images, dtype=np.uint8, mode="r",
@@ -127,7 +153,6 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
                 text_mmap, dtype=np.float32, mode="r",
                 shape=(self.n, self.text_middle, text_dim),
             )
-        self.df = self.df
 
         # Dynamic (on-the-fly) prompt strings for cross-attention conditioning.
         # When set, __getitem__ returns a text string instead of a text embedding.
@@ -175,6 +200,8 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
     def __getitem__(self, i):
         idx = self.index[i]
         arr = self._adapt_channels(np.asarray(self.images[idx]))
+        if self.rgba_mode == "premultiplied" and arr.shape[-1] == 4:
+            arr = premultiply_rgba_np(arr)
         dy = dx = 0
         do_roll = self.toroidal and (self.tileable is None or bool(self.tileable[idx]))
         if do_roll:
@@ -184,18 +211,28 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         x = torch.from_numpy(arr).permute(2, 0, 1).contiguous().float() / 127.5 - 1.0
         if self.has_prompts:
             view = np.random.randint(0, len(self.prompt_cols))
-            return x, str(self.prompts[idx, view])
-        if self.has_text:
+            text = str(self.prompts[idx, view])
+        elif self.has_text:
             if self.text_views > 1:
                 view = np.random.randint(0, self.text_views)
                 emb = torch.from_numpy(np.asarray(self.text[idx, view]).copy()).float()[None, :]
             else:
                 emb = torch.from_numpy(np.asarray(self.text[idx]).copy()).float()
+            text = emb
         else:
             # Unconditional: a single null token (must match inference, which
             # also feeds one null token for the placeholder/hash encoder).
-            emb = torch.zeros(1, self.text_dim, dtype=torch.float32)
-        return x, emb
+            text = torch.zeros(1, self.text_dim, dtype=torch.float32)
+        if not self.return_aux:
+            return x, text
+        aux = {
+            "tileable": torch.tensor(
+                bool(self.sample_tileable[idx]) if self.sample_tileable is not None else False,
+                dtype=torch.bool),
+            "asset_type": torch.tensor(
+                1 if str(self.df.iloc[idx].get("type")) == "item" else 0, dtype=torch.long),
+        }
+        return x, text, aux
 
 
 class ManifestImageDataset(torch.utils.data.Dataset):

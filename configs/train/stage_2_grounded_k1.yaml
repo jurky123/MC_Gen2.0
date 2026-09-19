@@ -7,7 +7,7 @@ train:
   # into K=4 prompt views. train split 941,104 / batch 1024 = 919 steps/epoch;
   # 10 epochs = 9,190 steps. Init weights from the Stage 1 checkpoint with
   # --init-from (text projection is re-initialised because Stage 1 was 768-d).
-  steps: 2757
+  steps: 9190
   log_every: 25
   save_every: 1000
   eval_every_epochs: 1

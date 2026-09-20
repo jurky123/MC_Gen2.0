@@ -21,11 +21,12 @@ FLUX_MODEL = "/home/iflab/models/FLUX.2-klein-4B"
 FLUX_LICENSE = "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)"
 
 EDIT_PROMPT = ("Redraw this pixel-art game texture as a smooth, highly detailed "
-               "high-resolution game texture with realistic materials. Keep "
-               "the exact same layout, shapes, colors, materials and "
-               "structure, but REMOVE all pixelation and blockiness: smooth "
-               "gradients, clean anti-aliased edges, fine surface detail. "
-               "NOT voxel, NOT minecraft style, NOT made of cubes. "
+               "high-resolution game texture with realistic materials. "
+               "Preserve the original semantic design, orientation, "
+               "proportions and major silhouette, while reconstructing "
+               "pixelated stair-step edges into physically plausible "
+               "continuous geometry; do not preserve individual voxel blocks "
+               "or pixel-grid boundaries. Keep the same colors and materials. "
                "No background scene, no text, no watermark.")
 
 
@@ -40,6 +41,8 @@ def main():
     ap.add_argument("--flux-steps", type=int, default=8)
     ap.add_argument("--init-mode", default="nearest",
                     help="upscale filter for the MC init: nearest (edges) or bicubic (smooth)")
+    ap.add_argument("--use-row-prompt", action="store_true",
+                    help="append the row's own text prompt as subject description")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--flux-device", default="cuda:1")
     args = ap.parse_args()
@@ -70,7 +73,7 @@ def main():
 
     man = (out / "manifest.jsonl").open("w", encoding="utf-8")
     with torch.no_grad():
-        for j, (row, prompt) in enumerate(zip(rows, prompts)):
+        for j, (row, prompt_row) in enumerate(zip(rows, prompts)):
             mc = Image.fromarray(np.asarray(imgs[row]), "RGBA")
             bg = Image.new("RGB", mc.size, (255, 255, 255))
             bg.paste(mc.convert("RGB"), mask=mc.split()[3])
@@ -78,7 +81,10 @@ def main():
             init = bg.resize((args.hd_size, args.hd_size), filt)
             g = torch.Generator(device=args.flux_device).manual_seed(args.seed + j)
             t0 = time.time()
-            hd = pipe(image=init, prompt=EDIT_PROMPT, height=args.hd_size,
+            prompt = EDIT_PROMPT
+            if args.use_row_prompt:
+                prompt = prompt + f" The subject is: {prompt_row}."
+            hd = pipe(image=init, prompt=prompt, height=args.hd_size,
                       width=args.hd_size, num_inference_steps=args.flux_steps,
                       generator=g).images[0]
             el = time.time() - t0
@@ -86,7 +92,7 @@ def main():
             hd.convert("RGB").resize((args.ref_size, args.ref_size),
                                      Image.Resampling.LANCZOS).save(out / "ref64" / f"row{row}.png")
             man.write(json.dumps({
-                "row": row, "prompt": prompt,
+                "row": row, "prompt": prompt_row, "edit_prompt": prompt,
                 "mc_source": "real MC target (supervision)",
                 "hd_png": f"hd/row{row}.png", "ref_png": f"ref64/row{row}.png",
                 "generator_model": "black-forest-labs/FLUX.2-klein-4B",

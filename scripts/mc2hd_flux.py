@@ -20,11 +20,13 @@ sys.path.insert(0, str(ROOT / "src"))
 FLUX_MODEL = "/home/iflab/models/FLUX.2-klein-4B"
 FLUX_LICENSE = "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)"
 
-EDIT_PROMPT = ("Redraw this pixel-art game texture as a highly detailed "
-               "high-resolution game texture. Keep the exact same layout, "
-               "shapes, colors, materials and structure; only add fine detail, "
-               "clean edges and realistic shading. No background scene, no "
-               "text, no watermark.")
+EDIT_PROMPT = ("Redraw this pixel-art game texture as a smooth, highly detailed "
+               "high-resolution game texture with realistic materials. Keep "
+               "the exact same layout, shapes, colors, materials and "
+               "structure, but REMOVE all pixelation and blockiness: smooth "
+               "gradients, clean anti-aliased edges, fine surface detail. "
+               "NOT voxel, NOT minecraft style, NOT made of cubes. "
+               "No background scene, no text, no watermark.")
 
 
 def main():

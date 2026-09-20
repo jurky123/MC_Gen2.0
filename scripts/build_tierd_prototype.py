@@ -31,9 +31,23 @@ from sample_sdedit import sdedit_euler  # noqa: E402
 FLUX_MODEL = "/home/iflab/models/FLUX.2-klein-4B"
 FLUX_LICENSE = "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)"
 
-# Prompt wrapper: keep the layout faithful to a texture asset, no scene.
+# Prompt wrapper: smooth, detailed, NON-voxel HD game art. The HD must NOT
+# already look like Minecraft: no cubes, no voxels, no pixelation, otherwise
+# the HD stage adds no value (downsampling blocky HD trivially looks "MC").
+HD_SUFFIX_BLOCK = (", seamless flat game texture, orthographic front view, "
+                   "smooth detailed realistic PBR materials, NOT voxel, NOT "
+                   "minecraft style, NOT made of cubes, NOT pixelated, "
+                   "no background scene, no text, no watermark")
+HD_SUFFIX_ITEM = (", single centered smooth AAA game item render on a pure "
+                  "white background, detailed realistic PBR materials, NOT "
+                  "voxel, NOT minecraft style, NOT made of cubes, NOT "
+                  "pixelated, no scene, no text, no watermark")
 HD_SUFFIX = (", game texture asset filling the whole frame, flat front view, "
              "no background scene, no character, no text, no watermark")
+
+
+def hd_suffix(asset_type):
+    return HD_SUFFIX_ITEM if asset_type == "item" else HD_SUFFIX_BLOCK
 
 
 def whitekey_alpha(hd_rgb, thresh=242):
@@ -133,7 +147,8 @@ def main():
         "guidance": args.guidance, "hd_size": args.hd_size,
         "flux_batch": FB, "sde_batch": SB, "seed": args.seed,
         "mc_ckpt": args.mc_ckpt, "t0": args.t0, "sde_steps": args.sde_steps,
-        "cfg": args.cfg, "hd_suffix": HD_SUFFIX,
+        "cfg": args.cfg, "hd_suffix_block": HD_SUFFIX_BLOCK,
+        "hd_suffix_item": HD_SUFFIX_ITEM,
         "n_prompts": len(prompts),
         "prompts_sha": __import__("hashlib").sha256(
             "\n".join(p["prompt"] for p in prompts).encode()).hexdigest()[:16],
@@ -187,7 +202,7 @@ def main():
                         for k in range(len(batch))]
                 t0 = time.time()
                 hds = flux(image=None,
-                           prompt=[p["prompt"] + HD_SUFFIX for p in batch],
+                           prompt=[p["prompt"] + hd_suffix(p.get("asset_type", "block")) for p in batch],
                            height=args.hd_size, width=args.hd_size,
                            num_inference_steps=args.flux_steps,
                            guidance_scale=args.guidance,

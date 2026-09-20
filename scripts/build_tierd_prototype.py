@@ -167,7 +167,7 @@ def main():
 
     def atomic_save(pil_img, path):
         tmp = Path(str(path) + ".tmp")
-        pil_img.save(tmp)
+        pil_img.save(tmp, format="PNG")
         os.replace(tmp, path)
 
     q = _queue.Queue(maxsize=2)

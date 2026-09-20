@@ -167,7 +167,30 @@
 - **附带发现与修复**：训练日志 `pending_loss` 从不重置 → loss 日志为累积和（看似发散，训练实际正常）；已修。
 - **文本塔推理路径**：`FrozenTextEncoder` 改为只跑 backbone（不再算 151k 词表 logits，此前 1024 提示 encode 会 OOM 27+ GiB），用 forward hook 抓层 9/18/27（与 hidden_states 索引语义一致，同 shape 下逐位一致）；新增 `pad_bucket`（按桶填充，控制编译形状数，当前训练置 0）。
 - **训练吞吐**：新增 `src/train/pipeline.py`（`ChunkedEncodedLoader`）——把一个梯度累计窗口的全部提示合并为一次文本塔前向，并在后台线程与 DiT 计算重叠；步时 ~5.2s → ~3.7s。`train.pipeline_encode: true` 默认开启（可在 `Trainer.compute_loss` 传入预编码 `text_pair`）。torch.compile 尝试过（DiT 0.49→0.19s/micro）但与变长文本序列的 recompile 成本不匹配，暂不启用。
-- **重训（v2 链，已启动）**：Stage 2 v2（premultiplied + 结构化 batch，9,190 步，从 stage_1_clean 初始化，输出 `checkpoints/stage_2_grounded_k1_v2/`）→ Stage 3 v2（frozen，干净 split，`scripts/run_stage_v2_chain.sh` 自动接力）→ 双评测（Stage-2 val 无遗忘 + Stage-3 val 干净指标）。
+- **重训（v2 链，已完成）**：Stage 2 v2（premultiplied + 结构化 batch + 精标子集以权重 0.1 并入主料，9,190 步，从 stage_1_clean 初始化，输出 `checkpoints/stage_2_grounded_k1_v2/`，best @8352 val mse 0.0750）→ Stage 3 v2（frozen，干净 split，400 步，`checkpoints/stage_3_frozen_v2/best.pt`，混合 val mse 0.0757）→ 双评测（Stage-2 val 无遗忘 + Stage-3 val 干净指标）。
+
+## v2 链事故与修复（2026-09-20）
+
+- **事故**：Stage 2 v2 跑到 9,175/9,190、Stage 3 v2 跑完 400 步后，两者都在最终 `val_validate` 的文本编码处崩溃（"hook 状态尺寸 64 vs 1024 不匹配" / "hooks missing layers"），导致 best.pt 没落盘，自动链停在 eval 之前。
+- **根因**：`FrozenTextEncoder._hook_states` 是跨线程共享可变状态——pipeline worker 线程在后台 encode 时，主线程的 val encode 同时跑，两个 forward 的 hook 输出在字典里交错（一个写了 layer 9 的 64 条，另一个的 18/27 层 1024 条留了下来），cat 炸掉。另：worker 收到 stop 不退出（while 循环没检查 stop），close() 的 60s join 超时后仍在后台 encode。
+- **修复**：encode 全程加锁 + 异常时清空 hook 状态；worker 循环检查 stop；`scripts/val_select.py`（standalone 验证 + promote）。
+- **重要发现（EMA）**：EMA shadow 在功能上是坏的——同 val 上 ema mse 1.43 vs raw 0.063。因为 `text_proj`/`text_null` 是随机重初始化后训练的，EMA 把初值与训练值平均后条件通路被破坏（backbone 平均没问题）。**全链路统一用 raw 权重**：val_validate、sample.py、`--init-from` 默认本就都是 raw，这次只是显式确认并写入工具。
+- **恢复**：Stage 2 v2 用 @8352 的 best.pt（val 0.0750，为最佳）；Stage 3 v2 用 val_select.py 验证 latest.pt（混合 val mse 0.0757，健康）后 promote 为 best.pt。三组评测已跑完。
+
+## v2 链评测结果（对比 v1，64 样本对照）
+
+| 指标 | v1 S2 | v2 S2 | v2 S3（S2 val，无遗忘） | v1 S3 fine | v2 S3 fine |
+|---|---|---|---|---|---|
+| 常用概念召回 block | 0.385 | 0.423 | 0.500 | — | 0.339 |
+| 常用概念召回 item | 0.361 | 0.361 | 0.394 | 0.468 | 0.406 |
+| 颜色命中 | 0.70 | 0.75 | 0.75 | 0.825 | 0.825 |
+| 真实-生成 L2 | 70.2 | 64.0 | 68.6 | 57.7 | 52.7 |
+| 直方图余弦 | 0.48 | 0.519 | 0.451 | — | 0.585 |
+| 检索准确率 | 0.125 | 0.109 | 0.094 | 0.188 | 0.156 |
+| text_effect | 13.6% | 3.5% | 3.4% | — | 13.1% |
+| 多样性 | 24.8 | 27.9 | 24.8 | — | 14.1 |
+
+解读：无灾难性遗忘（block/item 召回反而上升，颜色持平）；Stage-3 fine 的 item 召回/检索略低于 v1 主因是 v1 的 stage3 val 曾在 replay train 里（泄漏导致指标虚高），v2 是干净 holdout 上的诚实数字；L2/直方图反而更好。`text_effect` 在 Stage-2 val 上偏低（3.5%）是 premultiplied 尺度下的 artifact——同一模型在 Stage-3 val 上为 13.1%，文本条件工作正常。
 
 ## 下一步
 

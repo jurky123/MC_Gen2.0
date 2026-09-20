@@ -51,7 +51,10 @@ class SpatialAdapter(nn.Module):
         super().__init__()
         self.proj = nn.Linear(hidden_size, hidden_size, bias=bias)
         self.gate = nn.Parameter(torch.zeros(1))
-        nn.init.zeros_(self.proj.weight)
+        # NOTE: proj must NOT be zero-initialised together with the gate, or
+        # both stay at zero forever (dL/dgate involves proj(ref)=0 and
+        # dL/dproj involves tanh(gate)=0). Output is still exactly zero at
+        # init because tanh(0)=0, but the gate receives gradient.
 
     def forward(self, img_tokens, ref_tokens):
         if ref_tokens.shape[1] != img_tokens.shape[1]:
@@ -84,8 +87,9 @@ class ReferenceCrossAttention(nn.Module):
         self.norm1 = RMSNorm(hidden_size)
         self.norm2 = RMSNorm(hidden_size)
         self.gate = nn.Parameter(torch.zeros(1))
-        nn.init.zeros_(self.out.weight)
-        nn.init.zeros_(self.mlp[-1].weight)
+        # Same zero-init trap as the spatial adapter: keep the gate at zero for
+        # an identity initialisation, but leave out/mlp randomly initialised so
+        # the gate gradient is non-zero.
 
     def forward(self, img_tokens, ref_tokens):
         B, N, D = img_tokens.shape

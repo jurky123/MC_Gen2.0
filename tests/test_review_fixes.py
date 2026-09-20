@@ -152,3 +152,42 @@ def test_compatible():
     assert compatible("block", "tile", "marble", "grid", "")
     assert not compatible("block", "helmet", "steel", "plain", "transparent")
     assert compatible("item", "potion", "glass", "plain", "transparent")
+
+
+# ---- Stylizer reference path must actually receive gradient -----------------
+def test_reference_gate_receives_gradient():
+    import sys as _sys
+    from pathlib import Path as _P
+    _sys.path.insert(0, str(_P(__file__).resolve().parents[1] / "src"))
+    import torch as _t
+    from config import ModelConfig
+    from model.mc_flow_dit import MCFlowDiT
+
+    cfg = ModelConfig.from_dict({
+        "name": "t", "image_size": 32, "in_channels": 4, "patch_size": 2,
+        "hidden_size": 64, "num_heads": 4, "double_stream_blocks": 1,
+        "single_stream_blocks": 1, "text_dim": 32, "max_text_tokens": 8,
+        "text_injection": "cross_attn", "cross_attn_blocks": 1,
+        "ref_condition": "adapter+cross", "ref_size": 64, "ref_cross_blocks": 1,
+    })
+    m = MCFlowDiT(cfg)
+    x = _t.randn(2, 4, 32, 32)
+    t = _t.rand(2)
+    text = _t.randn(2, 5, 32)
+    mask = _t.ones(2, 5, dtype=_t.bool)
+    ref = _t.randn(2, 4, 64, 64)
+    # output must be identical with and without reference at init (identity)
+    with _t.no_grad():
+        v0 = m(x, t, text, text_mask=mask, reference=None)
+        v1 = m(x, t, text, text_mask=mask, reference=ref)
+        assert _t.allclose(v0, v1, atol=1e-5), "reference must be a no-op at init"
+        # shuffled reference must also equal the same at init
+        v2 = m(x, t, text, text_mask=mask, reference=ref.flip(0))
+        assert _t.allclose(v0, v2, atol=1e-5)
+    loss = m(x, t, text, text_mask=mask, reference=ref).pow(2).mean()
+    loss.backward()
+    gates = [n for n, p in m.named_parameters() if n.endswith("gate")]
+    assert gates, "no gates found"
+    grads = {n: m.get_parameter(n).grad for n in gates}
+    assert any(g is not None and g.abs().sum() > 0 for g in grads.values()), \
+        f"reference gates got no gradient: {grads}"

@@ -114,7 +114,7 @@ def main():
     enc = get_text_encoder("/home/iflab/models/Qwen3-8B", device="cuda:1",
                            dtype="bfloat16", max_length=512, layers=[9, 18, 27])
     h, hmask = enc.encode(prompts)
-    null_h, null_m = torch.zeros_like(h), torch.zeros_like(hmask)
+    null_h, null_m = torch.zeros_like(h).to(dev), torch.zeros_like(hmask).to(dev)
 
     model, mcfg, man = load(args.ckpt, dev)
     premult = bool(man.get("rgba_mode") == "premultiplied")
@@ -131,7 +131,7 @@ def main():
         with torch.no_grad():
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 x_base = sample_plain(base, z, h[k:k + 1].to(dev), hmask[k:k + 1].to(dev),
-                                      null_h, null_m, steps=args.steps)
+                                      null_h[k:k + 1], null_m[k:k + 1], steps=args.steps)
                 x_styl = sample_with_ref(model, z, h[k:k + 1].to(dev), hmask[k:k + 1].to(dev),
                                          ref, steps=args.steps, st=args.st, sr=args.sr)
                 ref_shuf = ds[int(ds.index[(k + 7) % len(ds.index)])][2]["reference"][None].to(dev)

@@ -31,6 +31,37 @@ MATERIALS = sorted(MATERIALS)
 COLORS = sorted(COLORS)
 STATES = sorted(STATES)
 
+# ---- extended coverage (beyond the stage-3 filename vocab) ----
+EXTRA_FORMS = """ring crown key gear lantern shield hammer spear staff wand orb
+egg feather flower mushroom shell skull coin chalice book scroll candle anvil
+bucket compass clock bell mirror vase statue mask glove boot cloak saddle
+sled cart wheel anchor chain rope ladder torch banner flag sail tent bridge
+fountain well mill windmill tower dome arch column statue pedestal altar throne
+cage trap hook needle pin button badge medal gem necklace bracelet earring
+brooch pendant locket flask jar jug mug cup plate bowl pot pan kettle basket
+crate sack pouch quiver sheath holster sling pouch vial syringe brush comb
+mirror razor hammer tongs shears scissors saw chisel file awl punch stamp seal
+die token chip tile domino dice pawn rook knight bishop queen king piece medal
+trophy medal ribbon banner pennant kite balloon lantern torch candle lamp
+furnace kiln forge bellows crucible mold cast ingot-mold""".split()
+EXTRA_MATERIALS = """marble steel bronze brass jade ruby sapphire topaz onyx pearl
+coral ivory ebony mahogany straw reed rope chain magma lava glass crystal ice
+frost silver-steel darksteel runesteel starmetal moonstone sunstone bloodstone
+amber jet coral shell chitin scale feather fur woolen linen silk velvet denim
+canvas burlap straw thatch reed bamboo rattan wicker clay brick cobble pebble
+gravel chalk limestone sandstone slate granite marble quartz crystal prism
+obsidian glass stained-glass mirror chrome copper brass bronze pewter tin lead
+nickel zinc aluminum titanium platinum gold rose-gold white-gold electrum""".split()
+EXTRA_COLORS = """crimson scarlet azure mint peach lavender charcoal cream rust
+moss sage olive teal cyan magenta violet indigo beige tan khaki slate ash snow
+ivory pearl coral salmon rose wine burgundy plum eggplant navy royal sky baby
+powder mint jade emerald forest pine lime chartreuse olive mustard amber honey
+bronze copper rust terracotta brick chocolate coffee caramel toffee sand stone
+slate steel iron lead pewter silver chrome platinum gold brass champagne""".split()
+ALL_FORMS = sorted(set(FORMS) | set(EXTRA_FORMS))
+ALL_MATERIALS = sorted(set(MATERIALS) | set(EXTRA_MATERIALS))
+ALL_COLORS = sorted(set(COLORS) | set(EXTRA_COLORS))
+
 # Bucket 2: eval failure modes (rare items, composite patterns, emissive,
 # transparent, thin structures). Each entry partially specifies fields.
 WEAKNESS_SEEDS = [
@@ -58,13 +89,49 @@ WEAKNESS_SEEDS = [
     {"form": "barrel", "material": "wood", "asset": "block"},
     {"form": "chest", "material": "oak", "asset": "block"},
     {"form": "ice", "material": "ice", "asset": "block", "state": "frozen"},
+    {"form": "record", "material": "ebony", "asset": "item"},
+    {"form": "helmet", "material": "steel", "asset": "item"},
+    {"form": "shield", "material": "oak", "asset": "item"},
+    {"form": "staff", "material": "ebony", "asset": "item"},
+    {"form": "orb", "material": "crystal", "asset": "item", "state": "glowing"},
+    {"form": "coin", "material": "gold", "asset": "item"},
+    {"form": "chalice", "material": "silver", "asset": "item"},
+    {"form": "book", "material": "leather", "asset": "item"},
+    {"form": "scroll", "material": "paper", "asset": "item"},
+    {"form": "candle", "material": "wax", "asset": "block", "state": "glowing"},
+    {"form": "mushroom", "material": "red", "asset": "block"},
+    {"form": "shell", "material": "pearl", "asset": "item"},
+    {"form": "skull", "material": "bone", "asset": "block"},
+    {"form": "anvil", "material": "iron", "asset": "block"},
+    {"form": "compass", "material": "brass", "asset": "item"},
+    {"form": "clock", "material": "oak", "asset": "block"},
+    {"form": "bell", "material": "bronze", "asset": "item"},
+    {"form": "vase", "material": "porcelain", "asset": "block"},
+    {"form": "mask", "material": "gold", "asset": "item"},
+    {"form": "throne", "material": "oak", "asset": "block"},
+    {"form": "fountain", "material": "marble", "asset": "block"},
+    {"form": "windmill", "material": "wood", "asset": "block"},
+    {"form": "honeycomb", "material": "honey", "asset": "block"},
 ]
 
 PATTERNS = ["brick courses", "dot grid", "grid", "stripes", "braid", "veins",
-            "checker", "border frame", "radial", "speckle", "cracks"]
-SILHOUETTES = ["square", "round", "tall", "flat", "symmetric", "compact"]
+            "checker", "border frame", "radial", "speckle", "cracks",
+            "horizontal stripes", "vertical stripes", "diagonal stripes",
+            "weave", "scales", "ribs", "honeycomb", "spiral", "zigzag",
+            "argyle diamonds", "bands", "spots", "stars", "checkerboard",
+            "marble veins", "wood grain", "moss patches", "rust patches",
+            "gems inset", "rune row", "studs", "rivets", "emblem crest",
+            "gradient", "two-tone split", "frame border", "corner ornaments"]
+SILHOUETTES = ["square", "round", "tall", "flat", "symmetric", "compact",
+               "tiny", "small", "medium", "large", "wide", "narrow",
+               "elongated", "stocky", "triangular", "hexagonal", "oval"]
 DETAILS = ["rivets", "carved edge", "metal bands", "jewel inlay", "handle",
-           "spout", "cap", "hinge", "runes", "studs"]
+           "spout", "cap", "hinge", "runes", "studs", "gold trim", "rope wrap",
+           "leather grip", "chain links", "gear teeth", "crown points",
+           "bottle cork", "key teeth", "helmet visor", "eye slit",
+           "chest lock", "drawer pulls", "ladder rungs", "fence posts",
+           "arrow fletching", "sword fuller", "shield boss", "gem facets",
+           "claw setting", "engraved lines", "embossed edge", "tassel"]
 
 
 def present_pairs(meta, limit=400000):
@@ -120,9 +187,9 @@ def main():
         asset = "block" if i % 2 == 0 else "item"
         out.append({
             "asset_type": asset,
-            "material": rng.choice(MATERIALS),
-            "form": rng.choice(FORMS),
-            "dominant_colors": rng.choice(COLORS),
+            "material": rng.choice(ALL_MATERIALS),
+            "form": rng.choice(ALL_FORMS),
+            "dominant_colors": rng.choice(ALL_COLORS),
             "silhouette": rng.choice(SILHOUETTES),
             "surface_pattern": rng.choice(PATTERNS + ["plain"]),
             "details": rng.choice(DETAILS + [""]),
@@ -137,9 +204,9 @@ def main():
         seed = dict(rng.choice(WEAKNESS_SEEDS))
         out.append({
             "asset_type": seed.get("asset", "block"),
-            "material": seed.get("material", rng.choice(MATERIALS)),
-            "form": seed.get("form", rng.choice(FORMS)),
-            "dominant_colors": rng.choice(COLORS),
+            "material": seed.get("material", rng.choice(ALL_MATERIALS)),
+            "form": seed.get("form", rng.choice(ALL_FORMS)),
+            "dominant_colors": rng.choice(ALL_COLORS),
             "silhouette": rng.choice(SILHOUETTES),
             "surface_pattern": seed.get("pattern", rng.choice(PATTERNS + ["plain"])),
             "details": rng.choice(DETAILS + [""]),
@@ -156,13 +223,13 @@ def main():
     while made < n3 and guard < n3 * 50:
         guard += 1
         asset = rng.choice(["block", "item"])
-        mat, frm = rng.choice(MATERIALS), rng.choice(FORMS)
+        mat, frm = rng.choice(ALL_MATERIALS), rng.choice(ALL_FORMS)
         if (mat, frm) in present:
             continue
         out.append({
             "asset_type": asset,
             "material": mat, "form": frm,
-            "dominant_colors": rng.choice(COLORS),
+            "dominant_colors": rng.choice(ALL_COLORS),
             "silhouette": rng.choice(SILHOUETTES),
             "surface_pattern": rng.choice(PATTERNS + ["plain"]),
             "details": rng.choice(DETAILS + [""]),

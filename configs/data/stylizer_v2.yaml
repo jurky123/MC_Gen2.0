@@ -1,0 +1,20 @@
+# Stylizer v2 pairs: ref64 = FLUX HD (384 -> 64), target = REAL MC texture,
+# text = the fine prompt used to generate the HD. Real MC is the supervision.
+stage: stylizer_pairs_v2
+
+dataset:
+  image_size: 32
+  channels: 4
+  rgba_mode: premultiplied
+  return_aux: true
+  sources:
+    - type: pairs
+      ref_mmap: pairs/stylizer_v2/ref.uint8.mmap
+      target_mmap: pairs/stylizer_v2/target.uint8.mmap
+      metadata: pairs/stylizer_v2/metadata.parquet
+      splits: pairs/stylizer_v2/splits.json
+      ref_size: 64
+      prompt_col: prompt
+      rgba_mode: premultiplied
+  text_dim: 12288
+  max_text_tokens: 512

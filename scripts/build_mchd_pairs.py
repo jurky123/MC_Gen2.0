@@ -113,6 +113,8 @@ def main():
     ap.add_argument("--steps", type=int, default=8)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--rows", default="", help="explicit rows (comma separated)")
+    ap.add_argument("--device", default="cuda:1", help="GPU for FLUX")
+    ap.add_argument("--shard", default="0/1", help="K/N shard of the row list")
     ap.add_argument("--build", default=str(ROOT / "data/build/mc_text2image32_wl"))
     ap.add_argument("--out", default=str(ROOT / "pairs/mchd_v1"))
     args = ap.parse_args()
@@ -137,11 +139,15 @@ def main():
         rows = [int(x) for x in args.rows.split(",") if x.strip()]
     else:
         rows = stratified_rows(build, args.n, seed=args.seed)
+    shard_k, shard_n = (int(x) for x in args.shard.split("/"))
+    if shard_n > 1:
+        rows = [r for i, r in enumerate(rows) if i % shard_n == shard_k]
+        print(f"shard {shard_k}/{shard_n}: {len(rows)} rows", flush=True)
 
     fingerprint = {"recipe": "mc->nearest->bil+gauss12->flux_edit", "size": args.size,
                    "steps": args.steps, "seed": args.seed, "flux_model": FLUX_MODEL,
                    "realism_prompt": REALISM, "strip_words": ["block", "blocks"],
-                   "n_rows": len(rows),
+                   "n_rows": len(rows), "shard": args.shard,
                    "rows_sha": hashlib.sha256(",".join(map(str, rows)).encode()).hexdigest()[:16]}
     fp = out / "config.json"
     if fp.exists():
@@ -168,7 +174,7 @@ def main():
         print(f"resume: {len(done)} done")
 
     pipe = Flux2KleinPipeline.from_pretrained(FLUX_MODEL, torch_dtype=torch.bfloat16)
-    pipe.to("cuda:1")
+    pipe.to(args.device)
     pipe.set_progress_bar_config(disable=True)
 
     rows = [r for r in rows if r not in done]
@@ -179,7 +185,7 @@ def main():
                                     else gp["prompt_0"].iloc[row])
             pr = f"{subject}. {REALISM}"
             init = preprocess(np.asarray(imgs[row]), args.size)
-            g = torch.Generator(device="cuda:1").manual_seed(args.seed + row)
+            g = torch.Generator(device=args.device).manual_seed(args.seed + row)
             t0 = time.time()
             hd = pipe(image=Image.fromarray(init), prompt=pr, height=args.size,
                       width=args.size, num_inference_steps=args.steps, generator=g).images[0]

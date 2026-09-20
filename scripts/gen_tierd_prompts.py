@@ -134,6 +134,57 @@ DETAILS = ["rivets", "carved edge", "metal bands", "jewel inlay", "handle",
            "claw setting", "engraved lines", "embossed edge", "tassel"]
 
 
+def mine_dataset_prompts(build, n, seed, exclude_rows=()):
+    """Bucket 4: sample real prompts previously used in our dataset.
+
+    Sources: grounded_prompts (1M filename-label prompts) + stage3 fine
+    prompts (subset rows). Stratified round-robin by project so big packs
+    don't dominate; exact-dedup; drop rows used in any holdout.
+    """
+    import pandas as pd
+
+    rng = random.Random(seed)
+    build = Path(build)
+    meta = pd.read_parquet(build / "metadata.parquet", columns=["project_id", "type"])
+    gp = pd.read_parquet(build / "grounded_prompts.parquet", columns=["prompt_0"])
+    subset_idx = {int(json.loads(l)["index"])
+                  for l in (build / "stage3_subset.jsonl").read_text().splitlines() if l.strip()}
+    s3p = pd.read_parquet(build / "stage3_prompts.parquet", columns=["prompt_0"])
+    excluded = set(exclude_rows)
+    # candidate pool: (prompt, asset_type, project)
+    by_proj = {}
+    for i in range(len(meta)):
+        if i in excluded:
+            continue
+        p = str(s3p["prompt_0"].iloc[i]) if i in subset_idx else str(gp["prompt_0"].iloc[i])
+        if len(p.split()) < 3:
+            continue
+        by_proj.setdefault(str(meta["project_id"].iloc[i]),
+                           []).append((p, str(meta["type"].iloc[i])))
+    projects = sorted(by_proj)
+    rng.shuffle(projects)
+    out, seen = [], set()
+    guard = 0
+    while len(out) < n and guard < n * 20:
+        guard += 1
+        for proj in projects:
+            if len(out) >= n:
+                break
+            pool = by_proj[proj]
+            p, at = pool[rng.randrange(len(pool))]
+            if p in seen:
+                continue
+            seen.add(p)
+            out.append({"asset_type": at if at in ("block", "item") else "block",
+                        "prompt": p, "bucket": 4, "novelty": 0,
+                        "material": "", "form": "", "dominant_colors": "",
+                        "silhouette": "", "surface_pattern": "", "details": "",
+                        "symmetry": "", "emissive": "", "transparency": "",
+                        "tileability": "", "orientation": "",
+                        "source": f"dataset:{proj}"})
+    return out
+
+
 def present_pairs(meta, limit=400000):
     """(material, form) pairs present in real filenames."""
     present = set()
@@ -168,14 +219,18 @@ def render(spec):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=2000)
-    ap.add_argument("--buckets", default="0.6,0.25,0.15")
+    ap.add_argument("--buckets", default="0.4,0.15,0.1,0.35",
+                    help="fractions for buckets 1,2,3,4 (4=dataset-mined)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--build", default=str(ROOT / "data/build/mc_text2image32_wl"))
     ap.add_argument("--out", default="/tmp/opencode/tierd_prompts_2k.jsonl")
     args = ap.parse_args()
     rng = random.Random(args.seed)
-    b1, b2, b3 = (float(x) for x in args.buckets.split(","))
-    n1, n2, n3 = int(args.n * b1), int(args.n * b2), args.n - int(args.n * b1) - int(args.n * b2)
+    fracs = [float(x) for x in args.buckets.split(",")]
+    assert abs(sum(fracs) - 1.0) < 1e-6 and len(fracs) == 4, "--buckets must be 4 fractions summing to 1"
+    b1, b2, b3 = (int(args.n * f) for f in fracs[:3])
+    b4 = args.n - b1 - b2 - b3
+    n1, n2, n3 = b1, b2, b3
 
     meta = pd.read_parquet(Path(args.build) / "metadata.parquet",
                            columns=["file_name", "type"])
@@ -241,13 +296,20 @@ def main():
         })
         made += 1
     rng.shuffle(out)
+    # bucket 4: mined real prompts (dedupe against buckets 1-3 as well)
+    have = {s.get("prompt", "") for s in out}
+    mined = [s for s in mine_dataset_prompts(args.build, b4, args.seed + 7)
+             if s["prompt"] not in have]
+    have.update(s["prompt"] for s in mined)
+    out.extend(mined)
     with open(args.out, "w", encoding="utf-8") as f:
         for spec in out:
-            spec["prompt"] = render({
-                "state": "", "colour": spec["dominant_colors"],
-                "material": spec["material"], "form": spec["form"],
-                "asset": spec["asset_type"], "pattern": spec["surface_pattern"],
-                "details": spec["details"], "silhouette": spec["silhouette"]})
+            if spec.get("bucket") != 4 or not spec.get("prompt"):
+                spec["prompt"] = render({
+                    "state": "", "colour": spec["dominant_colors"],
+                    "material": spec["material"], "form": spec["form"],
+                    "asset": spec["asset_type"], "pattern": spec["surface_pattern"],
+                    "details": spec["details"], "silhouette": spec["silhouette"]})
             f.write(json.dumps(spec) + "\n")
     cnt = Counter((s["bucket"], s["asset_type"]) for s in out)
     print(f"wrote {len(out)} prompts -> {args.out}")

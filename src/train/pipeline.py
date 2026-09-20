@@ -39,7 +39,7 @@ class ChunkedEncodedLoader:
         try:
             batch_iter = iter(self.loader)
             done = False
-            while not done:
+            while not done and not self._stop.is_set():
                 chunk = []
                 for _ in range(self.accum):
                     try:

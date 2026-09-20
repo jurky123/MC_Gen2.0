@@ -63,10 +63,11 @@ def generate(model, enc, prompts, device="cuda", steps=24, cfg=2.5, seeds=(0,), 
     for i in range(len(prompts)):
         per_seed = []
         for s in seeds:
-            g = torch.Generator(device=device).manual_seed(int(s))
+            g = torch.Generator(device=device if device != "cpu" else "cpu").manual_seed(int(s))
             z = torch.randn(1, model.cfg.in_channels, model.cfg.image_size,
                             model.cfg.image_size, generator=g, device=device)
-            with torch.autocast("cuda", dtype=torch.bfloat16):
+            ac = torch.autocast("cuda", dtype=torch.bfloat16) if device != "cpu" else torch.cpu.amp.autocast(dtype=torch.bfloat16)
+            with ac:
                 x = sample(model, z, h[i:i + 1], steps=steps, cfg=cfg,
                            text_uncond=null_h, solver="heun",
                            text_mask=mask[i:i + 1], text_uncond_mask=null_m)
@@ -101,11 +102,12 @@ def main():
     ap.add_argument("--n", type=int, default=64)
     ap.add_argument("--no-vlm", action="store_true")
     ap.add_argument("--out", default=str(ROOT / "outputs/eval_grounded"))
+    ap.add_argument("--device", default="cuda")
     args = ap.parse_args()
 
     build = Path(args.build)
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
-    device = "cuda"
+    device = args.device
     model, step, premultiplied = load_model(args.ckpt, device)
     enc = FrozenTextEncoder(args.text_tower, device=device, dtype="bfloat16",
                             max_length=512, layers=[9, 18, 27])
@@ -238,7 +240,8 @@ def main():
             t = rand_timesteps(xb.shape[0], device=device)
             xt, z, tgt = sample_data_noise(xb, t)
             nh = torch.zeros_like(hb); nm = torch.zeros_like(mb)
-            with torch.autocast("cuda", dtype=torch.bfloat16):
+            ac = torch.autocast("cuda", dtype=torch.bfloat16) if device != "cpu" else torch.cpu.amp.autocast(dtype=torch.bfloat16)
+            with ac:
                 vr = model(xt, t, hb, text_mask=mb).float()
                 vn = model(xt, t, nh, text_mask=nm).float()
             b = xb.shape[0]

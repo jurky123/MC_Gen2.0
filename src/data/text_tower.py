@@ -19,12 +19,18 @@ class FrozenTextEncoder:
     def __init__(self, model_name, device="cuda", dtype="bfloat16", max_length=512,
                  revision=None, trust_remote_code=True, instruction="", layers=None,
                  add_generation_prompt=True, enable_thinking=False, pad_bucket=0):
+        import threading
+
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         self.model_name = model_name
         self.device = device
         self.max_length = int(max_length)
         self.pad_bucket = int(pad_bucket or 0)
+        # Hook-captured states are shared mutable state; encodes may run from
+        # the pipeline worker thread and from the val pass on the main
+        # thread, so the whole forward+capture must be serialised.
+        self._encode_lock = threading.Lock()
         self.instruction = instruction or ""
         self.layers = [int(x) for x in (layers or [])]
         self.add_generation_prompt = bool(add_generation_prompt)
@@ -101,17 +107,22 @@ class FrozenTextEncoder:
                                  max_length=self.max_length, return_tensors="pt")
         input_ids = enc["input_ids"].to(self.device)
         mask = enc["attention_mask"].to(self.device).bool()
-        with torch.no_grad():
-            self.backbone(input_ids=input_ids, attention_mask=mask, use_cache=False)
-        if self.layers:
-            if len(self._hook_states) != len(self.layers):
-                missing = [li for li in self.layers if li not in self._hook_states]
-                raise RuntimeError(f"tower hooks missing layers: {missing}")
-            hidden = torch.cat([self._hook_states[li] for li in self.layers], dim=-1)
-            self._hook_states.clear()
-        else:
-            hidden = self.backbone(input_ids=input_ids, attention_mask=mask,
-                                   use_cache=False).last_hidden_state
+        with self._encode_lock:
+            try:
+                with torch.no_grad():
+                    self.backbone(input_ids=input_ids, attention_mask=mask, use_cache=False)
+                if self.layers:
+                    if len(self._hook_states) != len(self.layers):
+                        missing = [li for li in self.layers if li not in self._hook_states]
+                        raise RuntimeError(f"tower hooks missing layers: {missing}")
+                    hidden = torch.cat([self._hook_states[li] for li in self.layers], dim=-1)
+                else:
+                    hidden = self.backbone(input_ids=input_ids, attention_mask=mask,
+                                           use_cache=False).last_hidden_state
+            finally:
+                # Never let a failed/interleaved forward leave stale states for
+                # the next encode.
+                self._hook_states.clear()
         return hidden, mask
 
 

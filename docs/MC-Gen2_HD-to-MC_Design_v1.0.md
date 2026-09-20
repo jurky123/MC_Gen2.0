@@ -386,12 +386,63 @@ L=L_{flow}+\lambda_\alpha L_{alpha-boundary}
 
 **Gate 3**：各困难桶均有稳定增益，不只是总体平均指标上升。
 
-### Phase 4：反哺 t2i
+### Phase 4：反哺 t2i（Tier-D 合成数据混训，2026-09-20 细化）
 
-- 结构化 prompt→HD→Stylizer；
-- 质量、许可、重复和教师偏差过滤；
-- 合成数据从总 batch 的 10%–20% 开始；
-- 保持真实 MC 至少 70%，其余为 replay/精标，具体由消融确定。
+路线已确定：**prompt → FLUX.2-klein-4B HD → nearest 直接降采样到 32px 即为 MC**（SDEdit 只作 baseline/变体，不在主路径）。MC 侧质量已验证（结构/颜色保持好，item 经白底 flood-fill 转透明后背景干净）。
+
+#### 4.0 数据配方（batch 内多源混合，沿用 MixDataset 加权采样）
+
+| 源 | 内容 | 占比（pilot） | 说明 |
+|---|---|---|---|
+| S1 replay | Stage-2 grounded 全量（replay_splits train） | 65% | 保住基座分布，防遗忘 |
+| S2 fine | Stage-3 精标子集 train（stage3_splits train） | 20% | 保住精调对齐 |
+| S3 synthetic | Tier-D 合成 `(prompt, MC)` | 15% | 新语义增量 |
+
+真实 MC 合计 85%（≥70% 底线），合成从 15% 起步；消融 A8 覆盖 synthetic ∈ {0, 10, 15, 25}，找到拐点。S1/S2 沿用现有 replay/fine split（泄漏已修）；S3 为全新行号，与一切 val 无交集，上线前跑像素去重（vs 全量真实数据）。
+
+#### 4.1 HD 生成 prompt 设计（本阶段核心）
+
+目标：系统覆盖 + 专打短板 + 可控新颖度。prompt 由 11 字段结构化模板程序化生成：
+
+```text
+{asset_type, material, form, dominant_colors, silhouette,
+ surface/pattern, details, symmetry/directionality,
+ emissive/transparency, tileability, orientation}
+```
+
+渲染给 FLUX 的后缀（block/item 分两版）：
+
+- block：`", game texture asset filling the whole frame, flat front view, no background scene, no text, no watermark"`
+- item：`", single centered game item on a pure white background, no scene, no text, no watermark"`（白底是给 whitekey 转透明准备的）
+
+采样策略（三桶）：
+
+1. **词表分层桶（~60%）**：复用 Stage-3 的 63 form × 61 material × 30 colour × 49 state 词表，按 (type×form×material) 分层抽样，保证全覆盖；
+2. **短板桶（~25%）**：来自评测失败模式——稀有 item（乐器/机械/珠宝类）、复合图案（grid/dots/stripes/braid）、emissive（熔岩/发光）、transparent（玻璃/药水）、细结构（钥匙/匕首/戒指，配 t0 更低或直接降采样链）；
+3. **新颖组合桶（~15%）**：词表内未见过的 (material, form) 组合，测组合泛化；metadata 打 `novelty=1`，评测时拆 novel/seen 上报。
+
+量级：pilot 2k prompt（×2 seed，过滤后约 2–3k 对）→ Gate 4 通过后 20k → 50k+。block/item 各半；tileable block 打标（沿用 tileable 启发式 + 人工抽查）。
+
+#### 4.2 MC 侧处理（确定路线）
+
+1. HD 512 → **NEAREST** 32px（bicubic 模糊输入对 MC 模型是 OOD，SDEdit 同理）；
+2. item 白底 flood-fill 转透明（边界连通近白像素 → alpha 0，物品内部白色保留）；
+3. 过滤：近空白/近全黑拒绝、唯一颜色数上下界、与真实全量数据的像素级去重、VLM prompt 一致性抽查；
+4. 调色板量化（median-cut）**暂不默认开启**，作为变体进消融（直接降采样已足够好）。
+
+#### 4.3 训练配置
+
+- 初始化：`checkpoints/stage_3_frozen_v2/best.pt`（当前生产 t2i）；
+- lr 3e-5、warmup 100；pilot steps 400（与 Stage-3 同量级），full 1000；
+- 先 `freeze_backbone=true`（已验证无遗忘），再做 unfrozen 对照；
+- effective batch 1024、pipeline_encode 开启；其余超参沿用 stage_3_frozen_v2。
+
+#### 4.4 验收（Gate 4 具体化）
+
+- 对照：同 base、同 steps、**同真实数据预算**，A=真实 only vs B=真实+合成；
+- B 必须：长尾概念召回、复合属性、调色板指标提升；Stage-2 val 回归与 Stage-3 val 不显著下降（阈值：召回/颜色下降 < 2pt，保真 L2 上升 < 5%）；
+- 教师偏置检查：合成源跟 FLUX 风格走的比例（多样性、记忆化 `src/eval/memorization.py`）、novel 桶单独上报；
+- 人工/VLM 盲评新语义样本（细节、合理性、崩坏率）。
 
 **Gate 4**：相同 base、步数和真实数据预算下，加入合成数据能提升长尾概念/复合属性，并且 Stage 2/3 回归指标不显著下降。
 

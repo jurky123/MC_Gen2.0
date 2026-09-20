@@ -133,9 +133,13 @@ MC target 始终来自真实训练域。HD reference 可以带合理幻觉，但
 
 包括 nearest/bicubic 下采样、median-cut、k-means、调色板约束和 ordered dithering。它们必须被保留为 baseline，但不作为大规模训练底料。正式训练中的建议占比为 0%–10%，由消融决定。
 
-#### Tier D：Prompt→HD→MC——t2i 增强数据
+#### Tier D：Prompt→HD→MC——t2i 增强数据（主数据链路，项目决策 2026-09-20）
 
 当 Stylizer 通过验收后，使用丰富结构化 prompt 生成 HD，再转为 MC。必须保留原始 prompt，禁止用 VLM 重新猜测它作为唯一文本标签。
+
+**关键性质**：HD 生成时的文本可直接复用为 MC 样本的标注——`(prompt → HD → MC)` 链路自带高质量文本标注，这是它相对 MC→HD 锚定链路的最大优势（后者的文本仍需从 MC 侧重建）。因此 Tier D 是规模化获取"带好标注的 MC 数据"的主路径。
+
+在 Stylizer 就绪前，可用 **SDEdit 式 MC 化**（`scripts/sample_sdedit.py`）作为 Tier D 的过渡实现：HD → nearest 降采样到 32 → 前向加噪到 t0 → 用现有 MC t2i 模型去噪。t0 ∈ {0.3, 0.5, 0.7} 为起点；必须用 nearest（bicubic 模糊图对 MC 模型是 OOD）。SDEdit 的 teacher 是我们自己的模型，只能当 baseline/弱增强，不能作为 Stylizer 主监督（避免闭环自蒸馏；主监督仍是"真实 MC target + FLUX HD ref"）。
 
 结构化字段至少包括：
 
@@ -261,24 +265,23 @@ velocity = model(
 
 这比先把 reference 降到 32×32 再通道拼接更能保留高清结构，也不需要改变现有 `patch_embed` 输入维度。
 
-### 4.3 注入方式
+### 4.3 注入方式：spatial adapter 为主 + reference cross-attn 为辅
 
-首版推荐零初始化 spatial adapter：
+首版采用**双通路**（项目决策，2026-09-20）：
+
+1. **Spatial adapter（主结构通路）**：reference token 网格与 target token 网格位置对齐，逐位置门控残差注入：
 
 ```python
 image_tokens = image_tokens + gate * zero_proj(reference_tokens)
 ```
 
-`zero_proj` 与 gate 初始为零，使刚初始化的 Stylizer 与原 t2i 行为接近。可以在 2–4 个主干位置加入 gated residual。
+`zero_proj` 与 gate 初始为零，使刚初始化的 Stylizer 与原 t2i 行为接近。可以在 2–4 个主干位置加入 gated residual。负责"东西画在哪"。
 
-后续消融再考虑：
+2. **Reference cross-attention（辅助通路）**：image token 全局 query reference，负责位置对齐做不到的事——跨位置风格/调色板迁移、HD 细节与 32px 网格配准不完美时的鲁棒性、与文本编辑的交互。复用现有 `CrossAttnBlock` 模板，reference 走**独立**的 K/V 投影（不与文本拼同一 K/V 序列，两者结构、长度、职责不同，小数据下易互扰），输出投影同样零初始化 + gate。
 
-- reference cross-attention 全局 token；
-- 多尺度 reference feature；
-- ControlNet 式旁路；
-- 与文本 K/V 合并。
+训练策略：Phase 1 主干冻结时两路一起训（都是零初始化起点）；Phase 2 解冻尾部 blocks。消融矩阵 A1 保留三对照（adapter-only / cross-attn-only / 两者），若 cross-attn-only 在小数据下训不动或抢文本权重，则回到 adapter-only。
 
-不建议首版直接把文本和图像 token 拼成同一个 K/V 序列，因为两者结构、长度和职责不同，小数据下容易相互干扰。
+风险对冲：条件容量增大 + pair 数据小，用 §4.5 的 dropout 配比 + reference-shuffle 测试卡 Gate 1，防止模型无视文本或死记 reference。
 
 ### 4.4 训练参数解冻策略
 
@@ -624,7 +627,7 @@ configs/
 3. Path B 只作 baseline/弱正则；
 4. Stylizer 独立保存，但初始化自 Stage 3；
 5. 首版 target 32×32 RGBA，reference 64×64 RGBA；
-6. 首版采用 16×16 对齐的零初始化 spatial adapter；
+6. 首版采用 16×16 对齐的零初始化 spatial adapter **为主通路，另加独立 K/V 的 reference cross-attention 为辅助通路**（2026-09-20 决策）；
 7. 使用 premultiplied RGBA；
 8. 按 lineage 统一 split；
 9. 只有 tileable 样本使用 tile loss；

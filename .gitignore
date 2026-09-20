@@ -74,3 +74,6 @@ Thumbs.db
 .ipynb_checkpoints/
 .cache/
 .tools/
+
+# ── Pair datasets (HD/MC, generated artifacts) ──
+pairs/

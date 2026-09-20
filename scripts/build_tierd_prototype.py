@@ -77,6 +77,8 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--flux-device", default="cuda:1")
+    ap.add_argument("--flux-batch", type=int, default=4)
+    ap.add_argument("--sde-batch", type=int, default=4)
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -97,58 +99,131 @@ def main():
 
     man_path = out / "manifest.jsonl"
     man = man_path.open("a", encoding="utf-8")
-    h_all, mask_all = enc.encode([p["prompt"] for p in prompts])
-    null_h = torch.zeros_like(h_all[:1])
-    null_m = torch.zeros_like(mask_all[:1])
+    # (legacy single-sample path helpers kept for import reuse)
+    FB, SB = int(args.flux_batch), int(args.sde_batch)
 
-    with torch.no_grad():
-        for j, spec in enumerate(prompts):
-            prompt, asset = spec["prompt"], spec.get("asset_type", "block")
-            g = torch.Generator(device=flux_device).manual_seed(args.seed + j)
-            t0 = time.time()
-            hd = flux(image=None, prompt=prompt + HD_SUFFIX, height=args.hd_size,
-                      width=args.hd_size, num_inference_steps=args.flux_steps,
-                      guidance_scale=args.guidance, generator=g).images[0]
-            hd_path = out / "hd" / f"{j:04d}.png"
-            hd.save(hd_path)
-            hd_t = time.time() - t0
-            # nearest 32px init (bicubic-blurred input is OOD for the MC model)
-            rgba = hd.convert("RGBA")
-            if asset == "item":
-                # Items need a transparent background: white-key the HD.
-                rgba = Image.fromarray(whitekey_alpha(hd.convert("RGB")))
-            init = np.asarray(rgba.resize((32, 32), Image.Resampling.NEAREST),
-                              dtype=np.uint8)
-            x0 = torch.from_numpy(init).permute(2, 0, 1)[None].float().to(device) / 127.5 - 1.0
-            if premultiplied:
-                from data.rgba import premultiply_rgba_torch
+    import queue as _queue
+    import threading as _threading
 
-                x0 = premultiply_rgba_torch(x0)
-            gz = torch.Generator(device=device).manual_seed(args.seed + j)
-            z = torch.randn_like(x0)
-            xt0 = (1.0 - args.t0) * x0 + args.t0 * z
-            with torch.autocast("cuda", dtype=torch.bfloat16):
-                xhat = sdedit_euler(
-                    model, xt0, args.t0, h_all[j:j + 1].to(device), steps=args.sde_steps,
-                    cfg=args.cfg, text_uncond=null_h.to(device),
-                    text_mask=mask_all[j:j + 1].to(device), text_uncond_mask=null_m.to(device))
-            mc = to_uint8(xhat[0], premultiplied=premultiplied).permute(1, 2, 0).cpu().numpy()
-            mc_path = out / "mc" / f"{j:04d}.png"
-            Image.fromarray(mc, "RGBA").save(mc_path)
-            man.write(json.dumps({
-                "id": j, "prompt": prompt, "asset_type": asset,
-                "hd_png": str(hd_path), "mc_png": str(mc_path),
-                "generator_model": "black-forest-labs/FLUX.2-klein-4B",
-                "generator_license": FLUX_LICENSE,
-                "diffusers_ref": rev,
-                "flux_steps": args.flux_steps, "guidance": args.guidance,
-                "hd_size": args.hd_size, "seed": args.seed + j,
-                "mc_ckpt": args.mc_ckpt, "t0": args.t0,
-                "sde_steps": args.sde_steps, "cfg": args.cfg,
-                "hd_seconds": round(hd_t, 1),
-            }) + "\n")
-            man.flush()
-            print(f"[{j}] {asset} :: {prompt[:70]}... hd {hd_t:.1f}s", flush=True)
+    # Encode in chunks: the full prompt list does not fit on one GPU.
+    ENC_CHUNK = 256
+    prompts_all = [p["prompt"] for p in prompts]
+    h_chunks, m_chunks = [], []
+    for s in range(0, len(prompts_all), ENC_CHUNK):
+        h_c, m_c = enc.encode(prompts_all[s:s + ENC_CHUNK])
+        h_chunks.append(h_c)
+        m_chunks.append(m_c)
+
+    def text_at(j):
+        c, o = divmod(j, ENC_CHUNK)
+        return h_chunks[c][o:o + 1], m_chunks[c][o:o + 1]
+
+    null_src = h_chunks[0][:1]
+    null_h = torch.zeros_like(null_src)
+    null_m = torch.zeros_like(m_chunks[0][:1])
+
+    q = _queue.Queue(maxsize=2)
+    stop = _threading.Event()
+    err = {}
+
+    def producer():
+        try:
+            for s in range(0, len(prompts), FB):
+                if stop.is_set():
+                    break
+                batch = prompts[s:s + FB]
+                g = torch.Generator(device=flux_device).manual_seed(args.seed + s)
+                t0 = time.time()
+                hds = flux(image=None,
+                           prompt=[p["prompt"] + HD_SUFFIX for p in batch],
+                           height=args.hd_size, width=args.hd_size,
+                           num_inference_steps=args.flux_steps,
+                           guidance_scale=args.guidance,
+                           generator=g).images
+                el = time.time() - t0
+                while not stop.is_set():
+                    try:
+                        q.put((s, batch, list(hds), el / max(len(batch), 1)), timeout=1.0)
+                        break
+                    except _queue.Full:
+                        continue
+        except BaseException as e:
+            err["producer"] = e
+        finally:
+            try:
+                q.put(None, timeout=5)
+            except Exception:
+                pass
+
+    th = _threading.Thread(target=producer, daemon=True)
+    th.start()
+    try:
+        with torch.no_grad():
+            while True:
+                item = q.get()
+                if item is None:
+                    if err.get("producer") is not None:
+                        raise err["producer"]
+                    break
+                s, batch, hds, hd_t = item
+                # save HDs + build inits first (fast, CPU)
+                inits, hd_paths = [], []
+                for k, (spec, hd) in enumerate(zip(batch, hds)):
+                    j = s + k
+                    hd_path = out / "hd" / f"{j:05d}.png"
+                    hd.save(hd_path)
+                    hd_paths.append(hd_path)
+                    rgba = hd.convert("RGBA")
+                    if spec.get("asset_type", "block") == "item":
+                        rgba = Image.fromarray(whitekey_alpha(hd.convert("RGB")))
+                    inits.append(np.asarray(
+                        rgba.resize((32, 32), Image.Resampling.NEAREST), dtype=np.uint8))
+                # SDEdit in sub-batches of SB
+                for b in range(0, len(batch), SB):
+                    sub = batch[b:b + SB]
+                    idx = [s + b + t for t in range(len(sub))]
+                    x0 = torch.stack([
+                        torch.from_numpy(inits[b + t]).permute(2, 0, 1)
+                        for t in range(len(sub))]).float().to(device) / 127.5 - 1.0
+                    if premultiplied:
+                        from data.rgba import premultiply_rgba_torch
+
+                        x0 = premultiply_rgba_torch(x0)
+                    hsub = torch.cat([text_at(j)[0] for j in idx], dim=0)
+                    msub = torch.cat([text_at(j)[1] for j in idx], dim=0)
+                    gz = torch.Generator(device=device).manual_seed(args.seed + idx[0])
+                    z = torch.randn_like(x0)
+                    xt0 = (1.0 - args.t0) * x0 + args.t0 * z
+                    with torch.autocast("cuda", dtype=torch.bfloat16):
+                        xhat = sdedit_euler(
+                            model, xt0, args.t0, hsub.to(device), steps=args.sde_steps,
+                            cfg=args.cfg, text_uncond=null_h.expand(len(sub), -1, -1).to(device),
+                            text_mask=msub.to(device),
+                            text_uncond_mask=null_m.expand(len(sub), -1).to(device))
+                    for t, j in enumerate(idx):
+                        mc = to_uint8(xhat[t], premultiplied=premultiplied).permute(1, 2, 0).cpu().numpy()
+                        mc_path = out / "mc" / f"{j:05d}.png"
+                        Image.fromarray(mc, "RGBA").save(mc_path)
+                        man.write(json.dumps({
+                            "id": j, "prompt": prompts[j]["prompt"],
+                            "asset_type": prompts[j].get("asset_type", "block"),
+                            "bucket": prompts[j].get("bucket"),
+                            "novelty": prompts[j].get("novelty", 0),
+                            "hd_png": str(hd_paths[t]),
+                            "mc_png": str(mc_path),
+                            "generator_model": "black-forest-labs/FLUX.2-klein-4B",
+                            "generator_license": FLUX_LICENSE,
+                            "flux_steps": args.flux_steps, "guidance": args.guidance,
+                            "hd_size": args.hd_size, "seed": args.seed + j,
+                            "mc_ckpt": args.mc_ckpt, "t0": args.t0,
+                            "sde_steps": args.sde_steps, "cfg": args.cfg,
+                            "hd_seconds": round(hd_t, 2),
+                        }) + "\n")
+                    man.flush()
+                print(f"[{s}-{s+len(batch)-1}] done", flush=True)
+    finally:
+        stop.set()
+        th.join(timeout=120)
     print(f"done -> {out}")
 
 

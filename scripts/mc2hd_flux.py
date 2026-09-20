@@ -38,6 +38,8 @@ def main():
     ap.add_argument("--hd-size", type=int, default=512)
     ap.add_argument("--ref-size", type=int, default=64)
     ap.add_argument("--flux-steps", type=int, default=8)
+    ap.add_argument("--init-mode", default="nearest",
+                    help="upscale filter for the MC init: nearest (edges) or bicubic (smooth)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--flux-device", default="cuda:1")
     args = ap.parse_args()
@@ -72,7 +74,8 @@ def main():
             mc = Image.fromarray(np.asarray(imgs[row]), "RGBA")
             bg = Image.new("RGB", mc.size, (255, 255, 255))
             bg.paste(mc.convert("RGB"), mask=mc.split()[3])
-            init = bg.resize((args.hd_size, args.hd_size), Image.Resampling.NEAREST)
+            filt = Image.Resampling.BICUBIC if args.init_mode == "bicubic" else Image.Resampling.NEAREST
+            init = bg.resize((args.hd_size, args.hd_size), filt)
             g = torch.Generator(device=args.flux_device).manual_seed(args.seed + j)
             t0 = time.time()
             hd = pipe(image=init, prompt=EDIT_PROMPT, height=args.hd_size,
@@ -89,6 +92,7 @@ def main():
                 "generator_model": "black-forest-labs/FLUX.2-klein-4B",
                 "generator_license": FLUX_LICENSE,
                 "mode": "image-edit from MC upscale",
+                "init_mode": args.init_mode,
                 "edit_prompt": EDIT_PROMPT,
                 "flux_steps": args.flux_steps, "hd_size": args.hd_size,
                 "seed": args.seed + j, "hd_seconds": round(el, 1),

@@ -361,12 +361,13 @@ L=L_{flow}+\lambda_\alpha L_{alpha-boundary}
 
 **Gate 0**：数据可重复构建；所有 split lineage 交集为空；raw mmap round-trip 测试通过。
 
-### Phase 1：小规模 Adapter 原型
+### Phase 1：小规模 Adapter 原型（2026-09-20 修订）
 
-- 约 10k 真实 MC target；
-- 每个 target 2–4 个 HD reference；
+- 监督数据 = Tier-D 双变体混合，**无 T1 锚定**（Path-A HD 方块化/锯齿严重：nearest init 保真但 HD 侧锯齿，bicubic init 去锯齿但幻觉出原图没有的结构；T1 已从监督中完全去除）；
+- 每个 HD 生成两个 MC 变体：T2 直接降采样（90%）+ T3 SDEdit（10%），**直接降采样 : SDEdit = 9:1**（T2 保真度经对比验证更优）；
+- pilot：约 10k HD（即 10k 对，按 9:1 采样 MC 变体）；
 - 64×64 reference → 32×32 MC；
-- 只训练 adapter；
+- adapter + ref cross-attn 双通路一起训（零初始化起点，主干冻结）；
 - 暂不引入复杂双 CFG。
 
 **Gate 1**：在固定 paired test 和人工盲评上显著优于最佳 Path B；reference shuffle 后性能显著下降；alpha 和 item silhouette 不退化。
@@ -676,7 +677,7 @@ configs/
 本设计已给出的默认决策：
 
 1. MC→HD 使用现有模型，完全不训练；
-2. 主监督采用“现有 MC→HD 输出 + 原始真实 MC target”；
+2. ~~主监督采用"现有 MC→HD 输出 + 原始真实 MC target"~~ → **已废弃（2026-09-20）**：Path-A HD 方块化/锯齿严重，T1 锚定从监督中完全去除；**Stylizer 主监督 = Tier-D 双变体，直接降采样 : SDEdit = 9:1**；
 3. Path B 只作 baseline/弱正则；
 4. Stylizer 独立保存，但初始化自 Stage 3；
 5. 首版 target 32×32 RGBA，reference 64×64 RGBA；

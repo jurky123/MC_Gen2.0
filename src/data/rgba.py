@@ -13,6 +13,7 @@ Conventions:
 """
 import numpy as np
 import torch
+from PIL import Image
 
 A_EPS = 0.5  # source-space alpha threshold for "visible"
 
@@ -60,3 +61,28 @@ def rgba_roundtrip_diff(arr):
     pm = premultiply_rgba_np(arr)
     back = unpremultiply_rgba_np(pm)
     return np.abs(back.astype(np.int16) - np.asarray(arr).astype(np.int16))
+
+
+def prepare_model_image(arr, premultiplied=False):
+    """uint8 straight RGBA (H, W, 4) -> model-space (4, H, W) float tensor in
+    [-1, 1], premultiplied when the checkpoint manifest says so.
+
+    Centralises the train/infer/eval conversion so eval never feeds the model
+    out-of-distribution inputs (P1-1 in the design review).
+    """
+    t = torch.from_numpy(np.ascontiguousarray(arr)[..., :4]).permute(2, 0, 1).float() / 127.5 - 1.0
+    if premultiplied:
+        t = premultiply_rgba_torch(t[None])[0]
+    return t
+
+
+def composite_on_white(arr):
+    """uint8 RGBA -> uint8 RGB composited on a white background (for pHash /
+    feature metrics that must ignore transparent-region RGB, P1-3)."""
+    arr = np.asarray(arr)
+    pil = Image.fromarray(arr[..., :4].astype(np.uint8), "RGBA") if arr.shape[-1] == 4 else None
+    if pil is None:
+        return arr[..., :3].astype(np.uint8)
+    bg = Image.new("RGB", pil.size, (255, 255, 255))
+    bg.paste(pil.convert("RGB"), mask=pil.split()[3])
+    return np.asarray(bg)

@@ -47,7 +47,12 @@ def infer_n_rows(path, item_shape, dtype=np.uint8):
 
 
 def write_schema(out_dir, name, shape, dtype, extra=None):
-    """Write schema.json describing mmap files in a build directory."""
+    """Write schema.json describing mmap files in a build directory.
+
+    Merges into any existing schema, and refreshes top-level metadata so a
+    rebuild with different image size/channels cannot leave stale values
+    behind (P1-6).
+    """
     payload = {
         "format": MAGIC,
         "files": {name: {"shape": list(shape), "dtype": str(np.dtype(dtype))}},
@@ -58,7 +63,11 @@ def write_schema(out_dir, name, shape, dtype, extra=None):
     existing = out / "schema.json"
     if existing.exists():
         old = json.loads(existing.read_text(encoding="utf-8"))
-        old.setdefault("files", {}).update(payload["files"])
+        old_files = old.get("files", {})
+        old_files.update(payload["files"])
+        payload = {k: v for k, v in payload.items() if k != "files"}
+        old.update(payload)
+        old["files"] = old_files
         old["format"] = MAGIC
         payload = old
     existing.write_text(json.dumps(payload, indent=2), encoding="utf-8")

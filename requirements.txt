@@ -12,6 +12,7 @@ pyarrow
 xxhash
 opencv-python-headless
 imagehash
+scipy  # Tier-D whitekey_alpha (scipy.ndimage.binary_propagation)
 fastapi
 uvicorn
 httpx

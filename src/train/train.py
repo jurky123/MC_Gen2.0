@@ -337,6 +337,18 @@ class Trainer:
               f", skipped {len(skipped)}")
         if skipped:
             print("  skipped:", skipped)
+        # P1-4: the EMA shadow created in __init__ tracks the *fresh random*
+        # model. After re-initialising the weights it must be rebuilt from the
+        # current model, otherwise the shadow keeps anchoring at random init
+        # (with high decay this permanently corrupts the average and makes the
+        # EMA weights functionally broken).
+        if self.ema is not None:
+            ema_cfg = self.tcfg.ema
+            self.ema = EMA(self._checkpoint_model(),
+                           decay=float(ema_cfg.get("decay", 0.999)),
+                           update_every=int(ema_cfg.get("update_every", 1)),
+                           device=ema_cfg.get("device", "cpu"))
+            print("EMA re-initialised from init-from weights")
 
     def load(self, path):
         sd = torch.load(path, map_location=self.device)

@@ -95,21 +95,33 @@ def main():
     for role, rows in stage3_splits.items():
         assert set(rows) <= global_train, f"stage3 {role} leaks outside global train"
 
-    # ---- 3. replay train: global train minus stage3 holdout + pixel dups --
+    # ---- 3. replay train: project-clean (formal) + sample-clean (ref) ----
+    # Formal standard (design review 2026-09-20): exclude every row whose
+    # project contains a stage3 val/test row, then pixel dups of holdout rows.
+    # Sample-clean (row + exact-dup exclusion only) is kept for reference.
     holdout = set(stage3_splits["val"]) | set(stage3_splits["test"])
+    holdout_projects = set(meta.loc[sorted(holdout), "project_id"].astype(str))
     holdout_hashes = set(row_hashes(images, sorted(holdout)).values())
-    removed, dups = set(holdout), 0
+    proj_clean, sample_clean, dups = [], [], 0
     for i in global_splits["train"]:
         if i in holdout:
             continue
         h = hashlib.sha1(np.asarray(images[i]).tobytes()).hexdigest()
         if h in holdout_hashes:
-            removed.add(i)
             dups += 1
+            continue
+        sample_clean.append(i)
+        if str(meta.at[i, "project_id"]) not in holdout_projects:
+            proj_clean.append(i)
     replay_splits = {
-        "train": [i for i in global_splits["train"] if i not in removed],
+        "train": proj_clean,
         "val": [i for i in global_splits["val"] if i not in set(subset_rows)],
         "test": [i for i in global_splits["test"] if i not in set(subset_rows)],
+    }
+    replay_sampleclean = {
+        "train": sample_clean,
+        "val": replay_splits["val"],
+        "test": replay_splits["test"],
     }
     audit_no_leakage(stage3_splits, {"train": replay_splits["train"]}, "stage3 vs replay")
     check_disjoint({k: set(v) for k, v in replay_splits.items()}, "replay")
@@ -117,11 +129,15 @@ def main():
     # ---- 4. write outputs -------------------------------------------------
     (build / "stage3_splits.json").write_text(json.dumps(stage3_splits))
     (build / "replay_splits.json").write_text(json.dumps(replay_splits))
+    (build / "replay_splits_sampleclean.json").write_text(json.dumps(replay_sampleclean))
     if not (build / "splits.json.bak_v23").exists():
         (build / "splits.json.bak_v23").write_text(json.dumps(global_splits, indent=2))
 
     report = build_subset_report(build, meta, images, stage3_splits, subset_rows,
-                                 dropped=dropped, dup_rows=dups)
+                                 dropped=dropped, dup_rows=dups,
+                                 holdout_projects=len(holdout_projects),
+                                 proj_rows_removed=len(sample_clean) - len(proj_clean),
+                                 replay_train_rows=len(proj_clean))
     (build / "stage3_subset_audit.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
 
@@ -131,7 +147,8 @@ def row_hashes(images, rows):
 
 
 def build_subset_report(build, meta, images, stage3_splits, subset_rows,
-                        dropped, dup_rows):
+                        dropped, dup_rows, holdout_projects=0, proj_rows_removed=0,
+                        replay_train_rows=0):
     subset_df = meta.loc[sorted(subset_rows)]
     usable_rows = stage3_splits["train"] + stage3_splits["val"] + stage3_splits["test"]
     usable_df = meta.loc[sorted(usable_rows)]
@@ -160,7 +177,10 @@ def build_subset_report(build, meta, images, stage3_splits, subset_rows,
             "fully_transparent_fraction": float((sample[..., 3] == 0).mean()),
         },
         "duplicate_replay_rows_removed": int(dup_rows),
-        "leakage_check": "stage3 val/test disjoint from replay train: PASS",
+        "holdout_projects": int(holdout_projects),
+        "project_rows_removed_from_replay": int(proj_rows_removed),
+        "replay_train_rows_project_clean": int(replay_train_rows),
+        "leakage_check": "stage3 val/test disjoint from replay train (row + project): PASS",
     }
 
 

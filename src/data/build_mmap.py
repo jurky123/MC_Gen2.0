@@ -28,12 +28,15 @@ def _to_rgb_uint8(image, target_size):
 
 
 def build_mmap(out_dir, records, image_size=32, split_by="project_id", splits=None, seed=0,
-               channels=4, group_split_seed=0, fracs=(0.9, 0.05, 0.05)):
+               channels=4, group_split_seed=None, fracs=(0.9, 0.05, 0.05)):
     """Build a headerless images.uint8.mmap + metadata.parquet + splits.json.
 
     ``split_by`` names metadata column(s) whose joint value defines a split
     group (e.g. project_id): every row of the same group lands in the same
-    split (P0-2). Splits are deterministic given the seed.
+    split (P0-2). Splits are deterministic given the seed. An explicitly
+    passed ``splits`` mapping is honoured (validated); otherwise a group
+    split is generated. ``seed`` is the canonical split seed
+    (``group_split_seed`` is a deprecated alias, P1-5).
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -60,15 +63,25 @@ def build_mmap(out_dir, records, image_size=32, split_by="project_id", splits=No
     df = df.drop(columns=["path"], errors="ignore")
     df.to_parquet(out_dir / "metadata.parquet", index=False)
 
-    from data.lineage_split import group_split
+    from data.lineage_split import check_disjoint, group_split
 
-    roles, audit = group_split(df.to_dict("records"), group_keys=split_by,
-                               seed=group_split_seed, fracs=fracs)
-    splits = {role: [i for i, r in sorted(roles.items()) if r == role] for role in ("train", "val", "test")}
-    (out_dir / "split_audit.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
+    if group_split_seed is None:
+        group_split_seed = seed
+    if splits is None:
+        roles, audit = group_split(df.to_dict("records"), group_keys=split_by,
+                                   seed=group_split_seed, fracs=fracs)
+        splits = {role: [i for i, r in sorted(roles.items()) if r == role]
+                  for role in ("train", "val", "test")}
+        (out_dir / "split_audit.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
+        print(f"splits (group={split_by}): {audit['split_sizes']} groups={audit['n_groups']}")
+    else:
+        # Honour caller-provided splits, but validate them (P1-5).
+        check_disjoint({k: set(v) for k, v in splits.items()}, "explicit splits")
+        covered = sorted(i for v in splits.values() for i in v)
+        assert covered == list(range(n)), "explicit splits must cover all rows exactly once"
+        print(f"splits: explicit, sizes={ {k: len(v) for k, v in splits.items()} }")
     with open(out_dir / "splits.json", "w") as f:
         json.dump(splits, f)
-    print(f"splits (group={split_by}): {audit['split_sizes']} groups={audit['n_groups']}")
     return out_dir
 
 

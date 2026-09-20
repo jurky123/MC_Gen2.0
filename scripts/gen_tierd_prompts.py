@@ -185,6 +185,30 @@ def mine_dataset_prompts(build, n, seed, exclude_rows=()):
     return out
 
 
+# ---- light compatibility graph (P1-9): prune absurd combos ----
+# Forms that only make sense as items, and patterns/materials with constraints.
+ITEM_ONLY_FORMS = set("""sword pickaxe axe shovel hoe bow arrow helmet chestplate
+leggings boots ingot nugget gem ring crown key gear dagger staff wand orb coin
+chalice necklace bracelet earring brooch pendant locket flask jug mug cup plate
+bowl book scroll compass clock bell mask glove boot cloak saddle quiver sheath
+record die token chip dice pawn rook queen king medal trophy""".split())
+BLOCK_ONLY_PATTERNS = {"brick courses", "checkerboard", "honeycomb", "argyle diamonds"}
+TRANSPARENT_OK_MATERIALS = set("""glass ice crystal quartz amethyst diamond emerald
+prismarine slime honey water""".split())
+TRANSPARENT_OK_FORMS = {"potion", "bottle", "flask", "jar", "jug", "orb"}
+
+
+def compatible(asset, form, material, pattern, transparency):
+    if form in ITEM_ONLY_FORMS and asset != "item":
+        return False
+    if pattern in BLOCK_ONLY_PATTERNS and asset != "block":
+        return False
+    if transparency and not (material in TRANSPARENT_OK_MATERIALS
+                             or form in TRANSPARENT_OK_FORMS):
+        return False
+    return True
+
+
 def present_pairs(meta, limit=400000):
     """(material, form) pairs present in real filenames."""
     present = set()
@@ -238,15 +262,22 @@ def main():
 
     out = []
     # bucket 1: stratified over (asset, form, material)
-    for i in range(n1):
-        asset = "block" if i % 2 == 0 else "item"
+    made1 = guard1 = 0
+    while made1 < n1 and guard1 < n1 * 30:
+        guard1 += 1
+        asset = "block" if made1 % 2 == 0 else "item"
+        form, mat = rng.choice(ALL_FORMS), rng.choice(ALL_MATERIALS)
+        pat = rng.choice(PATTERNS + ["plain"])
+        if not compatible(asset, form, mat, pat, ""):
+            continue
+        made1 += 1
         out.append({
             "asset_type": asset,
-            "material": rng.choice(ALL_MATERIALS),
-            "form": rng.choice(ALL_FORMS),
+            "material": mat,
+            "form": form,
             "dominant_colors": rng.choice(ALL_COLORS),
             "silhouette": rng.choice(SILHOUETTES),
-            "surface_pattern": rng.choice(PATTERNS + ["plain"]),
+            "surface_pattern": pat,
             "details": rng.choice(DETAILS + [""]),
             "symmetry": rng.choice(["symmetric", "asymmetric", ""]),
             "emissive": "", "transparency": "",
@@ -281,12 +312,15 @@ def main():
         mat, frm = rng.choice(ALL_MATERIALS), rng.choice(ALL_FORMS)
         if (mat, frm) in present:
             continue
+        pat = rng.choice(PATTERNS + ["plain"])
+        if not compatible(asset, frm, mat, pat, ""):
+            continue
         out.append({
             "asset_type": asset,
             "material": mat, "form": frm,
             "dominant_colors": rng.choice(ALL_COLORS),
             "silhouette": rng.choice(SILHOUETTES),
-            "surface_pattern": rng.choice(PATTERNS + ["plain"]),
+            "surface_pattern": pat,
             "details": rng.choice(DETAILS + [""]),
             "symmetry": rng.choice(["symmetric", "asymmetric", ""]),
             "emissive": "", "transparency": "",

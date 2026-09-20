@@ -204,34 +204,50 @@ def main():
         common_recall = {k: round(float(np.mean(v)), 3) for k, v in per.items() if v}
 
     # ---- retrieval: is the generated image closest to its own real image? ----
+    # pHash runs on white-composited RGB so transparent-region RGB (arbitrary
+    # in real straight RGBA, zeroed in unpremultiplied generations) does not
+    # dominate the comparison (P1-3). Alpha masks are compared as well.
     retrieval = None
     try:
         import imagehash
 
-        gh = [imagehash.phash(Image.fromarray(np.asarray(o[0])[..., :3])) for o in outs]
-        rh = [imagehash.phash(Image.fromarray(np.asarray(img[i])[..., :3])) for i in picks]
-        retrieval = round(sum(1 for k, h in enumerate(gh)
-                              if min(range(len(rh)), key=lambda j: h - rh[j]) == k) / len(picks), 3)
+        from data.rgba import composite_on_white
+
+        gh = [imagehash.phash(Image.fromarray(composite_on_white(np.asarray(o[0])))) for o in outs]
+        rh = [imagehash.phash(Image.fromarray(composite_on_white(np.asarray(img[i])))) for i in picks]
+        gah = [imagehash.phash(Image.fromarray((np.asarray(o[0])[..., 3] > 127).astype(np.uint8) * 255)) for o in outs]
+        rah = [imagehash.phash(Image.fromarray((np.asarray(img[i])[..., 3] > 127).astype(np.uint8) * 255)) for i in picks]
+        hit_rgb = sum(1 for k, h in enumerate(gh)
+                      if min(range(len(rh)), key=lambda j: h - rh[j]) == k)
+        hit_alpha = sum(1 for k, h in enumerate(gah)
+                        if min(range(len(rah)), key=lambda j: h - rah[j]) == k)
+        retrieval = {"rgb_white_bg": round(hit_rgb / len(picks), 3),
+                     "alpha_mask": round(hit_alpha / len(picks), 3)}
     except Exception as exc:
         print("retrieval skipped:", exc)
 
     div = []
     for k in range(0, 8):
-        seeds = generate(model, enc, [prompts[k]], device, seeds=(0, 1, 2, 3))[0]
+        seeds = generate(model, enc, [prompts[k]], device, seeds=(0, 1, 2, 3),
+                         premultiplied=premultiplied)[0]
         stack = np.stack([s[..., :3].astype(np.float32) for s in seeds])
         div.append(float(stack.std(0).mean()))
 
     # ---- text effect: val flow-MSE real text vs null ----
+    # The model input must go through the same conversion as training
+    # (premultiplied when the checkpoint manifest says so, P1-1).
     text_effect = None
     try:
         from train.flow import rand_timesteps, sample_data_noise
+        from data.rgba import prepare_model_image
         torch.manual_seed(1234)  # deterministic timestep/noise for the comparison
         v_picks = (blocks + items)
         random.Random(2).shuffle(v_picks)
         v_picks = v_picks[:256]
         v_prompts = [str(gp["prompt_0"].iloc[i]) for i in v_picks]
-        v_real = np.stack([np.asarray(img[i]) for i in v_picks])
-        x = torch.from_numpy(v_real.astype(np.float32) / 127.5 - 1.0).permute(0, 3, 1, 2).to(device)
+        v_real = [prepare_model_image(np.asarray(img[i]), premultiplied=premultiplied)
+                  for i in v_picks]
+        x = torch.stack(v_real).to(device)
         th, tm = enc.encode(v_prompts)
         a = torch.nn.functional.mse_loss
         tr = tn = 0.0; nn = 0

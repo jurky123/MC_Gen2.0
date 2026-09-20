@@ -135,6 +135,8 @@ MC target 始终来自真实训练域。HD reference 可以带合理幻觉，但
 
 #### Tier D：Prompt→HD→MC——t2i 增强数据（主数据链路，项目决策 2026-09-20）
 
+命名（design review 2026-09-20）：当前实现（FLUX → nearest → SDEdit）称为 **Tier-D Bootstrap / SDEdit Baseline**；FLUX → 已训练 reference adapter 的路线称为 **Tier-D Stylizer**。只有后者通过 reference shuffle、paired test 和 Golden Set 后，才作为主 t2i 增强数据源。Bootstrap 版本质是"现有 MC t2i 对外部高清图降采样做 image-space SDEdit"，仍由现有 checkpoint 决定 MC 分布，存在自蒸馏与能力上限（不认识的长尾可能被洗掉；t0 小≈像素化，t0 大≈回到现有 t2i 语义；无法证明 HD 高频被利用）。
+
 当 Stylizer 通过验收后，使用丰富结构化 prompt 生成 HD，再转为 MC。必须保留原始 prompt，禁止用 VLM 重新猜测它作为唯一文本标签。
 
 **关键性质**：HD 生成时的文本可直接复用为 MC 样本的标注——`(prompt → HD → MC)` 链路自带高质量文本标注，这是它相对 MC→HD 锚定链路的最大优势（后者的文本仍需从 MC 侧重建）。因此 Tier D 是规模化获取"带好标注的 MC 数据"的主路径。

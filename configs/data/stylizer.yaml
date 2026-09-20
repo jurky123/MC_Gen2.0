@@ -1,0 +1,20 @@
+# HD->MC Stylizer pairs: ref64 from HD, target 32px (90% direct downsample /
+# 10% SDEdit), prompts reused from the Tier-D generation.
+stage: stylizer_pairs
+
+dataset:
+  image_size: 32
+  channels: 4
+  rgba_mode: premultiplied
+  return_aux: true
+  sources:
+    - type: pairs
+      ref_mmap: pairs/stylizer/ref.uint8.mmap
+      target_mmap: pairs/stylizer/target.uint8.mmap
+      metadata: pairs/stylizer/metadata.parquet
+      splits: pairs/stylizer/splits.json
+      ref_size: 64
+      prompt_col: prompt
+      rgba_mode: premultiplied
+  text_dim: 12288
+  max_text_tokens: 512

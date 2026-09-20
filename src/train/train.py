@@ -48,6 +48,23 @@ def _build_source(src, ds, split):
     normalize = bool(ds.get("normalize", True))
     text_dim = int(ds.get("text_dim", 768))
     channels = int(src.get("channels", ds.get("channels", 4)))
+    if kind == "pairs":
+        from data.pair_dataset import MmapPairDataset
+
+        return MmapPairDataset(
+            ref_mmap=src["ref_mmap"],
+            target_mmap=src["target_mmap"],
+            metadata=src["metadata"],
+            splits=src["splits"],
+            split=split,
+            ref_size=int(src.get("ref_size", ds.get("ref_size", 64))),
+            target_size=image_size,
+            rgba_mode=src.get("rgba_mode", ds.get("rgba_mode", "straight")),
+            prompt_col=src.get("prompt_col", "prompt"),
+            ref_premultiplied=bool(src.get("ref_premultiplied", False)),
+            zero_reference=bool(src.get("zero_reference", False)),
+            shuffle_reference=bool(src.get("shuffle_reference", False)),
+        )
     if kind == "manifest":
         return ManifestImageDataset(
             manifest=src["manifest"],
@@ -146,7 +163,8 @@ class Trainer:
 
         if getattr(train_cfg, "freeze_backbone", False):
             trainable_prefixes = ("text_proj", "text_null", "cross_blocks",
-                                  "head", "head_norm", "t_embedder")
+                                  "head", "head_norm", "t_embedder",
+                                  "ref_encoder", "ref_adapters", "ref_cross_blocks")
             frozen = trainable = 0
             for name, param in self.model.named_parameters():
                 if name.startswith(trainable_prefixes):
@@ -228,12 +246,16 @@ class Trainer:
         else:
             drop = self.cond_drop
         tileable_mask = aux.get("tileable") if isinstance(aux, dict) else None
+        reference = aux.get("reference") if isinstance(aux, dict) else None
+        ref_drop = float(getattr(self.tcfg, "ref_dropout", 0.0)) if reference is not None else None
         if self.autocast is not None:
             with self.autocast:
-                v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop)
+                v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop,
+                               reference=reference, ref_drop_prob=ref_drop)
                 return flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss,
                                       tileable_mask=tileable_mask)
-        v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop)
+        v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop,
+                       reference=reference, ref_drop_prob=ref_drop)
         return flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss,
                               tileable_mask=tileable_mask)
 
@@ -487,7 +509,11 @@ class Trainer:
         with torch.no_grad():
             for batch in loader:
                 x, text = batch[0], batch[1]
+                aux = batch[2] if len(batch) > 2 else None
                 x = x.to(self.device)
+                if isinstance(aux, dict):
+                    aux = {k: v.to(self.device) for k, v in aux.items()}
+                reference = aux.get("reference") if isinstance(aux, dict) else None
                 text_mask = None
                 if isinstance(text, (list, tuple)):
                     text, text_mask = self.text_encoder.encode(list(text))
@@ -500,9 +526,11 @@ class Trainer:
                 xt, z, target = sample_data_noise(x, t)
                 if self.autocast is not None:
                     with self.autocast:
-                        v = self.model(xt, t, text, text_mask=text_mask)
+                        v = self.model(xt, t, text, text_mask=text_mask,
+                                       reference=reference)
                 else:
-                    v = self.model(xt, t, text, text_mask=text_mask)
+                    v = self.model(xt, t, text, text_mask=text_mask,
+                                   reference=reference)
                 total += F.mse_loss(v.float(), target).item() * b
                 n += b
         mse = total / max(n, 1)

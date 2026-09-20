@@ -42,6 +42,15 @@ class ModelConfig:
 
     cond_dropout: float = 0.12
 
+    # Reference-image conditioning for the HD->MC Stylizer. Empty = disabled.
+    # "adapter+cross" enables the zero-init spatial adapter and the reference
+    # cross-attention (see model/reference.py).
+    ref_condition: str = ""
+    ref_size: int = 64
+    ref_channels: int = 4
+    ref_adapter_positions: list = field(default_factory=lambda: [0, 1])
+    ref_cross_blocks: int = 0
+
     @property
     def patch_dim(self):
         return self.in_channels * self.patch_size * self.patch_size
@@ -125,6 +134,9 @@ class TrainConfig:
     log_file: str = ""
     # Save ``<output_dir>/best.pt`` whenever validation improves.
     save_best: bool = False
+    # Per-sample reference dropout for the HD->MC Stylizer (keeps a
+    # null-reference / text-only branch usable).
+    ref_dropout: float = 0.0
     # Which key of the val_validate() metrics dict drives checkpoint selection.
     select_metric: str = "flow_mse"
 

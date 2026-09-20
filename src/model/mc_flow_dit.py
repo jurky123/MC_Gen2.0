@@ -67,6 +67,36 @@ class MCFlowDiT(nn.Module):
 
         self.rope = Rotary2D(self.head_dim)
 
+        # ---- optional reference-image conditioning (HD->MC Stylizer) ----
+        self.ref_condition = str(getattr(cfg, "ref_condition", "") or "")
+        if self.ref_condition:
+            from .reference import (
+                ReferenceCrossAttention,
+                ReferenceEncoder,
+                SpatialAdapter,
+            )
+
+            self.ref_size = int(getattr(cfg, "ref_size", 64))
+            self.ref_encoder = ReferenceEncoder(
+                cfg.hidden_size, in_channels=int(getattr(cfg, "ref_channels", 4)),
+                ref_size=self.ref_size, bias=cfg.bias)
+            self.ref_adapter_positions = list(getattr(cfg, "ref_adapter_positions", [0, 1]))
+            if "adapter" in self.ref_condition:
+                self.ref_adapters = nn.ModuleList([
+                    SpatialAdapter(cfg.hidden_size, bias=cfg.bias)
+                    for _ in self.ref_adapter_positions])
+            n_ref_cross = int(getattr(cfg, "ref_cross_blocks", 0))
+            if "cross" in self.ref_condition and n_ref_cross:
+                self.ref_cross_blocks = nn.ModuleList([
+                    ReferenceCrossAttention(
+                        cfg.hidden_size, cfg.num_heads, bias=cfg.bias,
+                        qk_norm=cfg.qk_norm, mlp_ratio=2.0)
+                    for _ in range(n_ref_cross)])
+
+    def encode_reference(self, reference):
+        """(B, 4, S, S) in [-1,1] -> (B, G*G, D) reference tokens."""
+        return self.ref_encoder(reference.to(dtype=self.patch_embed.weight.dtype))
+
     def _patchify(self, x):
         B, C, H, W = x.shape
         p = self.patch_size
@@ -91,13 +121,27 @@ class MCFlowDiT(nn.Module):
             text_emb = torch.where(mask[:, :, None], null, text_emb)
         return text_emb
 
-    def forward(self, x, t, text, text_mask=None, cond_drop_prob=None, return_tokens=False):
+    def forward(self, x, t, text, text_mask=None, cond_drop_prob=None,
+                reference=None, ref_drop_prob=None, return_tokens=False):
         B, C, H, W = x.shape
         p = self.patch_size
         tokens, gh, gw = self._patchify(x)
         img = self.patch_embed(tokens)
 
         c = self.t_embedder(t)
+
+        # Reference dropout: per-sample masking keeps a null-reference branch so
+        # the same model still supports text-only generation (and dual CFG).
+        ref_tokens = None
+        if self.ref_condition and reference is not None:
+            ref_tokens = self.encode_reference(reference)
+            if ref_drop_prob is not None and self.training and ref_drop_prob > 0:
+                keep = (torch.rand(B, device=x.device) >= ref_drop_prob)
+                if not keep.all():
+                    ref_tokens = torch.where(keep[:, None, None], ref_tokens,
+                                             torch.zeros_like(ref_tokens))
+        adapter_idx = {pos: k for k, pos in enumerate(
+            getattr(self, "ref_adapter_positions", []))}
 
         if self.text_injection == "cross_attn":
             # The MMDiT image/text streams keep a learned register token (in
@@ -108,8 +152,12 @@ class MCFlowDiT(nn.Module):
             lt = 1
             cos_img, sin_img = self.rope.get(gh, gw, x.device, x.dtype)
             cos_cross, sin_cross = pad_rope(cos_img, sin_img, lt)
+            if ref_tokens is not None and 0 in adapter_idx:
+                img = self.ref_adapters[adapter_idx[0]](img, ref_tokens)
             for block in self.double_blocks:
                 img, reg = block(img, reg, c, cos_img, sin_img, cos_cross, sin_cross)
+            if ref_tokens is not None and 1 in adapter_idx:
+                img = self.ref_adapters[adapter_idx[1]](img, ref_tokens)
             seq = torch.cat([reg, img], dim=1)
             for block in self.single_blocks:
                 seq = block(seq, c, cos_cross, sin_cross)
@@ -129,6 +177,10 @@ class MCFlowDiT(nn.Module):
                     key_mask = key_mask & keep[:, None]
                 for block in self.cross_blocks:
                     img_tokens = block(img_tokens, text, key_mask, c)
+
+            if ref_tokens is not None and hasattr(self, "ref_cross_blocks"):
+                for block in self.ref_cross_blocks:
+                    img_tokens = block(img_tokens, ref_tokens)
         else:
             Lt = text.shape[1]
             if cond_drop_prob is not None and self.training and cond_drop_prob > 0:

@@ -66,6 +66,7 @@ def main():
     ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_phase1_v2/best.pt"))
     ap.add_argument("--base", default=str(ROOT / "checkpoints/stage_3_frozen_v2/best.pt"))
     ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer_v2"))
+    ap.add_argument("--ref-size", type=int, default=64)
     ap.add_argument("--hd-dirs", default="pairs/mchd_stage3_a,pairs/mchd_stage3_b")
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--steps", type=int, default=20)
@@ -85,7 +86,8 @@ def main():
     ds = MmapPairDataset(
         ref_mmap=str(pairs / "ref.uint8.mmap"), target_mmap=str(pairs / "target.uint8.mmap"),
         metadata=str(pairs / "metadata.parquet"), splits=str(pairs / "splits.json"),
-        split="val", ref_size=64, target_size=32, rgba_mode="premultiplied")
+        split="val", ref_size=args.ref_size, target_size=32,
+        rgba_mode="premultiplied")
     df = pd.read_parquet(pairs / "metadata.parquet")
     hd_map = {}
     for d in args.hd_dirs.split(","):

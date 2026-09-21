@@ -196,12 +196,54 @@
 - Stage-3 v2 的 Stage-2 val item 召回 0.361→0.261 有下降（block 反升 0.423→0.538），n=64 + VLM 裁判噪声下属小幅波动，无灾难性遗忘；fine 集 L2/直方图/颜色均优于 v1，item 召回低于 v1 主因是 v1 stage3 val 有泄漏（虚高）。
 - Stage-3 v2 已用 project-clean replay + 修复后代码重跑，best val mse 0.07586，in-loop 选点正常。
 
+## MC→HD 路线定型的探索（2026-09-20）
+
+目标是给 HD→MC Stylizer 造 `(HD, prompt, 真实 MC)` 锚定对，逐一实测了多种 MC→HD 方案：
+
+- **FLUX.2-klein edit（图条件）**：保布局，但输出保留输入硬台阶；改 prompt/加噪去噪都不解决。
+  - latent img2img（加噪 t0=0.2~0.8 再积分）**完全无用**：蒸馏模型只从纯噪声起步，中途起噪只会把图"磨糊"（四档输出几乎一致）。
+  - 步数 8/16/24 输出几乎一致（8 步够用）。
+- **Qwen-Image-Edit（20B，有 negative prompt）**：写实度强，但会重写布局/加场景；512 已低于其原生 ~1M 像素，256 勉强、**128 直接崩坏**（生成人脸/瓶子等无关内容）。
+- **输入预处理是关键**：先 `NEAREST` 放大再低通滤波，可把输出的"网格台阶"从 61.6 降到 ~1.0：
+  | 预处理 | 台阶比 | 备注 |
+  |---|---|---|
+  | nearest | 61.6 | 硬台阶 |
+  | **bilateral+gauss12** | **1.5** | 推荐（边缘干净、细节保留好）|
+  | gauss16 | 1.15 | 备选 |
+  | gauss28 | 0.85 | 最平滑但结构损失大 |
+  | bilateral / meanshift 单独 | 234 / 183 | 保边算子方向相反，反而留台阶 |
+- **prompt 是第二关键**：
+  - 写实措辞（"photorealistic PBR, studio render"）→ 照片级素材（此前"扁平卡通"是措辞导致）；
+  - **去掉 `block` 一词**，否则模型把输入理解成立方体（苔藓地毯被画成 3D 方块）；
+  - item 需加"居中白底"。
+- **真实 MC 的原生分辨率**：抽样 3072 张 100% 为 **16×16**（我们存储为 32，即 2×2 色块）；而 Tier-D 早期用 `HD→32` 直接降采样得到的是 32×32 有效网格（比真实 MC 细 2 倍），SDEdit 还会打散网格（格子一致率 1.00→0.50）——旧 Tier-D 路径因此**废弃**。
+- 结论：**MC→HD 只保留一条路**（见 `docs/MC2HD_RECIPE.md`），Tier-D 的 prompt→HD→MC 改由 Stylizer 承担。
+
+## MC→HD 量产（17,085 对锚定）
+
+- `scripts/build_mchd_pairs.py`：分层抽样（type×form×material 轮询）→ `NEAREST 384` → `bilateral+gauss12` → FLUX edit（8 步）→ HD 384；
+  prompt = `"<Stage-3 精标描述，剔除 block>。photorealistic high-end game asset, ..."`；
+  断点续跑 + 原子写入 + `config.json` 指纹 + `manifest.jsonl` provenance（含许可证）。
+- 双卡分片跑完 **17,085/17,085**（Stage-3 精标全子集，block 8,475 / item 8,610），0.99s/张。
+- **踩坑修复**：`stratified_rows` 里 `set` 迭代顺序受 Python hash 随机化影响 → 两个分片拿到不同的基准列表，导致 3,994 行重复生成、3,994 行漏掉（覆盖率 77%）。改为排序 token 后确定性，补齐缺失行。
+
+## HD→MC Stylizer v1 → v3
+
+架构：`MCFlowDiT` + `ReferenceEncoder`（stride 自适应，输出 16×16 token 与目标网格对齐）+ 零初始化 spatial adapter（位置 0/1）+ 独立 K/V 的 reference cross-attn×2；冻结主干只训参考通路（trainable 81.07M / frozen 55.08M）。
+
+- **零初始化陷阱（重要）**：gate 与 proj 同时零初始化 → 两者梯度恒为 0，参考通路永远不学（表现为"打乱参考指标完全不变"）。修法：gate 零初始化 + proj 随机初始化（输出仍严格为 0）。
+- **v1/v2（ref 64，target=HD 的确定性降采样/SDEdit）**：Gate-1 数值好看，但**免费 resize 就能赢**——target 是 ref 的确定性函数，模型学不到东西。已废弃该数据构造。
+- **v3（当前基线）**：target = **真实 MC**（锚定对），ref 64→**128**，条件丢弃（ref 0.25 / text 0.15）+ 混入 30% **text-only** 真实数据（Stage-3 精标 15% + Stage-2 replay 15%，用零参考实现，统一 aux 键以便 batch 混合）。
+  - 训练 4,000 步（冻结主干），覆盖 17,085 对（train 16,293 / val 792，按 project 分组）；
+  - Gate-1：base t2i L2 60.3 / IoU 0.665 → **Stylizer L2 32.0 / IoU 0.902**；打乱参考退化到 55.8 / 0.704（参考确实被使用）；
+  - 开环（自拟 prompt → FLUX 文生图 → Stylizer）：v2 的失败项全部修好——药水瓶（含软木塞）、青铜齿轮（带齿与中心孔）、骑士头盔（面甲缝）、黑曜石灯笼（暗框青焰）、金冠、匕首均可辨认；block/纹理类一贯稳定。
+  - 产物：`checkpoints/stylizer_v3/best.pt`、`pairs/stylizer_v3/`、`outputs/eval_stylizer_v3/`、评审图 `scripts/review_stylizer.py`。
+
 ## 下一步
 
-- 等 v2 重训链完成（Stage 2 v2 → Stage 3 v2 → 双评测），对比 v1/v2 指标（同 seed、同 val 集；注意表示切换为 premultiplied，指标含义随之更新）。
-- FLUX2 MC→HD 小样本调参（Phase 0 原型）：少量 Stage-3 子集 target 各生成 2–4 个 HD reference，结构过滤 + 人工抽查，淘汰高漂移参数配置。
-- 调好后对 Stage-3 子集（20k target）批量生成锚定配对，按 lineage split 入 `pairs/`。
-- Phase 1：reference encoder（64×64→16×16 token 网格）+ 零初始化 spatial adapter，只训 adapter，Gate 1（paired test 显著优于确定性像素化基线 + reference shuffle 掉点验证）。
-- 建立 512 条 Img2Img Golden Set 与 `eval_img2img.py`。
-- 用图生图/HD 参考**辅助校正标注**（缓解精标漏细节）。
+- **Tier-D 数据引擎**：用 Stylizer v3 批量产 `(prompt, MC)` 合成对（prompt 用 17k 四桶列表 / 继续扩量），过滤后按 **Gate-4** 做 t2i 混合消融（合成占比 0/10/20%），验证长尾概念与复合属性增益、Stage-2/3 回归不退化。
+- 与确定性 MC 化（`HD→16→32→量化16色→饱和×2.2`）做对照，确认 Stylizer 的增量价值。
+- 补齐评测：`eval_img2img.py` 与 512 条 Img2Img Golden Set（人工审核已同意）。
+- 用 Stylizer/HD 参考**辅助校正标注**（缓解精标漏细节）。
+- 可选：Stylizer Phase 2（解冻末端 blocks / LoRA、reference-strength 曲线、文本编辑）。
 

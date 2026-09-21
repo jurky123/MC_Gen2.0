@@ -107,23 +107,20 @@ MC→HD 仅作为外部数据生产工具。仓库中只需要数据适配器、
 
 ### 3.1 数据分层
 
-#### Tier A：真实 MC 锚定配对——主训练数据
+#### Tier A：真实 MC 锚定配对——主训练数据（唯一 MC→HD 路径）
 
-对真实 MC 纹理运行现有 MC→HD 模型：
+**已定型并量产（2026-09-20）**，完整配方见 `docs/MC2HD_RECIPE.md`：
 
 ```text
-HD_ref = ExistingMC2HD(MC_target, parameters, seed)
-pair   = (HD_ref, MC_target, prompt, metadata)
+真实 MC(32) → NEAREST 384 → bilateral+gauss12
+           → FLUX.2-klein-4B image-edit（8 步，prompt = 精标描述去 "block" + 写实指令）
+           → HD_ref 384
+pair = (HD_ref, 真实 MC, prompt, metadata)
 ```
 
-建议每个 target 生成 2–4 个变体：
-
-- 低重绘强度：严格结构保持；
-- 中等重绘强度：补充合理材质细节；
-- 不同随机种子或外观；
-- 可选的不同光照/锐度设置。
-
-MC target 始终来自真实训练域。HD reference 可以带合理幻觉，但必须通过结构过滤。
+- Stage-3 精标全子集 **17,085 对**已完成（block 8,475 / item 8,610），~1.0 s/张；
+- 关键点：低通预处理的强度决定输出台阶（62→1.5）；写实措辞决定观感；删 `block` 避免立方体化；
+- 该 target 为真实 MC，因此不存在"target 是 ref 的确定性函数、免费 resize 即可赢"的问题。
 
 #### Tier B：程序化 reference 扰动——预热和鲁棒性
 
@@ -253,19 +250,18 @@ velocity = model(
 )
 ```
 
-### 4.2 Reference Encoder
+### 4.2 Reference Encoder（2026-09-20 更新为 128×128）
 
-当前 target 为 32×32、patch size 2，对应 16×16 target token 网格。首版使用：
+当前 target 为 32×32、patch size 2，对应 16×16 target token 网格。**首版采用 128×128×4 reference**：
 
 ```text
-64×64×4 reference
-→ convolutional stem
-→ stride 4
+128×128×4 reference
+→ convolutional stem（stride 自适应：stride = ref_size / 16）
 → 16×16×D
 → 256 spatial reference tokens
 ```
 
-这比先把 reference 降到 32×32 再通道拼接更能保留高清结构，也不需要改变现有 `patch_embed` 输入维度。
+stride 由 `ref_size / (image_size / patch_size)` 推出：64→stride 4（1 步），128→stride 8（4,2 两步）。实测 64 会让细结构（剑刃、瓶口、齿轮齿）在参考里只剩 1–2 像素，Stylizer 输出糊成团；128 后开环 item 生成全部可辨。
 
 ### 4.3 注入方式：spatial adapter 为主 + reference cross-attn 为辅
 
@@ -361,16 +357,18 @@ L=L_{flow}+\lambda_\alpha L_{alpha-boundary}
 
 **Gate 0**：数据可重复构建；所有 split lineage 交集为空；raw mmap round-trip 测试通过。
 
-### Phase 1：小规模 Adapter 原型（2026-09-20 修订）
+### Phase 1：Adapter 原型（2026-09-20 已完成 v3）
 
-- 监督数据 = Tier-D 双变体混合，**无 T1 锚定**（Path-A HD 方块化/锯齿严重：nearest init 保真但 HD 侧锯齿，bicubic init 去锯齿但幻觉出原图没有的结构；T1 已从监督中完全去除）；
-- 每个 HD 生成两个 MC 变体：T2 直接降采样（90%）+ T3 SDEdit（10%），**直接降采样 : SDEdit = 9:1**（T2 保真度经对比验证更优）；
-- pilot：约 10k HD（即 10k 对，按 9:1 采样 MC 变体）；
-- 64×64 reference → 32×32 MC；
-- adapter + ref cross-attn 双通路一起训（零初始化起点，主干冻结）；
-- 暂不引入复杂双 CFG。
 
-**Gate 1**：在固定 paired test 和人工盲评上显著优于最佳 Path B；reference shuffle 后性能显著下降；alpha 和 item silhouette 不退化。
+- **监督数据 = Tier A 真实 MC 锚定对**（17,085 对，`docs/MC2HD_RECIPE.md`），target 是真实 MC 分布而非 HD 的确定性降采样；
+- **reference 128×128**（encoder stride 8）→ 32×32 real MC；
+- 数据混合：**70% 锚定对 + 30% text-only 真实数据**（Stage-3 精标 15% + Stage-2 replay 15%，以零参考实现）→ 保住纯文生图能力；
+- 条件丢弃：ref 0.25 / text 0.15，覆盖四种条件组合；
+- adapter + ref cross-attn 双通路一起训（零初始化起点，主干冻结），4,000 步（trainable 81.07M / frozen 55.08M）；
+- 双 CFG 推理（文本与参考各一档），暂不做 reference-strength 曲线。
+
+**Gate 1（2026-09-20 结果，v3）**：base t2i L2 60.3 / IoU 0.665 → **Stylizer L2 32.0 / IoU 0.902**；打乱参考退化至 55.8 / 0.704（参考确实被使用）；开环自拟 prompt（FLUX 文生图 → Stylizer）中，细结构 item（药水瓶/齿轮/头盔/灯笼/王冠/匕首）全部可辨。
+**踩坑记录**：若 gate 与 proj 同时零初始化，参考通路梯度恒为 0（表现为打乱参考指标完全不变）→ 必须 gate 零初始化 + proj 随机初始化。
 
 ### Phase 2：有限解冻与可控性
 
@@ -399,7 +397,7 @@ L=L_{flow}+\lambda_\alpha L_{alpha-boundary}
 |---|---|---|---|
 | S1 replay | Stage-2 grounded 全量（replay_splits train） | 65% | 保住基座分布，防遗忘 |
 | S2 fine | Stage-3 精标子集 train（stage3_splits train） | 20% | 保住精调对齐 |
-| S3 synthetic | Tier-D 合成 `(prompt, MC)` | 15% | 新语义增量 |
+| S3 synthetic | Tier-D 合成 `(prompt, MC)`（由 Stylizer 生成，见 Phase 4） | 15% | 新语义增量 |
 
 真实 MC 合计 85%（≥70% 底线），合成从 15% 起步；消融 A8 覆盖 synthetic ∈ {0, 10, 15, 25}，找到拐点。S1/S2 沿用现有 replay/fine split（泄漏已修）；S3 为全新行号，与一切 val 无交集，上线前跑像素去重（vs 全量真实数据）。
 

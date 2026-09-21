@@ -91,6 +91,7 @@ def main():
     ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_phase1/best.pt"))
     ap.add_argument("--base", default=str(ROOT / "checkpoints/stage_3_frozen_v2/best.pt"))
     ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer"))
+    ap.add_argument("--ref-size", type=int, default=64)
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--steps", type=int, default=16)
     ap.add_argument("--st", type=float, default=2.0)
@@ -108,7 +109,7 @@ def main():
         target_mmap=str(Path(args.pairs) / "target.uint8.mmap"),
         metadata=str(Path(args.pairs) / "metadata.parquet"),
         splits=str(Path(args.pairs) / "splits.json"), split="val",
-        ref_size=64, target_size=32, rgba_mode="premultiplied")
+        ref_size=args.ref_size, target_size=32, rgba_mode="premultiplied")
     idxs = list(range(min(args.n, len(ds))))
     prompts = [str(ds.df["prompt"].iloc[ds.index[i]]) for i in idxs]
     enc = get_text_encoder("/home/iflab/models/Qwen3-8B", device="cuda:1",

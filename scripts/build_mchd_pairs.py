@@ -86,8 +86,11 @@ def stratified_rows(build, n, seed=0):
         # round-robin over (form, material) buckets, then fill
         buckets = {}
         for i in cand:
-            toks = set(clean_tokens(str(meta.at[i, "file_name"]), keep_parts=True,
-                                    keep_anim=True, keep_generic=False))
+            # sorted(): set iteration over strings is not deterministic across
+            # processes (hash randomisation), which previously made shards
+            # overlap and leave ~23% of rows unprocessed.
+            toks = sorted(set(clean_tokens(str(meta.at[i, "file_name"]), keep_parts=True,
+                                           keep_anim=True, keep_generic=False)))
             form = next((w for w in toks if w in FORMS), "other")
             mat = next((w for w in toks if w in MATERIALS), "other")
             buckets.setdefault((form, mat), []).append(i)

@@ -71,5 +71,10 @@ class MmapPairDataset(torch.utils.data.Dataset):
         aux = {
             "reference": ref,
             "tileable": torch.tensor(bool(self.df["tileable"].iloc[idx]), dtype=torch.bool),
+            # kept identical to MmapImageTextDataset aux keys so that batches
+            # mixing pair and text-only sources collate cleanly
+            "asset_type": torch.tensor(
+                1 if str(self.df["asset_type"].iloc[idx]) == "item" else 0,
+                dtype=torch.long),
         }
         return x, prompt, aux

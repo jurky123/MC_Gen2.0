@@ -115,8 +115,12 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
         rgba_mode="straight",
         return_aux=False,
         tileable_col="tileable",
+        zero_reference=False,
+        ref_size=64,
     ):
         assert rgba_mode in ("straight", "premultiplied")
+        self.zero_reference = bool(zero_reference)
+        self.ref_size = int(ref_size)
         self.image_size = image_size
         self.toroidal = toroidal
         self.normalize = normalize
@@ -245,6 +249,11 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
             "asset_type": torch.tensor(
                 1 if str(self.df.iloc[idx].get("type")) == "item" else 0, dtype=torch.long),
         }
+        if self.zero_reference:
+            # Text-only sample inside a reference-conditioned batch: a zero
+            # reference is exactly the null-reference branch of the model
+            # (bias-free projections), and keeps the batch dict homogeneous.
+            aux["reference"] = torch.zeros(4, self.ref_size, self.ref_size)
         return x, text, aux
 
 

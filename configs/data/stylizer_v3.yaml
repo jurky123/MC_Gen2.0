@@ -1,0 +1,47 @@
+# Stylizer v3 data: 70% HD->MC pairs (real MC target, ref 128) +
+# 15% Stage-3 fine text-only + 15% Stage-2 grounded text-only (zero reference).
+stage: stylizer_v3
+
+dataset:
+  image_size: 32
+  channels: 4
+  rgba_mode: premultiplied
+  return_aux: true
+  ref_size: 128
+  text_dim: 12288
+  max_text_tokens: 512
+  sources:
+    - type: pairs
+      ref_mmap: pairs/stylizer_v3/ref.uint8.mmap
+      target_mmap: pairs/stylizer_v3/target.uint8.mmap
+      metadata: pairs/stylizer_v3/metadata.parquet
+      splits: pairs/stylizer_v3/splits.json
+      ref_size: 128
+      prompt_col: prompt
+      rgba_mode: premultiplied
+      weight: 0.70
+    # text-only: keeps pure t2i generation intact
+    - type: mmap
+      images: data/build/mc_text2image32_wl/images.uint8.mmap
+      metadata: data/build/mc_text2image32_wl/metadata.parquet
+      splits: data/build/mc_text2image32_wl/stage3_splits.json
+      channels: 4
+      rgba_mode: premultiplied
+      return_aux: true
+      zero_reference: true
+      ref_size: 128
+      prompt_views: data/build/mc_text2image32_wl/stage3_prompts.parquet
+      prompt_cols: [prompt_0]
+      weight: 0.15
+    - type: mmap
+      images: data/build/mc_text2image32_wl/images.uint8.mmap
+      metadata: data/build/mc_text2image32_wl/metadata.parquet
+      splits: data/build/mc_text2image32_wl/replay_splits.json
+      channels: 4
+      rgba_mode: premultiplied
+      return_aux: true
+      zero_reference: true
+      ref_size: 128
+      prompt_views: data/build/mc_text2image32_wl/grounded_prompts.parquet
+      prompt_cols: [prompt_0]
+      weight: 0.15

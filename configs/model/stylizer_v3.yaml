@@ -1,0 +1,27 @@
+# Stylizer v3: reference at 128x128 (encoder stride 8 -> 16x16 tokens),
+# stronger conditional dropout, mixed with text-only t2i data.
+model:
+  name: MCFlowDiTStylizerV3
+  image_size: 32
+  in_channels: 4
+  patch_size: 2
+  hidden_size: 512
+  num_heads: 8
+  mlp_ratio: 3.0
+  text_mlp_ratio: 1.0
+  double_stream_blocks: 3
+  single_stream_blocks: 6
+  text_dim: 12288
+  max_text_tokens: 512
+  text_injection: cross_attn
+  cross_attn_blocks: 4
+  qk_norm: true
+  rope: 2d
+  activation: swiglu
+  bias: false
+  cond_dropout: 0.15
+  ref_condition: adapter+cross
+  ref_size: 128
+  ref_channels: 4
+  ref_adapter_positions: [0, 1]
+  ref_cross_blocks: 2

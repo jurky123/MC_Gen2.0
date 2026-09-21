@@ -19,22 +19,38 @@ from .norm import RMSNorm
 
 
 class ReferenceEncoder(nn.Module):
-    """(B, 4, S, S) reference -> (B, (S/4)^2, D) tokens (S=64 -> 16x16)."""
+    """(B, 4, S, S) reference -> (B, G*G, D) tokens.
 
-    def __init__(self, hidden_size, in_channels=4, stem=128, ref_size=64, bias=False):
+    The output grid must match the target token grid (image_size / patch_size,
+    e.g. 16x16), so the convolutional stride is derived from the reference
+    resolution: 64 -> stride 4, 128 -> stride 8.
+    """
+
+    def __init__(self, hidden_size, in_channels=4, stem=128, ref_size=64,
+                 grid=16, bias=False):
         super().__init__()
         self.ref_size = ref_size
-        self.grid = ref_size // 4
-        self.net = nn.Sequential(
-            nn.Conv2d(in_channels, stem, 3, padding=1, bias=bias),
-            nn.GroupNorm(8, stem),
-            nn.SiLU(),
-            nn.Conv2d(stem, stem * 2, 3, stride=2, padding=1, bias=bias),
-            nn.GroupNorm(8, stem * 2),
-            nn.SiLU(),
-            nn.Conv2d(stem * 2, hidden_size, 3, stride=2, padding=1, bias=bias),
-            nn.GroupNorm(8, hidden_size),
-        )
+        stride = max(1, int(round(ref_size / grid)))
+        self.grid = ref_size // stride if ref_size % stride == 0 else grid
+        strides = []
+        s = 1
+        while s < stride:
+            step = min(2, stride // s) if stride // s >= 2 else stride // s
+            step = _largest_divisor_step(s, stride)
+            strides.append(step)
+            s *= step
+        layers = [nn.Conv2d(in_channels, stem, 3, padding=1, bias=bias),
+                  nn.GroupNorm(8, stem), nn.SiLU()]
+        ch = stem
+        for st in strides:
+            out_ch = min(ch * 2, hidden_size)
+            layers += [nn.Conv2d(ch, out_ch, 3, stride=st, padding=1, bias=bias),
+                       nn.GroupNorm(8, out_ch), nn.SiLU()]
+            ch = out_ch
+        if ch != hidden_size:
+            layers += [nn.Conv2d(ch, hidden_size, 1, bias=bias),
+                       nn.GroupNorm(8, hidden_size)]
+        self.net = nn.Sequential(*layers)
 
     def forward(self, ref):
         if ref.shape[-1] != self.ref_size:
@@ -42,6 +58,14 @@ class ReferenceEncoder(nn.Module):
                                 mode="nearest")
         h = self.net(ref)
         return h.flatten(2).transpose(1, 2)  # (B, G*G, D)
+
+
+def _largest_divisor_step(so_far, target):
+    """Largest stride step (<=4) such that so_far*step divides target."""
+    for step in (4, 2, 1):
+        if target % (so_far * step) == 0:
+            return step
+    return 1
 
 
 class SpatialAdapter(nn.Module):

@@ -95,6 +95,8 @@ def _build_source(src, ds, split):
         rgba_mode=src.get("rgba_mode", ds.get("rgba_mode", "straight")),
         return_aux=bool(src.get("return_aux", ds.get("return_aux", False))),
         tileable_col=src.get("tileable_col", ds.get("tileable_col", "tileable")),
+        zero_reference=bool(src.get("zero_reference", ds.get("zero_reference", False))),
+        ref_size=int(src.get("ref_size", ds.get("ref_size", 64))),
     )
 
 

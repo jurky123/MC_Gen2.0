@@ -72,6 +72,8 @@ def main():
     pipe.set_progress_bar_config(disable=True)
     model, man = load(args.ckpt, args.device)
     pm = bool(man.get("rgba_mode") == "premultiplied")
+    ref_size = int(getattr(model.cfg, "ref_size", 64))
+    print(f"reference size from checkpoint: {ref_size}")
 
     subjects = [clean_subject(p) for p in PROMPTS]
     texts = [f"{s}. {REALISM}" for s in subjects]
@@ -89,8 +91,9 @@ def main():
                           num_inference_steps=args.flux_steps, generator=g).images[0]
             hd.save(out / f"{k:02d}_hd.png")
             ref = torch.from_numpy(
-                np.dstack([np.asarray(hd.convert("RGB").resize((64, 64), Image.Resampling.LANCZOS)),
-                           np.full((64, 64), 255, np.uint8)])).permute(2, 0, 1)[None].float().to(args.device) / 127.5 - 1.0
+                np.dstack([np.asarray(hd.convert("RGB").resize((ref_size, ref_size),
+                                                               Image.Resampling.LANCZOS)),
+                           np.full((ref_size, ref_size), 255, np.uint8)])).permute(2, 0, 1)[None].float().to(args.device) / 127.5 - 1.0
             g2 = torch.Generator(device=args.device).manual_seed(args.seed + k)
             z = torch.randn(1, 4, 32, 32, generator=g2, device=args.device)
             with torch.autocast("cuda", dtype=torch.bfloat16):

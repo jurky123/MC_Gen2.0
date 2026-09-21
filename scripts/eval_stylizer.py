@@ -91,7 +91,8 @@ def main():
     ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_phase1/best.pt"))
     ap.add_argument("--base", default=str(ROOT / "checkpoints/stage_3_frozen_v2/best.pt"))
     ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer"))
-    ap.add_argument("--ref-size", type=int, default=64)
+    ap.add_argument("--ref-size", type=int, default=0,
+                    help="0 = take from the checkpoint model_cfg")
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--steps", type=int, default=16)
     ap.add_argument("--st", type=float, default=2.0)
@@ -119,6 +120,8 @@ def main():
 
     model, mcfg, man = load(args.ckpt, dev)
     premult = bool(man.get("rgba_mode") == "premultiplied")
+    ref_size = int(args.ref_size) or int(getattr(mcfg, "ref_size", 64))
+    print(f"reference size from checkpoint: {ref_size}")
     base, base_cfg, _ = load(args.base, dev)
 
     rows, agg = [], {"base": [], "styl": [], "shuf": []}

@@ -2,11 +2,17 @@
 
 
 计划分阶段课程学习，第一阶段使用无文本标注的mc素材和像素艺术素材学习分布；
+
 二阶段用粗标注mc素材学习，条件引导；
+
 三阶段使用Qwen27B精标过的mc素材微调。
+
 后续想做将写实素材转换为mc素材，用flux2和qwenimage2.1转换了一批mc素材，图片条件加文本条件引导。泛化性较弱。
+
 全程vibecoding。
+
 目前暂时放弃继续这个项目，训练数据和代码都已上传，数据集在hf。
+
 Generate **low-resolution voxel-game / pixel-art textures** (32×32, RGBA) from text with a
 compact **pixel-space Rectified-Flow Transformer**.
 

@@ -53,7 +53,7 @@ flowchart LR
 
 ## 开始使用
 
-[下载 4128 步检查点](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt)（约 326 MB） · [SHA256 校验](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt)
+(https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt)（约 326 MB） · [SHA256 校验](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt)
 
 Qwen3-VL-Embedding-8B 需单独下载，脚本会固定版本并校验文件。
 

@@ -1,93 +1,95 @@
-"""Render an inventory gallery from verified, unmodified model outputs."""
+"""Render paper-style train/test qualitative panels from verified model outputs."""
 import hashlib
 import json
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+from matplotlib.lines import Line2D
+from matplotlib.textpath import TextPath
+import numpy as np
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'docs/images/showcase'
 
 
-def font(size, *, chinese=False, bold=False, mono=False):
-    if chinese:
-        name = 'NotoSansCJK-Bold.ttc' if bold else 'NotoSansCJK-Regular.ttc'
-        path = '/usr/share/fonts/opentype/noto/' + name
-    else:
-        name = 'DejaVuSansMono' if mono else 'DejaVuSans'
-        path = '/usr/share/fonts/truetype/dejavu/' + name + ('-Bold' if bold else '') + '.ttf'
-    return ImageFont.truetype(path, size)
-
-
-def spaced(draw, xy, text, *, fill, size=18, spacing=3):
-    x, y = xy
-    face = font(size)
-    for char in text:
-        draw.text((x, y), char, font=face, fill=fill)
-        x += draw.textlength(char, font=face) + spacing
-
-
-def slot(draw, x, y, width, height):
-    cut = 8
-    points = [(x + cut, y), (x + width - cut, y), (x + width, y + cut),
-              (x + width, y + height - cut), (x + width - cut, y + height),
-              (x + cut, y + height), (x, y + height - cut), (x, y + cut)]
-    draw.polygon(points, fill='#17252d', outline='#30414a', width=2)
-    draw.line((x + cut + 2, y + 3, x + width - cut - 2, y + 3), fill='#3c4c53')
-    draw.line((x + cut, y + height - 3, x + width - cut, y + height - 3), fill='#0c151b', width=2)
+def wrap_prompt(prompt, face, max_width):
+    lines, current = [], ''
+    for word in prompt.split():
+        proposed = (current + ' ' + word).strip()
+        width = TextPath((0, 0), proposed, prop=face).get_extents().width
+        if current and width > max_width:
+            lines.append(current)
+            current = word
+        else:
+            current = proposed
+    lines.append(current)
+    assert len(lines) <= 3, f'Caption exceeds the three-line figure layout: {prompt}'
+    return '\n'.join(lines)
 
 
 def render():
     manifest = json.loads((ASSETS / 'manifest.json').read_text())
     assert manifest['checkpoint_step'] == 4128
-    groups = manifest['groups']
-    assert len(groups) == 4 and len(manifest['items']) == 16
-    canvas = Image.new('RGB', (1760, 1536))
-    draw = ImageDraw.Draw(canvas)
-    for y in range(canvas.height):
-        amount = y / canvas.height
-        draw.line((0, y, canvas.width, y), fill=tuple(int(a + (b - a) * amount)
-                  for a, b in zip((10, 21, 29), (15, 29, 35))))
-    for x in range(40, 1760, 40):
-        for y in range(40, 1536, 40):
-            draw.point((x, y), fill='#223139')
-    ink, muted, accent = '#edf4ec', '#8fa5ac', '#b3e9c1'
-    spaced(draw, (82, 47), 'MINECRAFT-INSPIRED PIXEL GENERATION', fill=muted, size=17, spacing=2.6)
-    draw.text((76, 84), 'MCGEN', font=font(116, bold=True), fill=ink)
-    draw.text((82, 229), '一句话，创造一个物品。', font=font(44, chinese=True), fill=ink)
-    draw.text((1290, 94), '16 × 16', font=font(64, bold=True), fill=accent)
-    spaced(draw, (1298, 181), 'NATIVE PIXEL ART', fill=muted, size=17, spacing=2)
-    draw.text((1298, 232), 'TEXT  →  ITEM', font=font(24, mono=True), fill=ink)
-    draw.line((80, 315, 1680, 315), fill='#2b3d45', width=2)
-    draw.rectangle((80, 312, 172, 317), fill=accent)
-    descriptions = ['金属、材质与工具', '穿戴与防御', '用颜色表达想法', '让名字成为灵感']
-    colors = ['#b3e9c1', '#91cde1', '#cbb9ec', '#e4c18d']
-    for row, group in enumerate(groups):
-        y = 356 + row * 262
-        color = colors[row]
-        draw.rectangle((82, y + 14, 92, y + 36), fill=color)
-        draw.text((108, y + 13), f'0{row + 1}', font=font(18, mono=True), fill=color)
-        draw.text((80, y + 57), group['title'], font=font(30, chinese=True, bold=True), fill=ink)
-        spaced(draw, (83, y + 107), group['id'].upper(), fill=color, size=16, spacing=2.3)
-        draw.text((82, y + 151), descriptions[row], font=font(20, chinese=True), fill=muted)
-        items = [item for item in manifest['items'] if item['category'] == group['id']]
-        assert len(items) == 4
-        for col, item in enumerate(items):
-            x = 400 + col * 330
-            slot(draw, x, y, 296, 222)
+    assert len(manifest['items']) == 32
+    plt.rcParams.update({'font.family': 'STIXGeneral', 'pdf.fonttype': 42,
+                         'ps.fonttype': 42, 'savefig.facecolor': 'white'})
+    fig = plt.figure(figsize=(16, 9), facecolor='white')
+    face = FontProperties(family='STIXGeneral', style='italic', size=14.2)
+    text_boxes, image_boxes = [], {}
+    for split, start, title in [('train', .035, '(a) Training-set captions'),
+                                ('test', .535, '(b) Held-out test captions')]:
+        items = [item for item in manifest['items'] if item['split'] == split]
+        assert len(items) == 16
+        fig.text(start, .973, title, fontsize=20, fontweight='bold', va='top', color='#171717')
+        fig.add_artist(Line2D([start, start + .43], [.925, .925],
+                             transform=fig.transFigure, color='#777777', linewidth=.7))
+        for index, item in enumerate(items):
+            row, col = divmod(index, 4)
+            center_x = start + .0525 + col * .1085
+            top = .904 - row * .214
+            image_height = .125
+            image_width = image_height * 9 / 16
+            axis = fig.add_axes([center_x - image_width / 2, top - image_height,
+                                 image_width, image_height])
             path = ASSETS / item['file']
             assert hashlib.sha256(path.read_bytes()).hexdigest() == item['sha256']
-            with Image.open(path) as image:
-                assert image.size == (16, 16) and image.mode == 'RGBA'
-                sprite = image.resize((160, 160), Image.Resampling.NEAREST)
-            canvas.paste(sprite, (x + 68, y + 12), sprite)
-            face = font(26)
-            width = draw.textlength(item['prompt'], font=face)
-            draw.text((x + (296 - width) / 2, y + 183), item['prompt'], font=face, fill=ink)
-    draw.line((80, 1430, 1680, 1430), fill='#2b3d45', width=2)
-    draw.text((82, 1462), '真实模型输出  ·  同一固定种子  ·  原始像素放大展示',
-              font=font(20, chinese=True), fill=muted)
-    draw.text((1390, 1466), 'SELECTED / 4128', font=font(21, mono=True), fill=accent)
-    canvas.save(ASSETS / 'showcase.png', optimize=True)
+            with Image.open(path) as raw:
+                assert raw.mode == 'RGBA' and raw.size == (16, 16)
+                background = Image.new('RGBA', raw.size, (246, 246, 246, 255))
+                background.alpha_composite(raw)
+                display = np.array(background.convert('RGB'))
+            axis.imshow(display, interpolation='nearest', resample=False)
+            axis.set_axis_off()
+            image_boxes[(split, row, col)] = axis
+            label = wrap_prompt(item['prompt'], face, max_width=.102 * 16 * 72)
+            text = fig.text(center_x, top - image_height - .011, label,
+                            fontproperties=face, ha='center', va='top',
+                            linespacing=1.08, color='#202020')
+            text_boxes.append((split, row, col, text))
+    fig.add_artist(Line2D([.5, .5], [.070, .975], transform=fig.transFigure,
+                         color='#d5d5d5', linewidth=.6))
+    fig.text(.5, .022, 'All images are generated from exact dataset captions; same checkpoint and seed throughout.',
+             fontsize=11, ha='center', va='center', color='#555555')
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    for split, row, col, text in text_boxes:
+        bounds = text.get_window_extent(renderer)
+        assert bounds.x0 >= 0 and bounds.x1 <= fig.bbox.width
+        if row < 3:
+            next_image = image_boxes[(split, row + 1, col)].get_window_extent(renderer)
+            assert bounds.y0 > next_image.y1, f'Caption overlaps the next sample: {text.get_text()}'
+        else:
+            assert bounds.y0 > .040 * fig.bbox.height
+    fig.savefig(ASSETS / 'showcase.png', dpi=180)
+    fig.savefig(ASSETS / 'showcase.pdf', metadata={
+        'Title': 'MCGen qualitative generation from training and held-out test captions',
+        'Creator': 'MCGen paper-style showcase renderer',
+    })
+    plt.close(fig)
 
 
 if __name__ == '__main__':

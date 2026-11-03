@@ -10,7 +10,9 @@ Text-to-Image · 16×16 RGBA · 81.4M Generator
 
 </div>
 
-![MCGen：武器、装备、彩色宝石和概念物品的真实生成结果](docs/images/showcase/showcase.png)
+![MCGen：从训练集与测试集真实文本标签生成的物品示例](docs/images/showcase/showcase.png)
+
+[PDF 原图](docs/images/showcase/showcase.pdf) · [样本与提示词](docs/images/showcase/manifest.json)
 
 
 使用原始文件名提取文本标注生成，计划未来实现参考图生成。

@@ -1,0 +1,45 @@
+{
+  "selection_seed": 20261104,
+  "generation_seed": 20261112,
+  "counts": {
+    "train": 16,
+    "test": 16
+  },
+  "candidate_counts": {
+    "train": {
+      "weapons": 4689,
+      "tools": 9684,
+      "equipment": 9673,
+      "gems": 1958,
+      "materials": 4088,
+      "magic": 675,
+      "food": 1997,
+      "objects": 2725
+    },
+    "test": {
+      "weapons": 104,
+      "tools": 194,
+      "equipment": 441,
+      "gems": 118,
+      "materials": 122,
+      "magic": 32,
+      "food": 156,
+      "objects": 155
+    }
+  },
+  "sampling": "Two samples in each of eight caption-defined categories per split; one longer caption preferred, different forms preferred, at most two targets per project. Fixed random seed; no filtering by generated quality.",
+  "eligibility": "2-6 lowercase words,10-48 characters; explicit terminal item form and at least one word in the declared material/color/theme vocabulary; single-letter/component/technical markers and competing item forms excluded; nonopaque items with24-236 visible pixels. These are display-caption filters, not changes to training supervision.",
+  "train_source": "outputs/qwen_vl_embedding_large_20261103/catalog/samples.jsonl",
+  "test_source": "data/catalogs/native16_v3/catalog/samples.jsonl",
+  "test_policy": "Original test split, unique item-only targets; no training target/group/lineage overlap; filename policy unchanged; exact prompt strings also absent from training captions.",
+  "test_exposure": "The32 selected examples are now viewed development/showcase examples. They are not an untouched final test benchmark. No training catalog or split is modified.",
+  "interpretation": "Illustrative stratified showcase, not a population-weighted quality estimate. Target images are stored locally for provenance, never substituted for generated outputs.",
+  "steps": 32,
+  "solver": "heun",
+  "text_scale": 2,
+  "precision": "float32",
+  "checkpoint_sha256": "790d2264f5e3559894dba726b99a7109185dca2f40d009065bccdea4c29369e2",
+  "checkpoint_step": 4128,
+  "text_identity": "7dc02f153dae1b1d277f4b39812e6e6f9fe56d53fb37e371717da06733114402",
+  "device": "cuda:1"
+}

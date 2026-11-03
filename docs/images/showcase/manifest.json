@@ -1,0 +1,134 @@
+{
+  "checkpoint": "fullscale best, step 2000",
+  "checkpoint_sha256": "809fb3ecbafbbe42909d9c08fac8a90c495248596f04d69f52a99aab445de281",
+  "selection": "All 18 basic category/color prompts at the first fixed evaluation seed; no per-image seed selection.",
+  "display": "Unmodified RGBA outputs, nearest-neighbor enlargement on neutral cards.",
+  "items": [
+    {
+      "category": "sword",
+      "prompt": "a red sword",
+      "seed": 20261112,
+      "file": "items/red_sword.png",
+      "sha256": "92ecf859736f839d3e01eee3d6de270000f5f4d6c760c2db5b3ca496cfb22946"
+    },
+    {
+      "category": "sword",
+      "prompt": "a blue sword",
+      "seed": 20261112,
+      "file": "items/blue_sword.png",
+      "sha256": "02d38e3db5d043d2840a5165d0bd855669e6d2515528e23fcd5dbd4f3d2d8827"
+    },
+    {
+      "category": "sword",
+      "prompt": "a green sword",
+      "seed": 20261112,
+      "file": "items/green_sword.png",
+      "sha256": "94a654049c4f49c0c0142c2f032100821f10b16a589aca24f81d0e8a09ee193a"
+    },
+    {
+      "category": "gem",
+      "prompt": "a red gem",
+      "seed": 20261112,
+      "file": "items/red_gem.png",
+      "sha256": "a228680ef08d0d210ed3284488f737340da61b28de415b3393656ffcbc08c4cb"
+    },
+    {
+      "category": "gem",
+      "prompt": "a blue gem",
+      "seed": 20261112,
+      "file": "items/blue_gem.png",
+      "sha256": "bcab167d8ab438b241ea56b41e1463bbab6e38fc484c0294f5e74b88c54a3674"
+    },
+    {
+      "category": "gem",
+      "prompt": "a purple gem",
+      "seed": 20261112,
+      "file": "items/purple_gem.png",
+      "sha256": "76ef46f79e8d159382151802de6e678a98c664e92b48432c123277828037cc48"
+    },
+    {
+      "category": "helmet",
+      "prompt": "a golden helmet",
+      "seed": 20261112,
+      "file": "items/golden_helmet.png",
+      "sha256": "149f4597129026cfcfed6b45c22bee854002287770c89e7a5ed44c444ae4e6d9"
+    },
+    {
+      "category": "helmet",
+      "prompt": "a blue helmet",
+      "seed": 20261112,
+      "file": "items/blue_helmet.png",
+      "sha256": "92b1aff9f8b48b1dee206763464ada51efcb6523bdffdd81d1254641e161018b"
+    },
+    {
+      "category": "helmet",
+      "prompt": "a green helmet",
+      "seed": 20261112,
+      "file": "items/green_helmet.png",
+      "sha256": "6e2b21166beca3ceb195aafa5269b1d41ea8356a3d00c64570659fdf1fd59c1d"
+    },
+    {
+      "category": "apple",
+      "prompt": "a red apple",
+      "seed": 20261112,
+      "file": "items/red_apple.png",
+      "sha256": "297a05e525e8561eb80c94d6a1aa243c10d246a1c270f5ce85416cfeae52af8a"
+    },
+    {
+      "category": "apple",
+      "prompt": "a blue apple",
+      "seed": 20261112,
+      "file": "items/blue_apple.png",
+      "sha256": "6e9c2c0084e8637d94da93a2af59da885c6ef476ec09e6a1ab0c3bf1a957b5f9"
+    },
+    {
+      "category": "apple",
+      "prompt": "a golden apple",
+      "seed": 20261112,
+      "file": "items/golden_apple.png",
+      "sha256": "ad608496cceffbdbc8b69fdc2b618551e7be1c9502f078c433c28f4e90ec2e35"
+    },
+    {
+      "category": "pickaxe",
+      "prompt": "a red pickaxe",
+      "seed": 20261112,
+      "file": "items/red_pickaxe.png",
+      "sha256": "0e1c270c4f78119eb69c52fbcf1239bd21448f4adc56ebcd5bbd8767b4d38097"
+    },
+    {
+      "category": "pickaxe",
+      "prompt": "a blue pickaxe",
+      "seed": 20261112,
+      "file": "items/blue_pickaxe.png",
+      "sha256": "1541ee932f6cef86ea36a208fc9eec7d4a07a6ed0194061a28f13b353a8edca0"
+    },
+    {
+      "category": "pickaxe",
+      "prompt": "a purple pickaxe",
+      "seed": 20261112,
+      "file": "items/purple_pickaxe.png",
+      "sha256": "18f136b01a33b1ff7e0d0752e235561e055998074257e503c1ba22862b735f4e"
+    },
+    {
+      "category": "shield",
+      "prompt": "a red shield",
+      "seed": 20261112,
+      "file": "items/red_shield.png",
+      "sha256": "504a16f8226440f9e9fd507f854f9f6936cd7adc5f8f63191ea990517ede5f26"
+    },
+    {
+      "category": "shield",
+      "prompt": "a blue shield",
+      "seed": 20261112,
+      "file": "items/blue_shield.png",
+      "sha256": "e7457df86dc722c0378808c9c0e69b75e6e1f56cc802826a1b1f8bd7921c9559"
+    },
+    {
+      "category": "shield",
+      "prompt": "a green shield",
+      "seed": 20261112,
+      "file": "items/green_shield.png",
+      "sha256": "b85d4198e182ec4dc004ea6a4c8958ab3ac8e510895711fb25690f0f62df68ee"
+    }
+  ]
+}

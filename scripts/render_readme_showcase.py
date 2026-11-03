@@ -1,62 +1,92 @@
-"""Lay out the checked-in model outputs without modifying their pixels."""
+"""Render an inventory gallery from verified, unmodified model outputs."""
 import hashlib
 import json
 from pathlib import Path
-
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'docs/images/showcase'
 
 
-def font(size, chinese=False, bold=False):
-    path = ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc' if chinese else
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf' if bold else
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+def font(size, *, chinese=False, bold=False, mono=False):
+    if chinese:
+        name = 'NotoSansCJK-Bold.ttc' if bold else 'NotoSansCJK-Regular.ttc'
+        path = '/usr/share/fonts/opentype/noto/' + name
+    else:
+        name = 'DejaVuSansMono' if mono else 'DejaVuSans'
+        path = '/usr/share/fonts/truetype/dejavu/' + name + ('-Bold' if bold else '') + '.ttf'
     return ImageFont.truetype(path, size)
+
+
+def spaced(draw, xy, text, *, fill, size=18, spacing=3):
+    x, y = xy
+    face = font(size)
+    for char in text:
+        draw.text((x, y), char, font=face, fill=fill)
+        x += draw.textlength(char, font=face) + spacing
+
+
+def slot(draw, x, y, width, height):
+    cut = 8
+    points = [(x + cut, y), (x + width - cut, y), (x + width, y + cut),
+              (x + width, y + height - cut), (x + width - cut, y + height),
+              (x + cut, y + height), (x, y + height - cut), (x, y + cut)]
+    draw.polygon(points, fill='#17252d', outline='#30414a', width=2)
+    draw.line((x + cut + 2, y + 3, x + width - cut - 2, y + 3), fill='#3c4c53')
+    draw.line((x + cut, y + height - 3, x + width - cut, y + height - 3), fill='#0c151b', width=2)
 
 
 def render():
     manifest = json.loads((ASSETS / 'manifest.json').read_text())
-    canvas = Image.new('RGB', (1600, 1160), '#f4f3ed')
+    assert manifest['checkpoint_step'] == 4128
+    groups = manifest['groups']
+    assert len(groups) == 4 and len(manifest['items']) == 16
+    canvas = Image.new('RGB', (1760, 1536))
     draw = ImageDraw.Draw(canvas)
-    ink, muted, green = '#233d31', '#768076', '#3f7754'
-    draw.text((60, 40), 'MCGEN', font=font(76, bold=True), fill=ink)
-    draw.text((64, 138), '用文字，创造你的物品。', font=font(30, chinese=True), fill=ink)
-    draw.text((1110, 75), 'TEXT TO ITEMS', font=font(19, bold=True), fill=green)
-    draw.text((1110, 110), 'Minecraft-inspired pixel art', font=font(16), fill=muted)
-    for row, col, color in [(0, 1, '#acc39b'), (0, 2, '#d9dfb9'),
-                            (1, 0, '#d9dfb9'), (1, 1, '#5c9064'), (1, 2, '#89ad76'),
-                            (2, 0, '#acc39b'), (2, 1, '#89ad76')]:
-        x, y = 1432 + col * 29, 55 + row * 29
-        draw.rectangle((x, y, x + 24, y + 24), fill=color)
-    draw.line((60, 202, 1540, 202), fill='#dce0d4', width=2)
-    draw.rectangle((60, 200, 132, 204), fill=green)
-    categories = [('sword', '剑'), ('gem', '宝石'), ('helmet', '头盔'),
-                  ('apple', '苹果'), ('pickaxe', '镐'), ('shield', '盾牌')]
-    for col, (category, label) in enumerate(categories):
-        x = 60 + col * 250
-        draw.text((x + 8, 220), label, font=font(23, chinese=True), fill=ink)
-        rows = [r for r in manifest['items'] if r['category'] == category]
-        assert len(rows) == 3
-        for row, item in enumerate(rows):
-            y = 266 + row * 254
-            draw.rounded_rectangle((x, y, x + 230, y + 236), radius=18,
-                                   fill='#ffffff', outline='#e2e5db', width=1)
-            draw.rounded_rectangle((x + 15, y + 15, x + 215, y + 175), radius=12,
-                                   fill='#e9ede5')
+    for y in range(canvas.height):
+        amount = y / canvas.height
+        draw.line((0, y, canvas.width, y), fill=tuple(int(a + (b - a) * amount)
+                  for a, b in zip((10, 21, 29), (15, 29, 35))))
+    for x in range(40, 1760, 40):
+        for y in range(40, 1536, 40):
+            draw.point((x, y), fill='#223139')
+    ink, muted, accent = '#edf4ec', '#8fa5ac', '#b3e9c1'
+    spaced(draw, (82, 47), 'MINECRAFT-INSPIRED PIXEL GENERATION', fill=muted, size=17, spacing=2.6)
+    draw.text((76, 84), 'MCGEN', font=font(116, bold=True), fill=ink)
+    draw.text((82, 229), '一句话，创造一个物品。', font=font(44, chinese=True), fill=ink)
+    draw.text((1290, 94), '16 × 16', font=font(64, bold=True), fill=accent)
+    spaced(draw, (1298, 181), 'NATIVE PIXEL ART', fill=muted, size=17, spacing=2)
+    draw.text((1298, 232), 'TEXT  →  ITEM', font=font(24, mono=True), fill=ink)
+    draw.line((80, 315, 1680, 315), fill='#2b3d45', width=2)
+    draw.rectangle((80, 312, 172, 317), fill=accent)
+    descriptions = ['金属、材质与工具', '穿戴与防御', '用颜色表达想法', '让名字成为灵感']
+    colors = ['#b3e9c1', '#91cde1', '#cbb9ec', '#e4c18d']
+    for row, group in enumerate(groups):
+        y = 356 + row * 262
+        color = colors[row]
+        draw.rectangle((82, y + 14, 92, y + 36), fill=color)
+        draw.text((108, y + 13), f'0{row + 1}', font=font(18, mono=True), fill=color)
+        draw.text((80, y + 57), group['title'], font=font(30, chinese=True, bold=True), fill=ink)
+        spaced(draw, (83, y + 107), group['id'].upper(), fill=color, size=16, spacing=2.3)
+        draw.text((82, y + 151), descriptions[row], font=font(20, chinese=True), fill=muted)
+        items = [item for item in manifest['items'] if item['category'] == group['id']]
+        assert len(items) == 4
+        for col, item in enumerate(items):
+            x = 400 + col * 330
+            slot(draw, x, y, 296, 222)
             path = ASSETS / item['file']
             assert hashlib.sha256(path.read_bytes()).hexdigest() == item['sha256']
-            sprite = Image.open(path).convert('RGBA')
-            assert sprite.size == (16, 16)
-            sprite = sprite.resize((128, 128), Image.Resampling.NEAREST)
-            canvas.paste(sprite, (x + 51, y + 31), sprite)
-            label_font = font(18)
-            width = draw.textlength(item['prompt'], font=label_font)
-            draw.text((x + (230 - width) / 2, y + 194), item['prompt'], font=label_font, fill=ink)
-    draw.line((60, 1051, 1540, 1051), fill='#dce0d4', width=2)
-    draw.text((60, 1083), '真实模型输出  ·  仅放大展示，保留原始像素', font=font(20, chinese=True), fill=muted)
-    draw.text((1320, 1088), 'MCGen / 2026', font=font(17), fill=muted)
+            with Image.open(path) as image:
+                assert image.size == (16, 16) and image.mode == 'RGBA'
+                sprite = image.resize((160, 160), Image.Resampling.NEAREST)
+            canvas.paste(sprite, (x + 68, y + 12), sprite)
+            face = font(26)
+            width = draw.textlength(item['prompt'], font=face)
+            draw.text((x + (296 - width) / 2, y + 183), item['prompt'], font=face, fill=ink)
+    draw.line((80, 1430, 1680, 1430), fill='#2b3d45', width=2)
+    draw.text((82, 1462), '真实模型输出  ·  同一固定种子  ·  原始像素放大展示',
+              font=font(20, chinese=True), fill=muted)
+    draw.text((1390, 1466), 'SELECTED / 4128', font=font(21, mono=True), fill=accent)
     canvas.save(ASSETS / 'showcase.png', optimize=True)
 
 

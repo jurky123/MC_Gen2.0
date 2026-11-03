@@ -9,6 +9,12 @@ from .config import fingerprint
 
 class TextEncoder:
     def __init__(self, cfg, model_cfg, device="cpu"):
+        self.embedding = None
+        if cfg.backend == "qwen3_vl_embedding":
+            from .qwen_embedding import QwenVLEmbedding
+            self.embedding = QwenVLEmbedding(cfg, model_cfg, device)
+            self.identity = self.embedding.identity
+            return
         self.cfg, self.model_cfg, self.device = cfg, model_cfg, device
         identity_config = asdict(cfg)
         identity_config.pop("cache_mb", None)
@@ -42,6 +48,8 @@ class TextEncoder:
 
     @torch.no_grad()
     def encode(self, prompts, output_device):
+        if getattr(self, "embedding", None) is not None:
+            return self.embedding.encode(prompts, output_device)
         if not prompts:
             raise ValueError("empty prompt batch")
         if self.cfg.backend == "byte" or not self.cache_limit:
@@ -77,6 +85,8 @@ class TextEncoder:
                 torch.stack([found[p][1][:length] for p in prompts]).to(output_device))
 
     def cache_stats(self):
+        if getattr(self, "embedding", None) is not None:
+            return self.embedding.cache_stats()
         return {"hits": self.hits, "misses": self.misses, "bytes": self.cache_bytes,
                 "limit_bytes": self.cache_limit, "entries": len(self.cache)}
 

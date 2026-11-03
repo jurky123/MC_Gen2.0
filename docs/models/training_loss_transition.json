@@ -1,0 +1,114 @@
+[
+  {
+    "first_step": 5000,
+    "last_step": 5049,
+    "updates": 50,
+    "mean_loss": 0.14316685765981674,
+    "min_loss": 0.13054579496383667,
+    "max_loss": 0.15298041701316833
+  },
+  {
+    "first_step": 5050,
+    "last_step": 5099,
+    "updates": 50,
+    "mean_loss": 0.1456389307975769,
+    "min_loss": 0.13368143141269684,
+    "max_loss": 0.15816164016723633
+  },
+  {
+    "first_step": 5100,
+    "last_step": 5149,
+    "updates": 50,
+    "mean_loss": 0.15132617056369782,
+    "min_loss": 0.13943152129650116,
+    "max_loss": 0.16648395359516144
+  },
+  {
+    "first_step": 5150,
+    "last_step": 5199,
+    "updates": 50,
+    "mean_loss": 0.15506270945072173,
+    "min_loss": 0.14590924978256226,
+    "max_loss": 0.16662834584712982
+  },
+  {
+    "first_step": 5200,
+    "last_step": 5249,
+    "updates": 50,
+    "mean_loss": 0.17093799263238907,
+    "min_loss": 0.1450585126876831,
+    "max_loss": 0.20823556184768677
+  },
+  {
+    "first_step": 5250,
+    "last_step": 5299,
+    "updates": 50,
+    "mean_loss": 0.24646219968795777,
+    "min_loss": 0.1886759251356125,
+    "max_loss": 0.2972249686717987
+  },
+  {
+    "first_step": 5300,
+    "last_step": 5349,
+    "updates": 50,
+    "mean_loss": 0.39118922501802444,
+    "min_loss": 0.23354968428611755,
+    "max_loss": 0.7302238941192627
+  },
+  {
+    "first_step": 5350,
+    "last_step": 5399,
+    "updates": 50,
+    "mean_loss": 0.49055043399333953,
+    "min_loss": 0.40775781869888306,
+    "max_loss": 0.6487289071083069
+  },
+  {
+    "first_step": 5400,
+    "last_step": 5449,
+    "updates": 50,
+    "mean_loss": 0.4314688491821289,
+    "min_loss": 0.40262195467948914,
+    "max_loss": 0.4589785635471344
+  },
+  {
+    "first_step": 5450,
+    "last_step": 5499,
+    "updates": 50,
+    "mean_loss": 0.5187050372362136,
+    "min_loss": 0.3850221335887909,
+    "max_loss": 0.8567883968353271
+  },
+  {
+    "first_step": 5500,
+    "last_step": 5549,
+    "updates": 50,
+    "mean_loss": 0.409168701171875,
+    "min_loss": 0.35834598541259766,
+    "max_loss": 0.45990005135536194
+  },
+  {
+    "first_step": 5550,
+    "last_step": 5599,
+    "updates": 50,
+    "mean_loss": 0.3804672330617905,
+    "min_loss": 0.34942546486854553,
+    "max_loss": 0.47105321288108826
+  },
+  {
+    "first_step": 5600,
+    "last_step": 5649,
+    "updates": 50,
+    "mean_loss": 0.38831278145313264,
+    "min_loss": 0.34164559841156006,
+    "max_loss": 0.44580188393592834
+  },
+  {
+    "first_step": 5650,
+    "last_step": 5699,
+    "updates": 50,
+    "mean_loss": 0.46011103570461276,
+    "min_loss": 0.408860445022583,
+    "max_loss": 0.5915750861167908
+  }
+]

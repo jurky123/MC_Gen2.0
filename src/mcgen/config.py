@@ -46,8 +46,8 @@ class ModelConfig:
             raise ValueError("model dimensions must be positive integers")
         if self.text_normalization not in ("none", "layernorm"):
             raise ValueError("text_normalization must be none or layernorm")
-        if self.conditioning not in ("shared", "separate"):
-            raise ValueError("conditioning must be shared or separate")
+        if self.conditioning not in ("shared", "separate", "text_only"):
+            raise ValueError("conditioning must be shared, separate or text_only")
         if type(self.byte_tokens) is not bool:
             raise ValueError("byte_tokens must be boolean")
         if self.size not in (8, 16, 32, 64):
@@ -74,11 +74,11 @@ class TextConfig:
     def __post_init__(self):
         if type(self.cache_mb) is not int or self.cache_mb < 0:
             raise ValueError("cache_mb must be a nonnegative integer")
-        if self.backend not in ("hf", "byte"):
-            raise ValueError("text backend must be hf or byte (smoke baseline only)")
-        if self.backend == "hf" and not self.model:
+        if self.backend not in ("hf", "byte", "qwen3_vl_embedding"):
+            raise ValueError("unsupported text backend")
+        if self.backend in ("hf", "qwen3_vl_embedding") and not self.model:
             raise ValueError("hf text backend requires an explicit local model path or pinned model ID")
-        if self.backend == "hf" and not Path(self.model).is_dir() and not re.fullmatch(r"[0-9a-f]{40}", self.revision):
+        if self.backend in ("hf", "qwen3_vl_embedding") and not Path(self.model).is_dir() and not re.fullmatch(r"[0-9a-f]{40}", self.revision):
             raise ValueError("remote text models require a 40-character commit SHA revision (not main/tag)")
         if not self.layers or any(not isinstance(x, int) for x in self.layers):
             raise ValueError("layers must be a nonempty integer list")
@@ -148,6 +148,8 @@ class Experiment:
     target_scope: str = "all"
 
     def __post_init__(self):
+        if self.model.conditioning == "text_only" and self.task != "text":
+            raise ValueError("text_only architecture requires text task")
         if self.train.trainable == "attributes" and self.model.reference_encoding != "dual":
             raise ValueError("attribute adapter training requires dual reference encoding")
         if self.task not in ("joint", "text", "reference"):

@@ -85,7 +85,8 @@ class PixelFlow(nn.Module):
             ratio //= stride
             channels = w
         ref_layers.append(nn.Conv2d(channels, w, 1))
-        self.reference_encoder = nn.Sequential(*ref_layers)
+        if cfg.conditioning != "text_only":
+            self.reference_encoder = nn.Sequential(*ref_layers)
         if cfg.reference_encoding == "dual":
             # Pointwise features + symmetric reductions: no coordinates, patches
             # or neighbourhoods can transmit the reference silhouette.
@@ -123,6 +124,10 @@ class PixelFlow(nn.Module):
         h = h.masked_fill(~text_mask[..., None], 0)
         null_t = self.text_null.expand(b, -1, -1)
         valid_t = torch.ones(b, 1, dtype=torch.bool, device=h.device)
+        if self.cfg.conditioning == "text_only":
+            if reference is not None and (ref_present is None or bool(ref_present.any())):
+                raise ValueError("text_only model does not accept references")
+            return torch.cat((null_t, h), 1), torch.cat((valid_t, text_mask), 1)
         # Reference preprocessing is done once by runtime/training, tokens once
         # per sampling call. No zero-image convention or stochastic model dropout.
         if reference is None:

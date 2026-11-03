@@ -1,0 +1,26 @@
+{
+  "step": 4128,
+  "selection": "user_selected_visual_quality",
+  "source_checkpoint": "outputs/side_validation_20261103_222545/checkpoint.pt",
+  "source_sha256": "155daabeaca6d6b7bf17a753a1c6f70cf79a03d4051f5bb7fc24911443a9a18d",
+  "generator_parameters": 81409028,
+  "text_encoder": "Qwen/Qwen3-VL-Embedding-8B",
+  "text_encoder_frozen": true,
+  "text_identity": "7dc02f153dae1b1d277f4b39812e6e6f9fe56d53fb37e371717da06733114402",
+  "catalog_fingerprint": "73026a21f4280e03b7d93322a0ed5bc5395ab614512128e839089ccc8cb6f9cd",
+  "train_targets": 311510,
+  "validation_targets": 40808,
+  "last_training_step": 7211,
+  "training_status": "completed_before_user_stop_request",
+  "automatic_minimum_flow_step": 4644,
+  "recommendation": "Do not resume the degraded late checkpoints; selected4128 is a visual-review choice, not the minimum Flow MSE.",
+  "inference_checkpoint": "checkpoints/mcgen-step4128.pt",
+  "inference_sha256": "790d2264f5e3559894dba726b99a7109185dca2f40d009065bccdea4c29369e2",
+  "inference_bytes": 326227394,
+  "model_weights_in_git": false,
+  "frozen_encoder_parameters": "8B (model family designation, excluded from generator parameter count)",
+  "dataset_sources": [
+    "https://huggingface.co/datasets/OVAWARE/16xModdedMinecraft",
+    "https://huggingface.co/datasets/Risposta/MC_Gen"
+  ]
+}

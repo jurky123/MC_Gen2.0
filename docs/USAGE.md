@@ -2,6 +2,22 @@
 
 以下命令用于安装、生成、训练和评估。示例中的本机路径需按自己的环境替换；模型权重与数据不随仓库提供。
 
+## 当前选用版本
+
+当前选用扩容文生图实验的 **4128 步**。本机推理文件为 `checkpoints/mcgen-step4128.pt`，原始训练快照仍保留；这是人工比较生成效果后的选择，不是自动误差最小的 4644 步。
+
+```bash
+pip install -e '.[embedding]'
+python scripts/download_qwen_vl_embedding.py --out /home/iflab/models/Qwen3-VL-Embedding-8B
+mcgen sample --checkpoint checkpoints/mcgen-step4128.pt \
+  --prompt 'diamond sword' --seed 20261112 --steps 32 --text-scale 2 \
+  --out outputs/diamond_sword.png --device cuda:0
+```
+
+以上是本机路径示例。编码器的下载目录需与检查点记录一致；编码器文件经过校验，不能把旧 Qwen3-8B 替换到此检查点中。生成器权重目前仅在本地保留，不随 Git 发布。模型配置、文件哈希和数据规模见 [4128 步记录](models/step4128.json)。
+
+下方通用命令同时保留历史实验的 text/reference/joint 能力；当前推荐的 4128 步模型只用于文生图。
+
 ## 安装与验证
 
 ```bash
@@ -12,7 +28,7 @@ python -m pytest -q
 
 本机解释器 `/home/iflab/miniconda3/envs/mcgen/bin/python`。
 不安装时使用 `PYTHONPATH=src python -m mcgen ...`。
-Qwen 已下载至 `/home/iflab/models/Qwen3-8B`，固定官方 commit
+历史模型的 Qwen 已下载至 `/home/iflab/models/Qwen3-8B`，固定官方 commit
 `b968826d9c46dd6066d109eabc6255188de91218`，权重哈希已核验。
 
 ## 数据准备
@@ -41,7 +57,7 @@ mcgen import-images --manifest samples.jsonl --out data/new_assets --size 16
 
 `configs/v3/` 包含 item/tile 各自的 text/reference/joint 六组短试验配置；`other` 不进入这些实验。
 默认三种任务使用同一批配对目标，保证对照的数据范围一致；全量文生图扩展配置位于 `configs/v3/scale/`。
-保留 Qwen 三层特征，独立文字/参考图注意力，显式任务比例和有容量上限的特征缓存。
+历史 token 特征配置保留 Qwen 三层特征、独立文字/参考图注意力。当前扩容模型使用一个冻结的 Qwen Embedding 向量和纯文本主干，见 [当前模型记录](EMBEDDING_TEXT_20261103.md)。
 
 ```bash
 mcgen budget --config configs/v3/item_joint.yaml \

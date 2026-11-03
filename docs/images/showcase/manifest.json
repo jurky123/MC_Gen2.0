@@ -1,134 +1,162 @@
 {
-  "checkpoint": "fullscale best, step 2000",
-  "checkpoint_sha256": "809fb3ecbafbbe42909d9c08fac8a90c495248596f04d69f52a99aab445de281",
-  "selection": "All 18 basic category/color prompts at the first fixed evaluation seed; no per-image seed selection.",
-  "display": "Unmodified RGBA outputs, nearest-neighbor enlargement on neutral cards.",
+  "checkpoint": "Qwen VL embedding text-only generator, selected step4128",
+  "checkpoint_step": 4128,
+  "checkpoint_sha256": "155daabeaca6d6b7bf17a753a1c6f70cf79a03d4051f5bb7fc24911443a9a18d",
+  "seed": 20261112,
+  "sampling": {
+    "steps": 32,
+    "solver": "heun",
+    "text_scale": 2,
+    "precision": "float32"
+  },
+  "selection": "Curated16-prompt showcase; same seed for every item, no per-image seed selection. Not a quantitative benchmark.",
+  "display": "Unmodified native16x16 RGBA outputs; nearest-neighbour enlargement and background compositing only.",
+  "groups": [
+    {
+      "id": "tools",
+      "title": "武器与工具"
+    },
+    {
+      "id": "equipment",
+      "title": "护甲与装备"
+    },
+    {
+      "id": "gems",
+      "title": "宝石与色彩"
+    },
+    {
+      "id": "concepts",
+      "title": "名称与意象"
+    }
+  ],
   "items": [
     {
-      "category": "sword",
-      "prompt": "a red sword",
+      "category": "tools",
+      "prompt": "iron sword",
       "seed": 20261112,
-      "file": "items/red_sword.png",
-      "sha256": "92ecf859736f839d3e01eee3d6de270000f5f4d6c760c2db5b3ca496cfb22946"
+      "file": "items/iron_sword.png",
+      "sha256": "2986a7a1a88412949d730625a252b83cf2901afe273853f140876052bde8ba22",
+      "source_image": "outputs/side_validation_20261103_222545/images/024.png"
     },
     {
-      "category": "sword",
-      "prompt": "a blue sword",
+      "category": "tools",
+      "prompt": "diamond sword",
       "seed": 20261112,
-      "file": "items/blue_sword.png",
-      "sha256": "02d38e3db5d043d2840a5165d0bd855669e6d2515528e23fcd5dbd4f3d2d8827"
+      "file": "items/diamond_sword.png",
+      "sha256": "00f84ff2cace0b24b6b709990ff9a324116ee401bc847b3e345242cc00ba7e90",
+      "source_image": "outputs/side_validation_20261103_222545/images/026.png"
     },
     {
-      "category": "sword",
-      "prompt": "a green sword",
+      "category": "tools",
+      "prompt": "golden sword",
       "seed": 20261112,
-      "file": "items/green_sword.png",
-      "sha256": "94a654049c4f49c0c0142c2f032100821f10b16a589aca24f81d0e8a09ee193a"
+      "file": "items/golden_sword.png",
+      "sha256": "10102aeb747f12f8987e64381ad83f6af06e42dfc626a5b96d38c46a5eed6ad8",
+      "source_image": "outputs/side_validation_20261103_222545/images/028.png"
     },
     {
-      "category": "gem",
-      "prompt": "a red gem",
+      "category": "tools",
+      "prompt": "diamond pickaxe",
+      "seed": 20261112,
+      "file": "items/diamond_pickaxe.png",
+      "sha256": "d08279ce59a3f74e6f24b75c856755c226ed7a37d3cb63405ae6149e58b4ffd1",
+      "source_image": "outputs/side_validation_20261103_222545/images/034.png"
+    },
+    {
+      "category": "equipment",
+      "prompt": "helmet",
+      "seed": 20261112,
+      "file": "items/helmet.png",
+      "sha256": "c39d9625d64a076b0ddfc12379ba88e90a9143d3c239da185fcce331a722b809",
+      "source_image": "outputs/side_validation_20261103_222545/images/012.png"
+    },
+    {
+      "category": "equipment",
+      "prompt": "chestplate",
+      "seed": 20261112,
+      "file": "items/chestplate.png",
+      "sha256": "a4d9fa5ae7b8fcb7c3d5bdcfc63cd23013466a8370033961fc1f58b33acd0c74",
+      "source_image": "outputs/side_validation_20261103_222545/images/014.png"
+    },
+    {
+      "category": "equipment",
+      "prompt": "boots",
+      "seed": 20261112,
+      "file": "items/boots.png",
+      "sha256": "cdd037bdbdba9489f3e79a72b92b9ac9bf0d0b51f9f928250af23c77ffa0fe46",
+      "source_image": "outputs/side_validation_20261103_222545/images/018.png"
+    },
+    {
+      "category": "equipment",
+      "prompt": "wooden shield",
+      "seed": 20261112,
+      "file": "items/wooden_shield.png",
+      "sha256": "8e3530afc711dbffe9f00bcb7b03d6d83b224100254bfc8c2171da99c662b3e0",
+      "source_image": "outputs/side_validation_20261103_222545/images/046.png"
+    },
+    {
+      "category": "gems",
+      "prompt": "red gem",
       "seed": 20261112,
       "file": "items/red_gem.png",
-      "sha256": "a228680ef08d0d210ed3284488f737340da61b28de415b3393656ffcbc08c4cb"
+      "sha256": "528b7e50b0443e54fef6a6a03b5abcc37dc0b3ff57fddeaf654c370e392d5782",
+      "source_image": "outputs/side_validation_20261103_222545/images/048.png"
     },
     {
-      "category": "gem",
-      "prompt": "a blue gem",
+      "category": "gems",
+      "prompt": "blue gem",
       "seed": 20261112,
       "file": "items/blue_gem.png",
-      "sha256": "bcab167d8ab438b241ea56b41e1463bbab6e38fc484c0294f5e74b88c54a3674"
+      "sha256": "8c9b9ae05dece91d2e0c54c26074eaf43ce819504db6383f6dfd393962500471",
+      "source_image": "outputs/side_validation_20261103_222545/images/050.png"
     },
     {
-      "category": "gem",
-      "prompt": "a purple gem",
+      "category": "gems",
+      "prompt": "green gem",
+      "seed": 20261112,
+      "file": "items/green_gem.png",
+      "sha256": "47f9fed23d2864074f4dc67472064f10a45c9ce6d59072db6cecb7e26b58f950",
+      "source_image": "outputs/side_validation_20261103_222545/images/052.png"
+    },
+    {
+      "category": "gems",
+      "prompt": "purple gem",
       "seed": 20261112,
       "file": "items/purple_gem.png",
-      "sha256": "76ef46f79e8d159382151802de6e678a98c664e92b48432c123277828037cc48"
+      "sha256": "d21d43d17fd41763badfe2ac1f1fc7d585dd06124d61c9e96642a213b854d332",
+      "source_image": "outputs/side_validation_20261103_222545/images/054.png"
     },
     {
-      "category": "helmet",
-      "prompt": "a golden helmet",
+      "category": "concepts",
+      "prompt": "sun gem",
       "seed": 20261112,
-      "file": "items/golden_helmet.png",
-      "sha256": "149f4597129026cfcfed6b45c22bee854002287770c89e7a5ed44c444ae4e6d9"
+      "file": "items/sun_gem.png",
+      "sha256": "c91f13442a380d87890f73e8c8fbeb8069836bfd368deba01cb84b713f52df76",
+      "source_image": "outputs/side_validation_20261103_222545/images/072.png"
     },
     {
-      "category": "helmet",
-      "prompt": "a blue helmet",
+      "category": "concepts",
+      "prompt": "moon stone",
       "seed": 20261112,
-      "file": "items/blue_helmet.png",
-      "sha256": "92b1aff9f8b48b1dee206763464ada51efcb6523bdffdd81d1254641e161018b"
+      "file": "items/moon_stone.png",
+      "sha256": "dbbecdaa57042f79ae019769d9a69fc30dc2b66f2b3fcba0d0bc9a4e4299724d",
+      "source_image": "outputs/side_validation_20261103_222545/images/074.png"
     },
     {
-      "category": "helmet",
-      "prompt": "a green helmet",
+      "category": "concepts",
+      "prompt": "soul gem",
       "seed": 20261112,
-      "file": "items/green_helmet.png",
-      "sha256": "6e2b21166beca3ceb195aafa5269b1d41ea8356a3d00c64570659fdf1fd59c1d"
+      "file": "items/soul_gem.png",
+      "sha256": "133c93ccabe4486f0a43063c2cf2d6bd5b9c96ce8dbf8ba095602f19e98863ad",
+      "source_image": "outputs/side_validation_20261103_222545/images/076.png"
     },
     {
-      "category": "apple",
-      "prompt": "a red apple",
+      "category": "concepts",
+      "prompt": "void crystal",
       "seed": 20261112,
-      "file": "items/red_apple.png",
-      "sha256": "297a05e525e8561eb80c94d6a1aa243c10d246a1c270f5ce85416cfeae52af8a"
-    },
-    {
-      "category": "apple",
-      "prompt": "a blue apple",
-      "seed": 20261112,
-      "file": "items/blue_apple.png",
-      "sha256": "6e9c2c0084e8637d94da93a2af59da885c6ef476ec09e6a1ab0c3bf1a957b5f9"
-    },
-    {
-      "category": "apple",
-      "prompt": "a golden apple",
-      "seed": 20261112,
-      "file": "items/golden_apple.png",
-      "sha256": "ad608496cceffbdbc8b69fdc2b618551e7be1c9502f078c433c28f4e90ec2e35"
-    },
-    {
-      "category": "pickaxe",
-      "prompt": "a red pickaxe",
-      "seed": 20261112,
-      "file": "items/red_pickaxe.png",
-      "sha256": "0e1c270c4f78119eb69c52fbcf1239bd21448f4adc56ebcd5bbd8767b4d38097"
-    },
-    {
-      "category": "pickaxe",
-      "prompt": "a blue pickaxe",
-      "seed": 20261112,
-      "file": "items/blue_pickaxe.png",
-      "sha256": "1541ee932f6cef86ea36a208fc9eec7d4a07a6ed0194061a28f13b353a8edca0"
-    },
-    {
-      "category": "pickaxe",
-      "prompt": "a purple pickaxe",
-      "seed": 20261112,
-      "file": "items/purple_pickaxe.png",
-      "sha256": "18f136b01a33b1ff7e0d0752e235561e055998074257e503c1ba22862b735f4e"
-    },
-    {
-      "category": "shield",
-      "prompt": "a red shield",
-      "seed": 20261112,
-      "file": "items/red_shield.png",
-      "sha256": "504a16f8226440f9e9fd507f854f9f6936cd7adc5f8f63191ea990517ede5f26"
-    },
-    {
-      "category": "shield",
-      "prompt": "a blue shield",
-      "seed": 20261112,
-      "file": "items/blue_shield.png",
-      "sha256": "e7457df86dc722c0378808c9c0e69b75e6e1f56cc802826a1b1f8bd7921c9559"
-    },
-    {
-      "category": "shield",
-      "prompt": "a green shield",
-      "seed": 20261112,
-      "file": "items/green_shield.png",
-      "sha256": "b85d4198e182ec4dc004ea6a4c8958ab3ac8e510895711fb25690f0f62df68ee"
+      "file": "items/void_crystal.png",
+      "sha256": "44c1efe0ec7027893d473fbb11fec127c1b12a4455c14bfbd37aaaa490401dc2",
+      "source_image": "outputs/side_validation_20261103_222545/images/078.png"
     }
   ]
 }

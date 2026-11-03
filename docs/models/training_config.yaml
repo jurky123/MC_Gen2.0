@@ -1,0 +1,46 @@
+# Archived experiment configuration; selected checkpoint: step4128.
+# Later checkpoints regressed. Model path below belongs to the original machine.
+schema_version: 3
+task: text
+asset_type: item
+model:
+  size: 16
+  width: 512
+  depth: 12
+  heads: 8
+  ref_size: 16
+  text_dim: 4096
+  text_length: 1
+  conditioning: text_only
+  byte_tokens: false
+  text_normalization: layernorm
+text:
+  backend: qwen3_vl_embedding
+  model: /home/iflab/models/Qwen3-VL-Embedding-8B
+  revision: 2c4565515e0f265c6511776e7193b22c0968ddc7
+  layers:
+  - -1
+  chat_template: true
+  dtype: bfloat16
+  cache_mb: 0
+  instruction: ''
+train:
+  steps: 7211
+  batch_size: 672
+  accumulation: 1
+  warmup: 232
+  lr: 0.0002
+  precision: bfloat16
+  seam_weight: 0.0
+  eval_every: 516
+  val_samples: 1024
+  task_mix:
+    text: 0.9
+    reference: 0
+    joint: 0
+    unconditional: 0.1
+  seed: 2026110310
+  schedule_start: 0
+style: ''
+alpha_mode: continuous
+target_scope: all

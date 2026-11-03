@@ -2,7 +2,7 @@
 
 # MCGen
 
-**从一句话，生成 Minecraft 风格的像素物品。**
+
 
 Text-to-Image · 16×16 RGBA · 81.4M Generator
 
@@ -12,9 +12,9 @@ Text-to-Image · 16×16 RGBA · 81.4M Generator
 
 ![MCGen：武器、装备、彩色宝石和概念物品的真实生成结果](docs/images/showcase/showcase.png)
 
-<p align="center"><sub>选用第 4128 步检查点。16 个精选提示词使用同一固定种子，原生像素仅做最近邻放大。<a href="docs/images/showcase/manifest.json">提示词与来源</a></sub></p>
 
-从 `diamond sword` 到 `sun gem`，尝试物品、材质、颜色和抽象名称的组合。当前专注文生图，参考图路线暂缓；复杂部件关系和少见物品仍有错误。
+使用原始文件名提取文本标注生成，计划未来实现参考图生成。
+
 
 ## 生成方式
 
@@ -37,13 +37,11 @@ flowchart LR
 | 文本编码器 | **Qwen3-VL-Embedding-8B**，冻结；不计入生成器参数量 |
 | 训练集 | **311,510 张** |
 | 验证集 | **40,808 张** |
-| 当前选用 | **第 4128 步**，依据生成效果选择 |
 
 纹理主要来自 [OVAWARE/16xModdedMinecraft](https://huggingface.co/datasets/OVAWARE/16xModdedMinecraft) 及其图文衍生数据，覆盖多种 Minecraft 模组。项目整理的数据导出位于 [Risposta/MC_Gen](https://huggingface.co/datasets/Risposta/MC_Gen)，可通过[下载脚本](scripts/download_dataset_hf.py)获取。
 
 源表包含 1,034,057 条纹理记录；上表是经过去重、原生像素校验和清理后的实际使用量。文本监督由文件名和可恢复的资源路径提取，保留材质、颜色和抽象名称，不使用自动视觉描述。按来源项目划分数据，隔离跨集合重复。
 
-本轮训练已结束，后期检查点出现退化，当前保留 4128 步。[查看训练与检查点对照](docs/EMBEDDING_TEXT_20261103.md)。
 
 ## 开始使用
 

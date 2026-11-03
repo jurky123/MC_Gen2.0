@@ -1,0 +1,44 @@
+# Explicit Qwen token normalization; prior unnormalized checkpoints remain unchanged.
+schema_version: 3
+task: text
+asset_type: tile
+model:
+  size: 16
+  width: 256
+  depth: 8
+  heads: 8
+  ref_size: 128
+  text_dim: 12288
+  text_length: 128
+  conditioning: separate
+  byte_tokens: false
+  text_normalization: layernorm
+text:
+  backend: hf
+  model: /home/iflab/models/Qwen3-8B
+  revision: b968826d9c46dd6066d109eabc6255188de91218
+  layers:
+  - 9
+  - 18
+  - 27
+  chat_template: true
+  dtype: bfloat16
+  cache_mb: 1024
+train:
+  steps: 20000
+  batch_size: 16
+  accumulation: 2
+  warmup: 500
+  lr: 0.0002
+  precision: bfloat16
+  seam_weight: 0.0
+  eval_every: 100
+  val_samples: 128
+  task_mix:
+    text: 0.9
+    reference: 0
+    joint: 0
+    unconditional: 0.1
+style: ''
+alpha_mode: opaque
+target_scope: all

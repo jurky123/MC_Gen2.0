@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = [
     "data/build/stage1_32_rgba",
     "data/build/mc_text2image32",
+    "data/build/mc_text2image32_wl",
+    "data/build/stage2_32",
     "data/processed/minecraft_16x_finetune32",
     "data/processed/modrinth32",
 ]

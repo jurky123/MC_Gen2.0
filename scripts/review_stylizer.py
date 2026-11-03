@@ -1,10 +1,10 @@
 """Human-review sheet for the HD->MC Stylizer.
 
-For N validation rows:
-    HD (FLUX 384) | real MC target | base t2i (text only) | Stylizer (text+ref)
+For N validation rows (stratified random by default):
+    HD ref (per-generator) | real MC target | base t2i (text only) | Stylizer (text+ref)
 plus a zoom row for the two generated columns so artefacts are visible.
 
-    python scripts/review_stylizer.py --n 16 --out /tmp/opencode/styl_review
+    python scripts/review_stylizer.py --n 32 --out /tmp/opencode/styl_v4_review_n32
 """
 import argparse
 import json
@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from config import ModelConfig  # noqa: E402
-from data.pair_dataset import MmapPairDataset  # noqa: E402
+from data.pair_dataset import MmapPairDataset, sample_balanced_indices  # noqa: E402
 from data.rgba import unpremultiply_rgba_np  # noqa: E402
 from data.text_tower import get_text_encoder  # noqa: E402
 from infer.solver import to_uint8  # noqa: E402
@@ -29,7 +29,17 @@ from model.mc_flow_dit import MCFlowDiT  # noqa: E402
 def load(ckpt, dev):
     sd = torch.load(ckpt, map_location="cpu")
     m = MCFlowDiT(ModelConfig.from_dict(sd["model_cfg"]))
-    m.load_state_dict(sd["model"], strict=True)
+    try:
+        m.load_state_dict(sd["model"], strict=True)
+    except RuntimeError as exc:
+        # legacy checkpoint without the learned null-reference token
+        missing = [k for k in m.state_dict() if k not in sd["model"]]
+        if any("ref_null" in k for k in missing):
+            m.load_state_dict(sd["model"], strict=False)
+            m.legacy_null = True
+            print(f"legacy checkpoint: {missing} left at init")
+        else:
+            raise
     m.to(dev).eval()
     return m, sd.get("conditioning", {})
 
@@ -63,19 +73,24 @@ def unp(arr, pm):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_phase1_v2/best.pt"))
+    ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_v4/best.pt"))
     ap.add_argument("--base", default=str(ROOT / "checkpoints/stage_3_frozen_v2/best.pt"))
-    ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer_v2"))
+    ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer_v4"))
     ap.add_argument("--ref-size", type=int, default=0,
                     help="0 = take from the checkpoint model_cfg")
-    ap.add_argument("--hd-dirs", default="pairs/mchd_stage3_a,pairs/mchd_stage3_b")
-    ap.add_argument("--n", type=int, default=16)
+    ap.add_argument("--hd-dirs", default="",
+                    help="comma dirs with hd/rowXXXXXXX.png; empty = resolve from metadata src")
+    ap.add_argument("--n", type=int, default=32)
     ap.add_argument("--steps", type=int, default=20)
     ap.add_argument("--st", type=float, default=2.5)
     ap.add_argument("--sr", type=float, default=2.5)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--strata", default="generator",
+                    help="metadata column to balance across (empty = plain random)")
+    ap.add_argument("--order", choices=("random", "first"), default="random",
+                    help="random = seeded stratified sample; first = first n of val")
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--out", default="/tmp/opencode/styl_review")
+    ap.add_argument("--out", default="/tmp/opencode/styl_v4_review_n32")
     args = ap.parse_args()
 
     import pandas as pd
@@ -93,14 +108,40 @@ def main():
         split="val", ref_size=ref_size, target_size=32,
         rgba_mode="premultiplied")
     df = pd.read_parquet(pairs / "metadata.parquet")
+    # optional fallback map: scan hd_dirs (row -> path). Primary path is metadata src.
     hd_map = {}
-    for d in args.hd_dirs.split(","):
+    for d in filter(None, (s.strip() for s in args.hd_dirs.split(","))):
         d = Path(d)
+        if not d.is_absolute():
+            d = ROOT / d
         for p in d.glob("hd/row*.png"):
             hd_map[int(p.stem[3:])] = p
 
-    idxs = list(range(min(args.n, len(ds))))
+    def hd_path_for(pos):
+        i = ds.index[pos]
+        row = int(df["row"].iloc[i])
+        src = str(df["src"].iloc[i]) if "src" in df.columns else ""
+        if src:
+            p = (ROOT / src) / f"hd/row{row:07d}.png"
+            if p.exists():
+                return p
+        return hd_map.get(row)
+
+    if args.order == "first":
+        idxs = list(range(min(args.n, len(ds))))
+    else:
+        strata = args.strata or None
+        idxs = sample_balanced_indices(df, ds.index, args.n,
+                                       seed=args.seed, strata_col=strata)
+        if strata and strata in df.columns:
+            from collections import Counter
+            counts = Counter(str(df[strata].iloc[ds.index[i]]) for i in idxs)
+            print(f"stratified sample n={len(idxs)} over '{strata}': {dict(counts)}")
+        else:
+            print(f"random sample n={len(idxs)}")
     rows = [int(df["row"].iloc[ds.index[i]]) for i in idxs]
+    gens = [str(df["generator"].iloc[ds.index[i]]) if "generator" in df.columns
+            else "" for i in idxs]
     prompts = [str(df["prompt"].iloc[ds.index[i]]) for i in idxs]
     enc = get_text_encoder("/home/iflab/models/Qwen3-8B", device="cuda:1",
                            dtype="bfloat16", max_length=512, layers=[9, 18, 27])
@@ -128,9 +169,10 @@ def main():
             tgt = unp(to_uint8(x_t, premultiplied=pm).permute(1, 2, 0).cpu().numpy(), pm)
             b = unp(to_uint8(xb[0], premultiplied=bpm).permute(1, 2, 0).cpu().numpy(), bpm)
             s = unp(to_uint8(xs[0], premultiplied=pm).permute(1, 2, 0).cpu().numpy(), pm)
-            hd = (Image.open(hd_map[rows[k]]).convert("RGB") if rows[k] in hd_map else None)
-            tiles.append((prompts[k], hd, tgt, b, s))
-            print(f"[{k}] {prompts[k][:60]}", flush=True)
+            hd_file = hd_path_for(i)
+            hd = (Image.open(hd_file).convert("RGB") if hd_file is not None else None)
+            tiles.append((prompts[k], gens[k], hd, tgt, b, s))
+            print(f"[{k}] {gens[k] or '-':5s} {prompts[k][:60]}", flush=True)
 
     def paste(sheet, arr_or_img, xy, size, nearest=False):
         if arr_or_img is None:
@@ -151,11 +193,12 @@ def main():
     S, gap = 256, 8
     sheet = Image.new("RGB", (4 * S + 5 * gap, len(tiles) * (S + 26) + gap + 10), (24, 24, 24))
     d = ImageDraw.Draw(sheet)
-    d.text((gap, 2), "HD (FLUX 384) | real MC target | base t2i (text only) | STYLIZER (text+ref)",
+    d.text((gap, 2), "HD ref (per-generator) | real MC target | base t2i (text only) | STYLIZER (text+ref)",
            fill=(255, 255, 0))
-    for r, (p, hd, tgt, b, s) in enumerate(tiles):
+    for r, (p, g, hd, tgt, b, s) in enumerate(tiles):
         y = 24 + r * (S + 26)
-        d.text((gap, y), f"{p[:96]}", fill=(150, 220, 255))
+        tag = f"[{g}] " if g else ""
+        d.text((gap, y), f"{tag}{p[:92]}", fill=(150, 220, 255))
         paste(sheet, hd, (gap, y + 22), S)
         paste(sheet, tgt, (gap * 2 + S, y + 22), S, nearest=True)
         paste(sheet, b, (gap * 3 + S * 2, y + 22), S, nearest=True)

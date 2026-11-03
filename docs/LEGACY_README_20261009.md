@@ -1,0 +1,183 @@
+# MC-Gen 2.0
+
+> **Status: paused (October 2026).** The code, checkpoints and datasets are kept
+> as-is for reference; no active development. Final training results and the
+> HD→MC pipeline status live in [`PROGRESS.md`](PROGRESS.md).
+
+Generate **low-resolution voxel-game / pixel-art textures** (32×32, RGBA) from
+text with a compact **pixel-space Rectified-Flow Transformer** — no VAE, single
+GPU, seamless palette-faithful output.
+
+- Model: `MC-FlowDiT` (~130 M) — pixel-space MMDiT double-stream + single-stream
+- Resolution: 32×32 × 4 (RGBA), patch size 2, 2D RoPE, RMSNorm + QK-Norm, AdaLN-Zero
+- Objective: Rectified Flow / Flow Matching + optional edge (tile) loss
+- Text conditioning: frozen **Qwen3-8B** token states injected by **cross-attention**
+- License: **research / study only**
+
+---
+
+## Results
+
+Selected generations from the current checkpoint (nearest-neighbour upscaled;
+transparent background shown white):
+
+![generations](docs/images/generated.png)
+
+---
+
+## Features
+
+- **Pixel-space flow model** — no VAE, so pixel edges, palette and tile seams are preserved.
+- **Cross-attention text conditioning** — image tokens query a frozen Qwen3-8B token
+  sequence (hidden states from layers 9/18/27 concatenated → 12 288-d), computed **on the
+  fly** (no precomputed text embeddings; the text tower runs on a second GPU).
+- **Label-grounded prompts** — the source label words are authoritative: orientation and
+  abstract words are preserved verbatim, the `block` / `item` type is kept, and colour /
+  shape are inferred from the label; an optional LLM rewrite keeps every label word.
+- **Curated fine-tuning set** — a category-balanced subset (63 forms × 61 materials × 30
+  colours × 48 states) annotated by a local 27B VLM under a strict, validated JSON rule
+  (15 visual fields, verbatim label preservation, fallback on validation failure).
+- **Anti-forgetting fine-tuning** — fine-tuning mixes in replay data, uses a low LR and a
+  short schedule, CPU EMA, an optional backbone freeze (train only the conditioning path)
+  and forgetting-aware checkpoint selection.
+- **Evaluation suite** — concept recall, colour accuracy, real-vs-generated fidelity, seam
+  score, seed diversity, retrieval accuracy and text-effect (val loss vs null).
+
+---
+
+## Method (brief)
+
+```text
+Stage 1  pixel-art pretraining (image-only)          → pixel flow prior
+   ↓
+Stage 2  broad texture set + grounded prompts        → text alignment
+   ↓
+Stage 3  curated subset + 27B fine annotations
+         + replay mixing                              → precise text control
+   ↓
+HD→MC    MC→HD anchors (FLUX / Qwen) + Stylizer v4    → reference-based
+         (see docs/MC2HD_RECIPE.md, PROGRESS.md)        32×32 pixelation
+```
+
+**Prompt pipeline** — each texture keeps its source-label words. A deterministic grounded
+rewrite (`scripts/rewrite_grounded.py`) and a validated LLM rewrite
+(`src/data/grounded_rewrite.py`) both must keep every label word and the asset type.
+
+**Text tower** — `Qwen3-8B` causal LM, chat template with `enable_thinking=False`, hidden
+states from layers 9/18/27 concatenated (FLUX.2-klein style); frozen, run on a second GPU.
+See `src/data/text_tower.py`.
+
+**Model** — `src/model/mc_flow_dit.py`: patch embed → MMDiT blocks → cross-attention to text
+tokens → single-stream blocks → velocity head, with 2D RoPE, QK-Norm and AdaLN-Zero.
+`text_injection: cross_attn` keeps a learned register token so Stage-1 weights transfer.
+
+**Inference** — Heun / Euler flow ODE, 16–24 steps, CFG ≈ 2–3, frozen text tower with a
+learned null condition.
+
+**Stylizer (HD→MC)** — a reference-conditioned variant of the same flow model: an HD
+anchor (384px, from FLUX.2-klein-4B or Qwen-Image-2.1) is downsampled to a 128px
+reference and injected through zero-gated adapter + cross-attention blocks; dual CFG
+over text and reference. See `docs/MC2HD_RECIPE.md`.
+
+---
+
+## Repository layout
+
+```text
+configs/
+  data/      dataset descriptors (stage_1, stage_2_grounded_k1, stage_3, stylizer_v4, ...)
+  model/     tiny / base / base_flux2klein / stylizer_v4
+  train/     per-stage recipes (stage_1, stage_2_grounded_k1, stage_3, stylizer_v4, ...)
+  annotator.yaml, prompt_rewrite.yaml, grounded_rewrite.yaml, stage3_annotator.yaml
+src/
+  data/      builders, loaders, text tower, annotators, prompt pipelines
+  model/     MC-FlowDiT blocks (double/single stream, cross-attention, RoPE)
+  train/     flow, losses, EMA, trainer
+  infer/     solvers, sampling, FastAPI service
+  eval/      seam, attributes, diversity, memorization, caption bench
+scripts/     train / sample / annotate / rewrite / eval / HF upload entry points
+docs/        design docs (HD→MC recipe, Img2Img design, HD-to-MC design v1)
+tests/       unit tests (model conditioning, sampling, review fixes)
+hf/README.md dataset card published to Hugging Face
+data/        (git-ignored) raw and built datasets
+```
+
+---
+
+## Quickstart
+
+```bash
+pip install -r requirements.txt
+
+# Stage 2 — text alignment (Qwen3-8B cross-attention)
+python scripts/train.py \
+  --model configs/model/base_flux2klein.yaml \
+  --train configs/train/stage_2_grounded_k1.yaml \
+  --init-from checkpoints/stage_1/latest.pt
+
+# Stage 3 — annotated subset + replay, anti-forgetting
+python scripts/train.py \
+  --model configs/model/base_flux2klein.yaml \
+  --train configs/train/stage_3.yaml \
+  --init-from checkpoints/stage_2_grounded_k1/best.pt
+# optional frozen-conditioning variant: configs/train/stage_3_frozen.yaml
+
+# sample
+python scripts/sample.py \
+  --ckpt checkpoints/stage_3/best.pt \
+  --text-tower /path/to/Qwen3-8B --text-layers 9,18,27 \
+  --prompt "orange brick item" "mossy stone bricks block" \
+  --steps 20 --cfg 2.5 --solver heun
+
+# evaluate a checkpoint
+python scripts/eval_generation.py --ckpt checkpoints/stage_3/best.pt
+```
+
+Serving a local annotator with vLLM (one replica per GPU):
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python scripts/serve_vlm.py \
+  --model /path/to/Qwen3.8-27B --served-model-name qwen3.8-27b --port 8000 --mtp 2
+```
+
+Training datasets (preprocessed, research-only) are published separately on
+Hugging Face: [`Risposta/MC_Gen`](https://huggingface.co/datasets/Risposta/MC_Gen).
+Use `scripts/download_dataset_hf.py` or `hf download` to fetch them into the
+paths the configs expect.
+
+---
+
+## Tests
+
+```bash
+python -m pytest tests/ -q
+```
+
+---
+
+## License
+
+Research and study only. Do not use the trained models or published datasets
+commercially. Third-party assets remain under their original licenses — see the
+dataset card for provenance.
+
+
+## 远程历史补记
+
+以下保留自远程提交 `cb86865` 的旧项目说明，属于重启前状态，不代表当前计划。
+
+> # MC-Gen 2.0
+>
+>
+> 计划分阶段课程学习，第一阶段使用无文本标注的mc素材和像素艺术素材学习分布；
+>
+> 二阶段用粗标注mc素材学习，条件引导；
+>
+> 三阶段使用Qwen27B精标过的mc素材微调。
+>
+> 后续想做将写实素材转换为mc素材，用flux2和qwenimage2.1转换了一批mc素材，图片条件加文本条件引导。泛化性较弱。
+>
+> 全程vibecoding。
+>
+> 目前暂时放弃继续这个项目，训练数据和代码都已上传，数据集在hf。
+>

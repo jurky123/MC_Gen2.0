@@ -1,0 +1,47 @@
+# Portable reference config; set text.model to your verified local Qwen3-8B directory for offline use.
+# The historical queue script uses local artifacts and the original frozen run config.
+schema_version: 3
+task: text
+asset_type: item
+model:
+  size: 16
+  width: 256
+  depth: 8
+  heads: 8
+  ref_size: 128
+  text_dim: 12288
+  text_length: 128
+  conditioning: separate
+  byte_tokens: false
+  text_normalization: layernorm
+text:
+  backend: hf
+  model: Qwen/Qwen3-8B
+  revision: b968826d9c46dd6066d109eabc6255188de91218
+  layers:
+  - 9
+  - 18
+  - 27
+  chat_template: true
+  dtype: bfloat16
+  cache_mb: 0
+train:
+  steps: 200000
+  batch_size: 32
+  accumulation: 2
+  warmup: 1000
+  lr: 1.0e-05
+  precision: bfloat16
+  seam_weight: 0.0
+  eval_every: 2000
+  val_samples: 1024
+  task_mix:
+    text: 0.9
+    reference: 0
+    joint: 0
+    unconditional: 0.1
+  seed: 20261103
+  schedule_start: 0
+style: ''
+alpha_mode: continuous
+target_scope: all

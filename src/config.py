@@ -50,6 +50,9 @@ class ModelConfig:
     ref_channels: int = 4
     ref_adapter_positions: list = field(default_factory=lambda: [0, 1])
     ref_cross_blocks: int = 0
+    # Where each ref cross-attention block sits among single_stream_blocks;
+    # -1 = after all blocks (v3 layout).
+    ref_cross_positions: list = field(default_factory=lambda: [-1])
 
     @property
     def patch_dim(self):

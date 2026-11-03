@@ -166,7 +166,8 @@ class Trainer:
         if getattr(train_cfg, "freeze_backbone", False):
             trainable_prefixes = ("text_proj", "text_null", "cross_blocks",
                                   "head", "head_norm", "t_embedder",
-                                  "ref_encoder", "ref_adapters", "ref_cross_blocks")
+                                  "ref_encoder", "ref_adapters", "ref_cross_blocks",
+                                  "ref_null")
             frozen = trainable = 0
             for name, param in self.model.named_parameters():
                 if name.startswith(trainable_prefixes):
@@ -249,15 +250,18 @@ class Trainer:
             drop = self.cond_drop
         tileable_mask = aux.get("tileable") if isinstance(aux, dict) else None
         reference = aux.get("reference") if isinstance(aux, dict) else None
+        ref_present = aux.get("ref_present") if isinstance(aux, dict) else None
         ref_drop = float(getattr(self.tcfg, "ref_dropout", 0.0)) if reference is not None else None
         if self.autocast is not None:
             with self.autocast:
                 v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop,
-                               reference=reference, ref_drop_prob=ref_drop)
+                               reference=reference, ref_drop_prob=ref_drop,
+                               ref_present=ref_present)
                 return flow_tile_loss(v.float(), xt, t, target, self.tcfg.tile_loss,
                                       tileable_mask=tileable_mask)
         v = self.model(xt, t, text, text_mask=text_mask, cond_drop_prob=drop,
-                       reference=reference, ref_drop_prob=ref_drop)
+                       reference=reference, ref_drop_prob=ref_drop,
+                       ref_present=ref_present)
         return flow_tile_loss(v, xt, t, target, self.tcfg.tile_loss,
                               tileable_mask=tileable_mask)
 
@@ -516,6 +520,7 @@ class Trainer:
                 if isinstance(aux, dict):
                     aux = {k: v.to(self.device) for k, v in aux.items()}
                 reference = aux.get("reference") if isinstance(aux, dict) else None
+                ref_present = aux.get("ref_present") if isinstance(aux, dict) else None
                 text_mask = None
                 if isinstance(text, (list, tuple)):
                     text, text_mask = self.text_encoder.encode(list(text))
@@ -529,10 +534,10 @@ class Trainer:
                 if self.autocast is not None:
                     with self.autocast:
                         v = self.model(xt, t, text, text_mask=text_mask,
-                                       reference=reference)
+                                       reference=reference, ref_present=ref_present)
                 else:
                     v = self.model(xt, t, text, text_mask=text_mask,
-                                   reference=reference)
+                                   reference=reference, ref_present=ref_present)
                 total += F.mse_loss(v.float(), target).item() * b
                 n += b
         mse = total / max(n, 1)

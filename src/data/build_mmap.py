@@ -250,10 +250,11 @@ class MmapImageTextDataset(torch.utils.data.Dataset):
                 1 if str(self.df.iloc[idx].get("type")) == "item" else 0, dtype=torch.long),
         }
         if self.zero_reference:
-            # Text-only sample inside a reference-conditioned batch: a zero
-            # reference is exactly the null-reference branch of the model
-            # (bias-free projections), and keeps the batch dict homogeneous.
+            # Text-only sample inside a reference-conditioned batch: keep a
+            # zero tensor for batch-shape homogeneity, but flag it absent so
+            # the model uses its learned null-reference token (encoder(0) != 0).
             aux["reference"] = torch.zeros(4, self.ref_size, self.ref_size)
+            aux["ref_present"] = torch.tensor(False)
         return x, text, aux
 
 

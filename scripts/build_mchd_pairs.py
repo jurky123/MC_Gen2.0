@@ -2,7 +2,7 @@
 
     real MC (32px)
       -> NEAREST upscale to `--size` (384 default)
-      -> bilateral + gaussian (stair-step removal, low-frequency structure kept)
+      -> NEAREST upscale, then gauss16 (stair-step removal) or none (nearest)
       -> FLUX.2-klein edit, 8 steps
          prompt = "<fine description, word 'block' removed>. photorealistic
                    high-end game asset, PBR, realistic lighting, fine detail,
@@ -47,17 +47,72 @@ REALISM = ("photorealistic high-end game asset, physically based materials, "
            "voxel stair-step edges.")
 
 
-def preprocess(mc_rgba, size):
-    """32px MC -> smoothed `size` input (bil+gauss12 tuned at 512)."""
+PREPROC_MODES = ("nearest", "g16")
+PREPROC_SIGMA = {"g16": 16, "gauss28": 28}
+FLUX_PAIR_DIRS = ["pairs/mchd_stage3_a", "pairs/mchd_stage3_b", "pairs/mchd_fill_a", "pairs/mchd_fill_b"]
+
+
+def preprocess(mc_rgba, size, mode="g16"):
+    """32px MC -> `size` model input.
+
+    mode="nearest": plain NEAREST upscale (structure-faithful).
+    mode="g16" / "gauss28": NEAREST + gaussian sigma (scaled at 512) -> stair-step removal.
+    """
     pil = Image.fromarray(np.asarray(mc_rgba, dtype=np.uint8), "RGBA")
     bg = Image.new("RGB", pil.size, (255, 255, 255))
     bg.paste(pil.convert("RGB"), mask=pil.split()[3])
     large = np.asarray(bg.resize((size, size), Image.Resampling.NEAREST))
+    if mode == "nearest":
+        return large
+    if mode == "bil+g12":
+        d = max(3, int(round(25 * (size / 512.0))) | 1)
+        return gauss(bilateral(np.dstack([large, np.full((size, size), 255, np.uint8)]),
+                              d=d, sc=60, ss=60), max(1.0, 12 * (size / 512.0)))[..., :3].astype(np.uint8)
+    sigma = PREPROC_SIGMA.get(mode, 16)
     scale = size / 512.0
-    d = max(3, int(round(25 * scale)) | 1)
-    smoothed = gauss(bilateral(np.dstack([large, np.full((size, size), 255, np.uint8)]),
-                               d=d, sc=60, ss=60), max(1.0, 12 * scale))
+    smoothed = gauss(np.dstack([large, np.full((size, size), 255, np.uint8)]),
+                     max(1.0, sigma * scale))
     return smoothed[..., :3].astype(np.uint8)
+
+
+def pick_mode(preproc, seed, row):
+    """Deterministic per-row mode so resume is stable. 'mix' = nearest/g16 split."""
+    if preproc != "mix":
+        return preproc
+    return PREPROC_MODES[(seed * 1000003 + row) % len(PREPROC_MODES)]
+
+
+def alpha0_frac(mc_rgba):
+    return float(np.mean(np.asarray(mc_rgba)[..., 3] == 0))
+
+
+def preprocess_ref(mc_rgba, size, mode="gauss28", alpha_thresh=0.05):
+    """Alpha-aware reference for edit models.
+
+    64.8% of the MC targets are transparent cutouts (bed sides, nuggets, ...).
+    Compositing those on white makes the model fill the frame with a zoomed 3D
+    object ("cropped" look). So: cutouts -> keep RGBA (transparent background),
+    opaque full-bleed textures -> white composite (RGB ref).
+
+    Cutout alpha is blurred together with the colour (gauss does sigma on RGB and
+    sigma/2 on alpha). Keeping the NEAREST alpha edge makes the model read the
+    stair-step silhouette as pixel art and reproduce blocky output.
+
+    Returns HxWx3 (RGB) or HxWx4 (RGBA).
+    """
+    arr = np.asarray(mc_rgba, dtype=np.uint8)
+    pil = Image.fromarray(arr, "RGBA")
+    large = np.asarray(pil.resize((size, size), Image.Resampling.NEAREST))
+    sigma = PREPROC_SIGMA.get(mode, 28)
+    sc = size / 512.0
+    blur = (lambda x: gauss(np.dstack([x, np.full((size, size), 255, np.uint8)]),
+                            max(1.0, sigma * sc))[..., :3].astype(np.uint8))
+    if alpha0_frac(arr) > alpha_thresh:
+        return large if mode == "nearest" else gauss(large, max(1.0, sigma * sc)).astype(np.uint8)
+    bg = Image.new("RGB", pil.size, (255, 255, 255))
+    bg.paste(pil.convert("RGB"), mask=pil.split()[3])
+    large_bg = np.asarray(bg.resize((size, size), Image.Resampling.NEAREST))
+    return large_bg if mode == "nearest" else blur(large_bg)
 
 
 def clean_subject(text):
@@ -118,6 +173,15 @@ def main():
     ap.add_argument("--rows", default="", help="explicit rows (comma separated)")
     ap.add_argument("--device", default="cuda:1", help="GPU for FLUX")
     ap.add_argument("--shard", default="0/1", help="K/N shard of the row list")
+    ap.add_argument("--preproc", default="mix", choices=["mix", *PREPROC_MODES, "bil+g12"],
+                    help="input preprocessing; 'mix' = per-row nearest/g16")
+    ap.add_argument("--cutouts-only", action="store_true",
+                    help="only transparent cutout rows (alpha0 > 5%%), e.g. to rebuild the"
+                         " 65%% that the old white-composite recipe expanded to full frame")
+    ap.add_argument("--rows-from-manifests", action="store_true",
+                    help="row list = union of the existing FLUX pair manifests")
+    ap.add_argument("--prompt-style", default="auto", choices=["auto", "item"],
+                    help="'auto' = item prefix only for type==item; 'item' = always")
     ap.add_argument("--build", default=str(ROOT / "data/build/mc_text2image32_wl"))
     ap.add_argument("--out", default=str(ROOT / "pairs/mchd_v1"))
     args = ap.parse_args()
@@ -140,14 +204,25 @@ def main():
 
     if args.rows:
         rows = [int(x) for x in args.rows.split(",") if x.strip()]
+    elif args.rows_from_manifests:
+        rows = []
+        for d in FLUX_PAIR_DIRS:
+            p = ROOT / d / "manifest.jsonl"
+            if p.exists():
+                rows += [int(json.loads(l)["row"]) for l in p.read_text().splitlines() if l.strip()]
+        rows = sorted(set(rows))
     else:
         rows = stratified_rows(build, args.n, seed=args.seed)
+    if args.cutouts_only:
+        rows = [r for r in rows if alpha0_frac(np.asarray(imgs[r])) > 0.05]
     shard_k, shard_n = (int(x) for x in args.shard.split("/"))
     if shard_n > 1:
         rows = [r for i, r in enumerate(rows) if i % shard_n == shard_k]
         print(f"shard {shard_k}/{shard_n}: {len(rows)} rows", flush=True)
 
-    fingerprint = {"recipe": "mc->nearest->bil+gauss12->flux_edit", "size": args.size,
+    fingerprint = {"recipe": "mc->nearest->{bil+gauss12|none}->flux_edit", "size": args.size,
+                   "preproc": args.preproc, "prompt_style": args.prompt_style,
+                   "cutouts_only": args.cutouts_only,
                    "steps": args.steps, "seed": args.seed, "flux_model": FLUX_MODEL,
                    "realism_prompt": REALISM, "strip_words": ["block", "blocks"],
                    "n_rows": len(rows), "shard": args.shard,
@@ -186,8 +261,12 @@ def main():
         for k, row in enumerate(rows):
             subject = clean_subject(s3p["prompt_0"].iloc[row] if row in s3_rows
                                     else gp["prompt_0"].iloc[row])
-            pr = f"{subject}. {REALISM}"
-            init = preprocess(np.asarray(imgs[row]), args.size)
+            is_item = args.prompt_style == "item" or str(meta.at[row, "type"]) == "item" \
+                and args.prompt_style == "auto"
+            prefix = "single item centered on a plain white background, " if is_item else ""
+            pr = f"{prefix}{subject}. {REALISM}"
+            mode = pick_mode(args.preproc, args.seed, row)
+            init = preprocess(np.asarray(imgs[row]), args.size, mode)
             g = torch.Generator(device=args.device).manual_seed(args.seed + row)
             t0 = time.time()
             hd = pipe(image=Image.fromarray(init), prompt=pr, height=args.size,
@@ -206,7 +285,9 @@ def main():
                 "mc_source": "real MC target (supervision)",
                 "generator_model": "black-forest-labs/FLUX.2-klein-4B",
                 "generator_license": FLUX_LICENSE,
-                "preproc": "nearest->bil+gauss12", "size": args.size,
+                "preproc": {"nearest": "nearest", "g16": "nearest->gauss16",
+                            "gauss28": "nearest->gauss28", "bil+g12": "nearest->bil+gauss12"}[mode],
+                "size": args.size,
                 "steps": args.steps, "seed": args.seed + row,
                 "sec": round(el, 2),
             }) + "\n")

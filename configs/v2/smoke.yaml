@@ -1,0 +1,20 @@
+schema_version: 2
+task: joint
+asset_type: all
+model:
+  size: 8
+  width: 32
+  depth: 2
+  heads: 4
+  ref_size: 16
+  text_dim: 32
+  text_length: 48
+text:
+  backend: byte
+train:
+  steps: 6
+  warmup: 1
+  batch_size: 4
+  lr: 0.001
+  eval_every: 3
+  val_samples: 8

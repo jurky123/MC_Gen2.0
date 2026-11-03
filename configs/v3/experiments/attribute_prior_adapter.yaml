@@ -1,0 +1,46 @@
+schema_version: 3
+task: joint
+asset_type: item
+model:
+  size: 16
+  width: 256
+  depth: 8
+  heads: 8
+  ref_size: 128
+  text_dim: 12288
+  text_length: 128
+  conditioning: separate
+  byte_tokens: false
+  text_normalization: layernorm
+  reference_encoding: dual
+text:
+  backend: hf
+  model: /home/iflab/models/Qwen3-8B
+  revision: b968826d9c46dd6066d109eabc6255188de91218
+  layers:
+  - 9
+  - 18
+  - 27
+  chat_template: true
+  dtype: bfloat16
+  cache_mb: 65536
+train:
+  steps: 1000
+  batch_size: 64
+  accumulation: 1
+  warmup: 100
+  lr: 0.0003
+  precision: bfloat16
+  seam_weight: 0.0
+  eval_every: 200
+  val_samples: 256
+  task_mix:
+    text: 0.0
+    reference: 0.15
+    joint: 0.85
+    unconditional: 0.0
+  seed: 20261102
+  trainable: attributes
+style: ''
+alpha_mode: continuous
+target_scope: paired

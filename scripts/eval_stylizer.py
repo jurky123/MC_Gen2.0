@@ -8,8 +8,8 @@ against the deterministic baseline and two controls:
 
 Metrics per sample: RGB L2 to target, alpha IoU, edge-difference ratio.
 
-    python scripts/eval_stylizer.py --ckpt checkpoints/stylizer_phase1/best.pt \
-        --n 16 --out outputs/eval_stylizer
+    python scripts/eval_stylizer.py --ckpt checkpoints/stylizer_v4/best.pt \
+        --pairs pairs/stylizer_v4 --n 64 --out outputs/eval_stylizer_v4_n64
 """
 import argparse
 import json
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from config import ModelConfig  # noqa: E402
-from data.pair_dataset import MmapPairDataset  # noqa: E402
+from data.pair_dataset import MmapPairDataset, sample_balanced_indices  # noqa: E402
 from data.rgba import premultiply_rgba_torch, unpremultiply_rgba_torch  # noqa: E402
 from data.text_tower import get_text_encoder  # noqa: E402
 from infer.solver import to_uint8  # noqa: E402
@@ -36,7 +36,17 @@ def load(ckpt, device):
     sd = torch.load(ckpt, map_location="cpu")
     mcfg = ModelConfig.from_dict(sd["model_cfg"])
     model = MCFlowDiT(mcfg)
-    model.load_state_dict(sd["model"], strict=True)
+    try:
+        model.load_state_dict(sd["model"], strict=True)
+    except RuntimeError:
+        # legacy checkpoint (v1/v2/v3) without the learned null-reference token
+        missing = [k for k in model.state_dict() if k not in sd["model"]]
+        if any("ref_null" in k for k in missing):
+            model.load_state_dict(sd["model"], strict=False)
+            model.legacy_null = True
+            print(f"legacy checkpoint: {missing} left at init")
+        else:
+            raise
     model.to(device).eval()
     return model, mcfg, sd.get("conditioning", {})
 
@@ -88,9 +98,9 @@ def edges(rgb):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_phase1/best.pt"))
+    ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_v4/best.pt"))
     ap.add_argument("--base", default=str(ROOT / "checkpoints/stage_3_frozen_v2/best.pt"))
-    ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer"))
+    ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer_v4"))
     ap.add_argument("--ref-size", type=int, default=0,
                     help="0 = take from the checkpoint model_cfg")
     ap.add_argument("--n", type=int, default=16)
@@ -98,20 +108,38 @@ def main():
     ap.add_argument("--st", type=float, default=2.0)
     ap.add_argument("--sr", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--strata", default="generator",
+                    help="metadata column to balance across (empty = plain random)")
+    ap.add_argument("--order", choices=("random", "first"), default="random",
+                    help="random = seeded stratified sample; first = first n of val")
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--out", default=str(ROOT / "outputs/eval_stylizer"))
+    ap.add_argument("--out", default=str(ROOT / "outputs/eval_stylizer_v4"))
     args = ap.parse_args()
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     dev = args.device
+    ckpt_sd = torch.load(args.ckpt, map_location="cpu")
+    ref_size = int(args.ref_size) or int(ckpt_sd["model_cfg"].get("ref_size", 64))
+    print(f"reference size from checkpoint: {ref_size}")
     ds = MmapPairDataset(
         ref_mmap=str(Path(args.pairs) / "ref.uint8.mmap"),
         target_mmap=str(Path(args.pairs) / "target.uint8.mmap"),
         metadata=str(Path(args.pairs) / "metadata.parquet"),
         splits=str(Path(args.pairs) / "splits.json"), split="val",
-        ref_size=args.ref_size, target_size=32, rgba_mode="premultiplied")
-    idxs = list(range(min(args.n, len(ds))))
+        ref_size=ref_size, target_size=32, rgba_mode="premultiplied")
+    if args.order == "first":
+        idxs = list(range(min(args.n, len(ds))))
+    else:
+        strata = args.strata or None
+        idxs = sample_balanced_indices(ds.df, ds.index, args.n,
+                                       seed=args.seed, strata_col=strata)
+        if strata and strata in ds.df.columns:
+            from collections import Counter
+            counts = Counter(str(ds.df[strata].iloc[ds.index[i]]) for i in idxs)
+            print(f"stratified sample n={len(idxs)} over '{strata}': {dict(counts)}")
+        else:
+            print(f"random sample n={len(idxs)}")
     prompts = [str(ds.df["prompt"].iloc[ds.index[i]]) for i in idxs]
     enc = get_text_encoder("/home/iflab/models/Qwen3-8B", device="cuda:1",
                            dtype="bfloat16", max_length=512, layers=[9, 18, 27])
@@ -120,8 +148,6 @@ def main():
 
     model, mcfg, man = load(args.ckpt, dev)
     premult = bool(man.get("rgba_mode") == "premultiplied")
-    ref_size = int(args.ref_size) or int(getattr(mcfg, "ref_size", 64))
-    print(f"reference size from checkpoint: {ref_size}")
     base, base_cfg, _ = load(args.base, dev)
 
     rows, agg = [], {"base": [], "styl": [], "shuf": []}
@@ -138,7 +164,11 @@ def main():
                                       null_h[k:k + 1], null_m[k:k + 1], steps=args.steps)
                 x_styl = sample_with_ref(model, z, h[k:k + 1].to(dev), hmask[k:k + 1].to(dev),
                                          ref, steps=args.steps, st=args.st, sr=args.sr)
-                ref_shuf = ds[int(ds.index[(k + 7) % len(ds.index)])][2]["reference"][None].to(dev)
+                # control: same text + a different val reference (position, not global id)
+                shuf_pos = (k + 7) % len(ds)
+                while shuf_pos == k and len(ds) > 1:
+                    shuf_pos = (shuf_pos + 1) % len(ds)
+                ref_shuf = ds[shuf_pos][2]["reference"][None].to(dev)
                 x_shuf = sample_with_ref(model, z, h[k:k + 1].to(dev), hmask[k:k + 1].to(dev),
                                          ref_shuf, steps=args.steps, st=args.st, sr=args.sr)
         base_arr = to_uint8(x_base[0], premultiplied=premult).permute(1, 2, 0).cpu().numpy()

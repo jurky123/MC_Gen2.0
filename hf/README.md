@@ -39,7 +39,9 @@ are intentionally not included.
 | Path | Rows | Shape / dtype | Split (train/val/test) | Purpose |
 |---|---|---|---|---|
 | `data/build/stage1_32_rgba` | 3,185,719 | `uint8[32,32,4]` RGBA | 3,004,255 / 91,566 / 89,898 | **Stage 1** pixel + all-MC pretraining |
-| `data/build/mc_text2image32` | 1,034,057 | `uint8[32,32,3]` RGB | 941,104 / 43,184 / 49,769 | Minecraft domain (text+image), Stage 1/2 |
+| `data/build/mc_text2image32` | 1,034,057 | `uint8[32,32,3]` RGB | 941,104 / 43,184 / 49,769 | Minecraft domain (text+image), legacy RGB build |
+| `data/build/mc_text2image32_wl` | 1,034,057 | `uint8[32,32,4]` RGBA | 941,104 / 43,184 / 49,769 | **Stage 1/2 main MC set**: RGBA + weak/fine prompts + annotations + frozen-text embeddings |
+| `data/build/stage2_32` | 1,044,875 | `uint8[32,32,4]` RGBA | 949,165 / 44,417 / 51,293 | **Stage 2** unified texture set (MC-wl + Modrinth) + pooled text embeddings |
 | `data/processed/minecraft_16x_finetune32` | 1,498 | `32x32` tiles | manifest only | **Stage 3** curated fine-tune seeds |
 | `data/processed/modrinth32` | 10,818 | `32x32` tiles | manifest only | Modrinth MC textures (deduped) |
 
@@ -57,16 +59,43 @@ are intentionally not included.
 Minecraft rows are fully opaque; pixel-art rows keep their original alpha
 channel (transparent backgrounds are **not** composited onto black).
 
+### Extra files in `mc_text2image32_wl` / `stage2_32`
+
+| file | meaning |
+|---|---|
+| `text_embeddings.f32.mmap` | frozen Qwen3-8B text features, FP32; `mc_text2image32_wl` = 4 prompt views × 4096-d per row, `stage2_32` = 1 pooled 4096-d token per row. **Note:** embeddings are currently *not* in this repo (too large to push); recompute with `scripts/precompute_text.py` in the project repo. |
+| `prompt_views.*` / `grounded_prompts.*` / `filename_prompts.parquet` | prompt variants (K-view, label-grounded rewrite, filename weak prompts) |
+| `coarse_annotations.shard*.jsonl` | local-27B VLM captions (coarse profile) |
+| `annotation_manifest.jsonl` / `high_quality_manifest.jsonl` | annotation lineage (`stage2_32`) |
+| `replay_splits*.json` | anti-forgetting replay index sets |
+
+`metadata.parquet` columns for the unified datasets (`stage1_32_rgba`,
+`stage2_32`):
+
+| column | meaning |
+|---|---|
+| `index` | row index into the mmap |
+| `source_set` | originating processed set (see table above) |
+| `weak_prompt` | short text caption (MC filename/label or generic pixel-art) |
+| `source_metadata` | JSON blob with original filename, project, license, etc. |
+
+`mc_text2image32_wl/metadata.parquet` additionally carries Modrinth provenance
+(`file_name`, `project_id`, `mod_slug`, `author`, `license`, `version_url`,
+`type`, `tileable`) and the `text` / `weak_prompt` caption pair.
+
+The processed `*32` tile folders instead contain `tiles/<sha>.png` plus a
+`manifest.jsonl` and `summary.json`.
+
 ## File format
 
-Each mmap dataset directory contains:
+Each mmap dataset directory contains at least:
 
 ```text
 <name>/
 ├── images.uint8.mmap   # raw little-endian uint8, C-order (N, H, W, C)
 ├── metadata.parquet    # one row per image + provenance/prompt fields
 ├── splits.json         # {"train": [idx...], "val": [...], "test": [...]}
-└── build_summary.json  # counts and source breakdown
+└── build_summary.json  # counts and source breakdown (where present)
 ```
 
 `images.uint8.mmap` is a headerless NumPy array. Load it with:
@@ -80,18 +109,6 @@ imgs = np.memmap(
 )
 ```
 
-`metadata.parquet` columns for the unified datasets:
-
-| column | meaning |
-|---|---|
-| `index` | row index into the mmap |
-| `source_set` | originating processed set (see table above) |
-| `weak_prompt` | short text caption (MC filename/label or generic pixel-art) |
-| `source_metadata` | JSON blob with original filename, project, license, etc. |
-
-The processed `*32` tile folders instead contain `tiles/<sha>.png` plus a
-`manifest.jsonl` and `summary.json`.
-
 ## Download
 
 ```bash
@@ -103,7 +120,7 @@ hf download Risposta/MC_Gen \
   --include "data/build/stage1_32_rgba/*" \
   --local-dir .
 
-# everything (all four datasets)
+# everything (all datasets)
 hf download Risposta/MC_Gen --repo-type dataset --local-dir .
 ```
 

@@ -1,6 +1,47 @@
 # MC-Gen2.0 项目进度
 
-> 更新日期：2026-09-19；当前方案：v2.3（数据处理与条件编码定型）
+> **当前状态（2026-11-03）**：全量文生图 best 第 2,000 步已获使用者初步认可，作为优先试用候选；第 6,000 步不采用。训练按时停止，评估已完成，未更换服务默认模型。见[全量实验整理](docs/TEXT_FULLSCALE_20261103.md)。下方各阶段结论按时间保留。
+
+> 2026-11-02 长训完成：保守分支到 22,000 步，最佳验证点为 8,000 步（loss 0.14679，终点 0.15180）。227 固定案例与 157 拟合探针三方对照完成：末点新训练图拟合略好，整体泛化未改善，暂不替换原恢复候选。见[长训结果](docs/TEXT_EXTENSION_20261102.md)。
+
+> 2026-11-02 续训调整：高学习率重启分支在 17,303 步因持续退化主动停止；500 步 padding 对照两组均退化，不能归因于单一因素。主训练回到原 6,000 步模型及 Adam，使用原末尾 5e-6 学习率和完整 padding，继续至 22,000 步。当前目录 `outputs/text_expansion22k_conservative_20261102`。
+
+> 2026-11-02 长程续训：按用户要求从 6,000 步接续到 22,000 步，保留 Adam 状态和全局抽样序列；固定数据及异常描述回退规则。已启用实测约 1.23 倍局部吞吐的尾部 padding 优化，训练进行中。见[续训记录](docs/TEXT_EXTENSION_20261102.md)。
+
+> 2026-11-02 扩容进行中：按用户要求保留文件名/详细描述双监督，已构建 2,055 训练/216 验证图，全部候选图与固定 64 张文本样本完成复查；12 条异常详细描述回退到文件名监督。双文本名称选择实测 50.06%，6,000 步训练与 227 案例评估完成：原详细提示 MAE 40.235→34.526，新短名称验证 MAE 31.234→34.722，未获整体泛化提升；不替换原恢复版。补充 471 张拟合诊断显示新训练样本仍未学充分、旧样本拟合退化；每图曝光仅为之前的 28%，需要固定数据的长程对照后再归因。见[扩容方案与运行记录](docs/TEXT_EXPANSION_20261102.md)。
+
+> 2026-11-02 文生图恢复更新：逐图筛查后构建 378 训练/43 验证的完整物品核心集，完成 4,000 步训练和固定前后对照。宽范围短名称前景 IoU 0.579→0.656，无前景输出 2/64→0/64；长描述有退化。另验证固定 50% 参数合并，未取得整体更优结果。保留完整恢复权重作为短提示试用候选，详见[恢复报告](docs/TEXT_RECOVERY_CORE_20261102.md)。
+
+> 2026-11-02 最新：完成 1,152 张扩标、三组各 600 步的描述监督对照，以及 16 张干净物品的长/短提示隔离实验。混合监督将固定 64 条名称提示的前景 IoU 从全长描述组 0.522 恢复至 0.580（旧组 0.568）；泛化仍不稳定，未替换默认模型。详见[学习能力诊断](docs/TEXT_LEARNABILITY_20261102.md)。下方条目保留此前阶段记录。
+
+> 2026-11-02 标注更新：Qwen3-VL-8B-Instruct 已下载并通过四个权重分片的官方 SHA256 校验；256 张视觉标注及名称合并处理结束，32 条自动候选、224 条带隔离标记，全部仍待复核。抽查发现误识别与格式限制问题，未投入训练。产物：`outputs/semantic_caption_batch256_20261102/comparison.html`；细节见 [描述审计](docs/TEXT_CAPTION_AUDIT.md)。
+
+> 2026-11-02 当前状态：项目已重启为 v3。当前先做纯文生图，暂停高清参考图实验；正在修复文本监督。已建立 256 张描述审查集、查看 24 张并保留修订/隔离记录，尚未完成全量重标或开始新训练。详见 [描述审计](docs/TEXT_CAPTION_AUDIT.md) 与 [当前 README](README.md)。下方 2026-10-09 的暂停状态和训练方案为历史记录。
+
+> 更新日期：2026-10-09；**项目状态：已暂停**（代码/权重/数据按原样保留，不再迭代）。
+> 最终方案：v2.4（MC→HD 双生成器 + Stylizer v4 训练 + 全套评测已跑完）。
+
+## 项目状态（2026-10-09 暂停）
+
+- 训练与评测全部停止；GPU 空闲。最终保留的关键产物：
+  - `checkpoints/stage_3_frozen_v2/`（t2i base）、`checkpoints/stylizer_v4/`（HD→MC）、
+    `checkpoints/stylizer_v3/`（对照）、`checkpoints/stage_2_grounded_k1/`、`checkpoints/stage_1/`
+  - `pairs/stylizer_v4/`（34,170 对）、`pairs/ood_benchmark/`（48 条 OOD 基准）
+  - 评测：`outputs/eval_stylizer_v4_n64/`（公平 n=64 Gate-1）、`outputs/eval_stylizer_v3_on_v4_n64/`
+- 数据集已同步到 Hugging Face **`Risposta/MC_Gen`**（`scripts/upload_dataset_hf.py`，
+  新增 `mc_text2image32_wl`（21 个文件）与 `stage2_32`（6 个文件），卡片 `hf/README.md` 已更新；
+  注意 `text_embeddings.f32.mmap`（~80 GB）因太大未上传，可用 `scripts/precompute_text.py` 重算；
+  上传曾遇到 Xet `xorb not found` 错误（升级 `hf_xet` 到 1.7.0 + 清缓存后解决），
+  另修复了 `ignore_patterns` 中 `**/x` 匹配不到根目录文件的坑）。
+- 磁盘清理（2026-10-09，约 **104 GB**）：
+  - `/tmp/opencode` 临时大目录（phaseD_*、dump、synth、e2e、pkg_online 等）：62 GB → ~0.1 GB
+  - 废弃 checkpoint（debug/smoke/buggy/被 v2 或 v3/v4 取代的 stage_2 变体与 stylizer_phase1*）：
+    51 GB → **14 GB**，保留 `stage_1`、`stage_1_clean`、`stage_2_grounded_k1`、
+    `stage_3_frozen_v2`、`stylizer_v3`、`stylizer_v4`
+  - 过时 pairs（tierd_*、anch_*、stylizer v1/v2、mchd_v1）：19 GB → **14 GB**，
+    保留 `stylizer_v3/v4`、`ood_benchmark` 与全部 `mchd_*` 源锚点目录
+  - `data/build/smoke*` 测试集已删；`data`（108 GB 数据集本体）未动
+- 若重启项目：从 `PROGRESS.md` 末尾「已完成结论」与 `docs/MC2HD_RECIPE.md` 恢复上下文；单测 `python -m pytest tests/ -q`。
 
 ## 新训练课程
 
@@ -239,11 +280,169 @@
   - 开环（自拟 prompt → FLUX 文生图 → Stylizer）：v2 的失败项全部修好——药水瓶（含软木塞）、青铜齿轮（带齿与中心孔）、骑士头盔（面甲缝）、黑曜石灯笼（暗框青焰）、金冠、匕首均可辨认；block/纹理类一贯稳定。
   - 产物：`checkpoints/stylizer_v3/best.pt`、`pairs/stylizer_v3/`、`outputs/eval_stylizer_v3/`、评审图 `scripts/review_stylizer.py`。
 
-## 下一步
+## MC→HD 第二生成器：Qwen-Image-2.1（2026-09-22）
 
-- **Tier-D 数据引擎**：用 Stylizer v3 批量产 `(prompt, MC)` 合成对（prompt 用 17k 四桶列表 / 继续扩量），过滤后按 **Gate-4** 做 t2i 混合消融（合成占比 0/10/20%），验证长尾概念与复合属性增益、Stage-2/3 回归不退化。
-- 与确定性 MC 化（`HD→16→32→量化16色→饱和×2.2`）做对照，确认 Stylizer 的增量价值。
-- 补齐评测：`eval_img2img.py` 与 512 条 Img2Img Golden Set（人工审核已同意）。
-- 用 Stylizer/HD 参考**辅助校正标注**（缓解精标漏细节）。
-- 可选：Stylizer Phase 2（解冻末端 blocks / LoRA、reference-strength 曲线、文本编辑）。
+目的：同一份 MC 出两张不同风格的 HD，作为 Stylizer 的**参考多样性**来源（多生成器混训是设计，不是权宜）。
 
+- 配方（逐项 A/B 定型，见 `docs/MC2HD_RECIPE.md` v2）：
+  `NEAREST 384 → gauss28 → Qwen-Image-2.1 edit 30 步，true_cfg=1.0（无 negative）`；
+  prompt 只用原始 REALISM（P1），**不加任何"平滑"从句**（每加一句都变糊）。
+- 与 FLUX 路径的两个关键差异：
+  1. **Qwen 是步进蒸馏**：日志写 "Guidance scale 4.0 is ignored" 但 `true_cfg>1` 仍跑第二遍 forward（6.6s vs 3.4s）；
+     `true_cfg<=1` 时 negative prompt 被整体忽略。CFG 关闭后体素伪影自己消失了 → 不需要 neg prompt。
+  2. **FLUX 必须要 neg prompt**（meanabs 17–68），否则退回体素化；两条路径的 CFG 策略不同。
+- `torch.compile`：必须用 `mode="max-autotune-no-cudagraphs"`——`reduce-overhead` 会撞 KV cache 的
+  CUDA graph（"accessing tensor output of CUDAGraphs that has been overwritten"）。一次性编译成本 757s；
+  收益 cfg4 6.60→5.71 s、cfg1 3.43→2.90 s/img。
+- **8-bit 量化已排除**：A100 无 FP8 tensor core；`torchao int8_weight_only` 实测**更慢**
+  （bf16 3.30s vs int8 4.41s，显存 35.7→28.6GB，画质 meanabs 2.07）；`Rin247` 的 FP8/INT8 权重
+  是真量化（HTTP Range 读到 I8/F8_E4M3 + weight_scale）但布局非标准、diffusers 不认。torchao 已卸载。
+- 产物：`pairs/mchd_qwen21_{a,b}`（满幅 6,019）+ `pairs/mchd_qwen21_cut_{a,b}`（抠图 11,066）。
+- **许可证**：Qwen-Image-2.1 = Research License（非商用）→ 只进研究/评测数据；生产链路仍只用 FLUX（Apache-2.0）。
+
+## 抠图（64.8%）的三个连锁 bug（2026-09-22）
+
+17,085 对里 11,066（64.8%）是透明抠图（床侧板、矿粒、物品精灵），踩了三个坑：
+
+1. **裁切 bug**：抠图合成白底后，两个模型都"填满画面"，输出变成被裁切的放大 3D 物件。
+   → FLUX 侧加 item 前缀 `"single item centered on a plain white background, "` 修复
+   （`pairs/mchd_cutout_flux_{a,b}`，11,066 张）；代价是图案型抠图（`olive_leaves` 等）被过度简化。
+2. **紫色背景假象（非幻觉）**：RGBA 在 alpha=0 处的 RGB 是任意值（实测 (141,57,180)），
+   用 `convert("RGB")` 裸看会显示成紫色。**显示/合成必须 alpha-over-white**。
+   仓库多处旧脚本仍是裸 `convert("RGB")`，看图时要注意。
+3. **硬 alpha 方块感（最后一个 bug）**：alpha-aware ref（抠图传 RGBA）原先只模糊 RGB、
+   **保留原 NEAREST alpha 硬边** → 模型把锯齿轮廓当像素画复刻，输出仍有方块感。
+   → 改为对**整个 RGBA 做 gauss28**（`gauss()` 对 alpha 用 σ/2）后方块感消失
+   （`preprocess_ref` 已改，抠图行用 `--cutouts-only` 重生成 → `pairs/mchd_qwen21_cut_{a,b}`）。
+   冒烟验证：绿镐/苔藓/床/绿宝石四行软边输出全部干净、布局正确、无放大。
+
+## HD→MC Stylizer v4（2026-09-22，参考通路定型）
+
+在 v3 之上改了三处，全部有单测（`tests/test_ref_conditioning.py`，15 例）：
+
+1. **learned null-reference token**（`ref_null`）：参考通路**永远在跑**——要么吃真参考 token，
+   要么吃这个可学的 null token。训练时 dropout / text-only 行、CFG 时"无参考"三者**共用同一条代码路径**。
+   修复了 v3 的不一致：以前用**零图**当 null，但 `encoder(0)` 因 GroupNorm 仿射 ≠ 0（v3 实测两边恰好
+   都是 0 是因为 conv/GN 全无 bias，训练后 `ref_null` 学到非零就分叉了）。
+   → 数据侧显式发 `ref_present` 标志（`MmapPairDataset`=True / `zero_reference` 行=False），
+   `compute_loss` 与 `val_validate` 都透传给模型。
+2. **`ref_cross_positions` 可配置**：每个 ref cross-attn 块可以插在 `single_stream_blocks` 的任意位置
+   （-1 = 尾部，即 v3 布局）。修了补丁里的**双跑 bug**：原先尾部循环用 `cross_at.get(k, -1)`
+   按**块号**查**位置表**，导致中段块在尾部又跑一次。现在每个块严格跑一次（有测试覆盖 default/mid/重复位置/越界/无参考）。
+3. **多生成器混训数据**（`scripts/build_stylizer_pairs_v4.py`）：
+   同一 MC target 配**两个** HD ref（FLUX + Qwen），共享同一 prompt、同一真实 MC target；
+   按 `project_id` 分组切分保证同 row 的两个变体永远同侧（有防泄漏断言）。
+   满幅 6,019×2 + 抠图 11,066×2 = **34,170 对**，ref 128，target 真实 MC。
+   两个生成器的 HD 统一**白底合成**后进 ref（Qwen 是 RGBA、FLUX 是 RGB，不统一会让模型把
+   "透明背景"当成 Qwen 的风格特征）。
+
+配置：`configs/{model,data,train}/stylizer_v4.yaml`；`freeze_backbone` 的可训练前缀已加 `ref_null`；
+评测脚本（`eval_stylizer` / `probe` / `review` / `eval_ood`）都带 legacy 加载回退（v3 权重无 `ref_null`）。
+
+**队列**：`scripts/run_stylizer_queue_v4.sh` 已跑完（`QUEUE-V4-DONE`，2026-09-22 18:42）。
+
+### Stylizer v4 结果（2026-09-22）
+
+- 训练：4,000 步，冻结主干（trainable 81.07M / frozen 55.08M），init `stage_3_frozen_v2`；
+  best val flow_mse **0.09226**（step 4000）；产物 `checkpoints/stylizer_v4/{best,latest}.pt`。
+- 数据：`pairs/stylizer_v4/` **34,170** 对（flux 17,085 + qwen 17,085），train 32,586 / val 1,584，
+  project 分组无泄漏；QC 图 `/tmp/opencode/qc_v4/qc_v4.png`；单测 **42 passed**。
+- **Gate-1**（`outputs/eval_stylizer_v4/`，val 前 16，first-n 有偏）：
+
+  | ckpt × pairs | base t2i | Stylizer (dual CFG) | shuffled ref |
+  |---|---|---|---|
+  | v3 × v3 pairs（旧 FLUX-only val） | 60.3 / 0.665 | **32.0 / 0.902** | 55.8 / 0.704 |
+  | v3 × **v4 pairs**（first-16） | 60.3 / 0.665 | 39.4 / 0.846 | 58.3 / 0.709 |
+  | v4 × **v4 pairs**（first-16） | 60.0 / 0.664 | **38.4 / 0.884** | 53.0 / 0.805 |
+
+- **Gate-1 公平随机采样 n=64**（2026-10-09 补测；seed 0，按 `generator` 分层 flux/qwen 各 32，
+  同 seed 同样本；`eval_stylizer.py --order random`）：
+
+  | ckpt × pairs | base t2i | Stylizer (dual CFG) | shuffled ref |
+  |---|---|---|---|
+  | v4 × v4 val（random64） | 49.0 / 0.589 | **23.5 / 0.872** | 61.1 / 0.699 |
+  | v3 × v4 val（random64） | 49.0 / 0.589 | **23.1 / 0.882** | 47.2 / 0.727 |
+
+  同一大样本下 **v3 与 v4 基本打平**（v3 略好 0.4 L2 / 0.01 IoU；shuffled 退化也更小）。
+  first-16 上 v4 的优势来自有偏采样，不构成结论；`edge_rel` 均值被近零 target 边缘 outlier 拉爆，
+  以 L2 / IoU 为准。产物：`outputs/eval_stylizer_v4_n64/`、`outputs/eval_stylizer_v3_on_v4_n64/`。
+  采样函数 `src/data/pair_dataset.py::sample_balanced_indices` + 单测 `tests/test_sample_balanced.py`。
+- **OOD**（`/tmp/opencode/ood_eval/report.json`）：g1_flux_edit:none L2 31.1 / IoU 0.938 /
+  layout_corr 0.705；g3_qwen_edit:none L2 20.3 / IoU 1.000 / corr 0.807（Qwen 参考更贴 MC 分布）；
+  scale90 最伤（L2 38.4 / corr 0.420）；unpaired t2i corr 0.668。
+  MC 统计：生成图 colors ~450 / blocks2 ~0.18 vs 真实 MC colors 15 / blocks2 1.0（仍偏"照片感"）。
+- **robustness**（`/tmp/opencode/probe/probe.json`，sr=1.0）：none 37.4/0.868 →
+  crop5 38.2、shift4 40.5、scale95 41.9、blur 38.5、jpeg 37.8、color 37.0；
+  平移/缩放有损但不崩，像素对齐捷径不主导。
+- **review**：`/tmp/opencode/styl_v4_review/review.png`（n=16 first）与
+  `/tmp/opencode/styl_v4_review_n32/review.png`（n=32 分层随机，按 generator 标注 HD 来源）。
+- 已知 bug（当场修）：
+  1. `eval_stylizer.py` 曾在加载 ckpt **之前**用 `--ref-size` 默认 0 建 `MmapPairDataset`
+     → mmap 尺寸校验失败；已改为先读 `model_cfg.ref_size`（`probe` 同步修）。
+  2. shuffled-ref 对照曾写成 `ds[global_index]`（把全局行号当 split 内位置），随机采样下
+     `IndexError`；已改为 `ds[position]`（2026-10-09 修）。
+
+## 已完成结论（暂停时快照）
+
+- Stage 1/2/3 训练链路与评测链路完整可用；Stage-3 frozen（`stage_3_frozen_v2`）为最佳 t2i base。
+- HD→MC：双生成器（FLUX.2-klein-4B + Qwen-Image-2.1）锚点 + Stylizer v4 数据管线跑通；
+  参考条件化（adapter + cross-attn 零门控、`ref_null`/`ref_present`）单测覆盖。
+- Stylizer 在公平 n=64 上与 v3 打平（23.5 vs 23.1 L2）；shuffled-ref 退化明显，参考确实起作用；
+  生成纹理仍偏「照片感」（颜色数/块统计未收敛到真实 MC 分布）——若重启，优先补 Tier-D 合成数据消融。
+- 数据与代码发布：HF `Risposta/MC_Gen`（数据）、GitHub `jurky123/MC_Gen2.0`（代码）。
+
+## 暂停时不做 / 后续可选项（仅备忘）
+
+- Tier-D 数据引擎：用 Stylizer v4 批量产 `(prompt, MC)` 合成对，按 Gate-4 做 t2i 混合消融（0/10/20%）。
+- 与确定性 MC 化（`HD→16→32→量化16色→饱和×2.2`）做对照。
+- 补齐 `eval_img2img.py` 与 512 条 Img2Img Golden Set。
+- Stylizer Phase 2（解冻末端 blocks / LoRA、reference-strength 曲线、`ref_cross_positions` 消融）。
+
+
+### Full-scale item cleaning (2026-11-02, v2)
+
+User requested cleaning before deciding full-scale data composition; no new training started. Built `outputs/fullscale_clean_v2_20261102/catalog` from canonical native16_v3 item train/val targets. Retained 324,921 train / 41,869 val targets; quarantined 38,473 train / 3,047 val. Original pixels/catalog/split assignments and test set remain unchanged. v1 is superseded, retained for audit.
+
+Cleaning is reversible rule-based triage with 402 distinct stratified train images plus 48 supplemental train review positions, not exhaustive visual certification. Quarantine includes assembly/render fragments, conflicting asset types, opaque assets awaiting inspection, placeholders and empty filename supervision. GUI suffix alone, generic blade names outside assembly context, abstract names, numeric variants and unusual complete designs are retained. Explicit visual overrides restore complete inventory objects, including square opaque items. Unreviewed quarantine can contain valid items; retained pool can still contain unrecognized fragments.
+
+Filename-only train targets: 322,884; filename + retained eligible weak description: 2,037. With uniform target sampling and 50/50 caption choice within dual-caption images, descriptive prompts are only 0.3135% of text-conditioned draws. No all-corpus annotation, source balancing or shape constraints added. Category counts remain filename-token heuristics, with 77.49% outside the original 15 keywords, not a claim that this group is invalid or fully categorized.
+
+Artifacts: `scripts/clean_fullscale_items.py`, v2 `report.json`, `decisions.jsonl`, `review/decisions.json`, `verification.json`. Initial review sheets and supplemental contact sheet remain under `outputs/fullscale_clean_v1_20261102/review/`. Full target pixel hashes checked during inventory creation; final catalog verification checks source/manifest hashes, all alias lineage split isolation, caption counts and nonempty normalized text. Next decision: inspect composition and determine full-scale training budget/conditioning cache, not reuse 22k-step small-data schedule unchanged.
+
+### Full-scale 10k-caption queue launched (2026-11-03)
+
+User authorized expanding automatic descriptions to 10,000 training images and then full training, requested detached queuing without continued monitoring. Queue root: `outputs/fullscale_text10k_20261103`; PID 3658536, CUDA 0. Parent and annotation child confirmed alive after launch. Follow `queue_status.json`, `queue.log`, annotation `status.json`, and later `training/metrics.jsonl`. No ongoing assistant monitor was scheduled.
+
+Queue order: retain existing 2,037 eligible training descriptions; annotate a deterministic uniform train-only reserve until enough additional eligible descriptions exist; freeze exactly 10,000 dual-caption train targets while preserving all 324,921 cleaned train images and 41,869 cleaned val images; precompute exact frozen Qwen3-8B BF16 128-position features to disk; initialize model from accepted conservative step-8000 best_flow with fresh Adam; train 200,000 updates, microbatch 32 x accumulation 2, LR 1e-5 cosine to 1e-6, warmup 1,000, fixed flow validation 1,024 examples/checkpoint every 2,000 steps; evaluate final and best checkpoints against initialization on prior 227 plus 128 fixed cleaned-validation probes. Bad descriptions stay filename-only. No locked test or HD reference route, no production promotion.
+
+Effective text exposure is approximately 35.45 draws/image. At 10k descriptions and target-uniform 50/50 eligible captions, descriptive draws are approximately 1.54% of text samples. Exact disk cache avoids repeatedly encoding the full corpus; full sequence padding retained. Cache stage estimates ETA and checks disk reserve, roundtrips and encoder identity. Queue stops on stage failure and writes resume command; annotation, cache cursor and checkpoint resume supported. Catalog and code/protocol hashes recorded. Planning estimate 1-3 days total under shared GPU load, not measured completion guarantee.
+
+Validation before launch: 20 tests passed (disk text, training extension, caption supervision and target-balanced sampling); real Qwen cached tensors bitwise matched, isolated two-step GPU training/validation/checkpoint smoke passed (14.72 GiB peak reserved). Scripts: `scripts/queue_fullscale_text.py`; annotator now accepts --root. Trainer accepts an optional encoder, default behavior preserved. CPU/disk cache implementation: `src/mcgen/disk_text.py`.
+
+### Speed estimate requested (2026-11-03 shortly after midnight)
+
+Queue remains in annotation. Observed stable annotation throughput about 4,808 images/hour (mean 11.979 s/16 images); first 352/352 generated descriptions passed current automatic eligibility rules, not human certification. First queued batch target is 8,633 new annotations (24,000 is reserve size, not required workload). Isolated 40-update GPU probe with real model, microbatch32 x accumulation2 and exact disk feature reader measured mean 0.45317 s/update after 6 warmup updates, projecting 25.18h for 200k updates before full-corpus random I/O, validation/checkpoint and evaluation overhead. Probe used a tiny warm sample/cache while annotation concurrently ran, so it is not full-scale end-to-end throughput. Text precompute not yet measured. Current total remaining planning estimate 30-40h, subject to shared GPU/storage load. Evidence: `outputs/fullscale_text10k_20261103/speed_estimate.json` and `speed_probe_20261103/report.json`. Queue configuration/weights untouched; no continuing monitor requested or scheduled.
+
+### User-scheduled stop: 2026-11-03 09:00 Asia/Shanghai
+
+User explicitly clarified November 3, not November 4. Detached timer PID 3983728 is armed for `2026-11-03T09:00:00+08:00`, targeting only recorded queue session PGID 3658536 with PID start-time verification. Schedule/status: `outputs/fullscale_text10k_20261103/stop_schedule.json`, `stop_timer_status.json`. At deadline it writes STOP_REQUESTED.json and sends SIGTERM to the queue session, preventing subsequent stages. Future training child now handles SIGTERM by completing the current update and atomically saving latest.pt with optimizer state and stopped.json. Text-feature stage preserves durable cursor. If a process fails to exit within 120 seconds, only remaining members of this queue session are forcibly stopped. No automatic restart.
+
+Training stop/resume exactness and isolated absolute-time timer tested; 6 relevant tests passed. Code changes are separately recorded in stop_support_code_identity.json because initial queue code_identity.json predates user-requested stop support. Timer state confirmed armed; no assistant monitoring required. A future resume should inspect the stop result and remove/archive the stop-request marker only with user authorization to resume.
+
+### Stopped full-scale run evaluated (2026-11-03 afternoon)
+
+User requested evaluation only. Training remained stopped at step 6,000; best_flow was step 2,000. Created immutable checkpoint/metrics snapshots under `outputs/fullscale_eval6000_20261103` and evaluated prior accepted conservative best8000, new best2000 and latest6000 on all 355 fixed prompt/seed cases (227 previous probes + 128 cleaned validation filenames), using 32-step Heun / CFG2. Baseline generation was pixel-identical across the two GPUs. Added paired project bootstrap reports for both new checkpoints. No locked test, no training restart or production promotion.
+
+Fair same-1024 validation flow baseline measured without optimizer updates: prior .22663059, best2000 .21904988, step4000 .22266709, latest6000 .25206644. Prior / best2000 / latest6000 generation: core43 MAE29.8217 /29.7503 /33.6914; fullscale128 MAE45.0061 /44.3939 /43.8442 but alpha IoU .6386 /.5856 /.5530. Fullscale MAE project-bootstrap intervals cross zero for both candidates; alpha-IoU degradation intervals exclude zero. Novel36 requested-color pixel fraction .9427 /.9372 /.8758. No completely blank outputs among355 in any arm.
+
+Visually inspected all36 novel/basic cases and first24 fullscale probes in three-way contact sheets, plus target images for8 overlapping fullscale cases. Latest6000 exhibits clearly broken/faded silhouettes and detached pixels. Best2000 mostly preserves old basic-category ability but does not demonstrate robust broad generalization improvement. Keep prior accepted model as default; retain best2000 for diagnosis, do not promote latest6000. Only3% of the planned200k updates ran (~1.064 expected text draws/target), which does not by itself explain the regression.
+
+Artifacts: comparison.html (all355), comparison.json, visual_review.json, parent_flow.json, evaluation*/paired_analysis.json. Helper: scripts/compare_fullscale_stopped.py. Slow initial Qwen cold reads were observed; evaluation completed successfully.
+
+### Repository preparation and current candidate (2026-11-03)
+
+User reviewed full-scale best2000 and judged it basically usable and noticeably better than the preceding model. It is now the preferred experimental text-to-image candidate; this supersedes the earlier recommendation to keep the prior candidate first. Quantitative limitations and latest6000 regression remain documented. No training restart, service-default change or weight publication occurred.
+
+Prepared v3 core/legacy compatibility changes, data/caption/queue/evaluation tools, configs, tests and historical experiment documentation for Git. README now reflects current scope and preferred candidate. Added `docs/TEXT_FULLSCALE_20261103.md`, portable reference config, aggregate evaluation JSON and three generated-only comparison sheets. Training data, raw annotations, caches, checkpoints and full runtime outputs remain ignored. Remote README additions from cb86865 were preserved in the historical README before merging remote history.
+
+Pre-push verification: all138 tests passed in47.28s with two dependency deprecation warnings; offline wheel build passed. Sandboxed TestClient event-loop startup stalled, while the same isolated test and complete suite passed outside the sandbox. Staged files checked for model/data artifacts, size, whitespace and common credential patterns; new documentation links validated.

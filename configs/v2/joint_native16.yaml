@@ -1,0 +1,32 @@
+# Both text-only and reference-conditioned generation, using the restored
+# official Qwen3-8B snapshot. Existing 32px checkpoints are legacy.
+schema_version: 2
+task: joint
+asset_type: all
+model:
+  size: 16
+  width: 256
+  depth: 8
+  heads: 8
+  ref_size: 128
+  text_dim: 12288
+  text_length: 128
+text:
+  backend: hf
+  model: /home/iflab/models/Qwen3-8B
+  revision: b968826d9c46dd6066d109eabc6255188de91218
+  layers: [9, 18, 27]
+  chat_template: true
+  dtype: bfloat16
+train:
+  steps: 10000
+  batch_size: 16
+  accumulation: 4
+  warmup: 200
+  lr: 0.0002
+  precision: bfloat16
+  text_dropout: 0.15
+  ref_dropout: 0.30
+  seam_weight: 0.0
+  eval_every: 250
+  val_samples: 128

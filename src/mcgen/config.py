@@ -1,0 +1,185 @@
+"""Strict configuration. No silently ignored options or machine-specific defaults."""
+from dataclasses import asdict, dataclass, field, fields
+from pathlib import Path
+import hashlib
+import json
+import math
+import re
+
+import yaml
+
+
+def strict(cls, value):
+    if not isinstance(value, dict):
+        raise ValueError(f"{cls.__name__} must be a mapping")
+    unknown = set(value) - {f.name for f in fields(cls)}
+    if unknown:
+        raise ValueError(f"unknown {cls.__name__} options: {sorted(unknown)}")
+    return cls(**value)
+
+
+def fingerprint(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+@dataclass
+class ModelConfig:
+    size: int = 16
+    width: int = 256
+    depth: int = 8
+    heads: int = 8
+    ref_size: int = 128
+    text_dim: int = 768
+    text_length: int = 128
+    conditioning: str = "separate"
+    byte_tokens: bool = True
+    text_normalization: str = "none"
+    reference_encoding: str = "spatial"
+
+    def __post_init__(self):
+        if self.reference_encoding not in ("spatial", "dual"):
+            raise ValueError("reference_encoding must be spatial or dual")
+        if self.reference_encoding == "dual" and self.conditioning != "separate":
+            raise ValueError("dual reference encoding requires separate conditioning")
+        if any(type(v) is not int or v < 1 for v in (self.size, self.width, self.depth, self.heads,
+                                                    self.ref_size, self.text_dim, self.text_length)):
+            raise ValueError("model dimensions must be positive integers")
+        if self.text_normalization not in ("none", "layernorm"):
+            raise ValueError("text_normalization must be none or layernorm")
+        if self.conditioning not in ("shared", "separate"):
+            raise ValueError("conditioning must be shared or separate")
+        if type(self.byte_tokens) is not bool:
+            raise ValueError("byte_tokens must be boolean")
+        if self.size not in (8, 16, 32, 64):
+            raise ValueError("size must be 8 (tests), 16, 32 or 64")
+        if self.width < 16 or self.width % self.heads or self.width % 4:
+            raise ValueError("width must be divisible by heads and 4")
+        if min(self.depth, self.heads, self.text_dim, self.text_length) < 1:
+            raise ValueError("model dimensions must be positive")
+        if self.ref_size < self.size or self.ref_size % self.size:
+            raise ValueError("reference size must be a multiple of target size")
+
+
+@dataclass
+class TextConfig:
+    backend: str = "hf"
+    model: str = ""
+    revision: str = ""
+    layers: list = field(default_factory=lambda: [-1])
+    instruction: str = ""
+    chat_template: bool = False
+    dtype: str = "float32"
+    cache_mb: int = 256
+
+    def __post_init__(self):
+        if type(self.cache_mb) is not int or self.cache_mb < 0:
+            raise ValueError("cache_mb must be a nonnegative integer")
+        if self.backend not in ("hf", "byte"):
+            raise ValueError("text backend must be hf or byte (smoke baseline only)")
+        if self.backend == "hf" and not self.model:
+            raise ValueError("hf text backend requires an explicit local model path or pinned model ID")
+        if self.backend == "hf" and not Path(self.model).is_dir() and not re.fullmatch(r"[0-9a-f]{40}", self.revision):
+            raise ValueError("remote text models require a 40-character commit SHA revision (not main/tag)")
+        if not self.layers or any(not isinstance(x, int) for x in self.layers):
+            raise ValueError("layers must be a nonempty integer list")
+        if self.dtype not in ("float32", "bfloat16", "float16"):
+            raise ValueError("invalid text dtype")
+
+
+@dataclass
+class TrainConfig:
+    trainable: str = "all"
+    steps: int = 10000
+    batch_size: int = 16
+    accumulation: int = 1
+    lr: float = 0.0002
+    weight_decay: float = 0.01
+    warmup: int = 100
+    schedule_start: int = 0
+    seed: int = 0
+    text_dropout: float = 0.15
+    ref_dropout: float = 0.3
+    paired_fraction: float = 0.7
+    seam_weight: float = 0.0
+    precision: str = "float32"
+    eval_every: int = 250
+    val_samples: int = 128
+    grad_clip: float = 1.0
+    task_mix: dict | None = None
+
+    def __post_init__(self):
+        if self.trainable not in ("all", "attributes"):
+            raise ValueError("trainable must be all or attributes")
+        if self.task_mix is not None:
+            if set(self.task_mix) != {"text", "reference", "joint", "unconditional"}:
+                raise ValueError("task_mix requires text/reference/joint/unconditional probabilities")
+            if any(not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0 for v in self.task_mix.values()) or abs(sum(self.task_mix.values()) - 1) > 1e-8:
+                raise ValueError("task_mix probabilities must be nonnegative and sum to 1")
+        if any(type(v) is not int for v in (self.steps, self.batch_size, self.accumulation, self.warmup,
+                                          self.seed, self.eval_every, self.val_samples, self.schedule_start)):
+            raise ValueError("training counts/seed must be integers")
+        if not all(math.isfinite(x) for x in (self.lr, self.weight_decay, self.text_dropout, self.ref_dropout,
+                                              self.seam_weight, self.paired_fraction, self.grad_clip)):
+            raise ValueError("training settings must be finite")
+        if min(self.steps, self.batch_size, self.accumulation, self.eval_every, self.val_samples) < 1:
+            raise ValueError("training counts must be positive")
+        if not 0 <= self.schedule_start < self.steps:
+            raise ValueError("schedule_start must be in [0, steps)")
+        if not 0 <= self.warmup < self.steps - self.schedule_start:
+            raise ValueError("warmup must be in [0, steps - schedule_start)")
+        if self.lr <= 0 or self.grad_clip <= 0 or self.seam_weight < 0 or self.weight_decay < 0:
+            raise ValueError("invalid optimizer/loss settings")
+        if not all(0 <= x <= 1 for x in (self.text_dropout, self.ref_dropout, self.paired_fraction)):
+            raise ValueError("dropout must be in [0,1]")
+        if self.precision not in ("float32", "bfloat16"):
+            raise ValueError("training precision must be float32 or bfloat16")
+
+
+@dataclass
+class Experiment:
+    model: ModelConfig
+    text: TextConfig
+    train: TrainConfig
+    task: str = "joint"
+    asset_type: str = "all"
+    schema_version: int = 3
+    style: str = ""
+    alpha_mode: str = "continuous"
+    target_scope: str = "all"
+
+    def __post_init__(self):
+        if self.train.trainable == "attributes" and self.model.reference_encoding != "dual":
+            raise ValueError("attribute adapter training requires dual reference encoding")
+        if self.task not in ("joint", "text", "reference"):
+            raise ValueError("task must be joint, text or reference")
+        if self.asset_type not in ("all", "item", "tile"):
+            raise ValueError("asset_type must be all, item or tile")
+        if self.schema_version not in (2, 3):
+            raise ValueError("unsupported experiment schema")
+        if self.target_scope not in ("all", "paired"):
+            raise ValueError("target_scope must be all or paired")
+        if self.alpha_mode not in ("opaque", "binary", "continuous"):
+            raise ValueError("alpha_mode must be opaque, binary or continuous")
+        if not isinstance(self.style, str):
+            raise ValueError("style must be a string")
+        if self.text.backend == "byte" and not self.model.byte_tokens:
+            raise ValueError("byte backend requires byte_tokens")
+        mix = self.train.task_mix
+        if mix and self.task == "text" and (mix["reference"] or mix["joint"]):
+            raise ValueError("text experiment cannot sample reference tasks")
+        if mix and self.task == "reference" and (mix["text"] or mix["joint"]):
+            raise ValueError("reference experiment permits reference/unconditional only")
+
+    @classmethod
+    def from_dict(cls, value):
+        value = dict(value)
+        for name, kind in (("model", ModelConfig), ("text", TextConfig), ("train", TrainConfig)):
+            value[name] = strict(kind, value.get(name, {}))
+        return strict(cls, value)
+
+    @classmethod
+    def load(cls, path):
+        return cls.from_dict(yaml.safe_load(Path(path).read_text()))
+
+    def to_dict(self):
+        return asdict(self)

@@ -70,6 +70,11 @@ class MmapPairDataset(torch.utils.data.Dataset):
         prompt = str(self.df[self.prompt_col].iloc[idx])
         aux = {
             "reference": ref,
+            # v4: explicit presence flag. The model substitutes its learned
+            # null-reference token wherever this is False, so training-time
+            # dropout / text-only rows and CFG-time "no reference" share one
+            # code path (a zero image is NOT a null: encoder(0) != 0).
+            "ref_present": torch.tensor(not self.zero_reference, dtype=torch.bool),
             "tileable": torch.tensor(bool(self.df["tileable"].iloc[idx]), dtype=torch.bool),
             # kept identical to MmapImageTextDataset aux keys so that batches
             # mixing pair and text-only sources collate cleanly
@@ -78,3 +83,40 @@ class MmapPairDataset(torch.utils.data.Dataset):
                 dtype=torch.long),
         }
         return x, prompt, aux
+
+
+def sample_balanced_indices(df, index, n, seed=0, strata_col="generator"):
+    """Stratified random sample of positions into `index` (len <= n).
+
+    Balances across `df[strata_col]` when present (e.g. generator flux/qwen);
+    falls back to a plain random sample otherwise. Returns positions in
+    `index` (0..len(index)-1), shuffled.
+    """
+    n = min(int(n), len(index))
+    rng = np.random.RandomState(seed)
+    if n <= 0:
+        return []
+    if strata_col is None or strata_col not in getattr(df, "columns", ()):
+        return rng.permutation(len(index))[:n].tolist()
+    groups = {}
+    for pos, idx in enumerate(index):
+        key = str(df[strata_col].iloc[idx])
+        groups.setdefault(key, []).append(pos)
+    if len(groups) <= 1:
+        return rng.permutation(len(index))[:n].tolist()
+    keys = sorted(groups)
+    total = len(index)
+    alloc = {k: (n * len(groups[k])) // total for k in keys}
+    short = n - sum(alloc.values())
+    for k in sorted(keys, key=lambda x: len(groups[x]), reverse=True):
+        while short > 0 and alloc[k] < len(groups[k]):
+            alloc[k] += 1
+            short -= 1
+        if short <= 0:
+            break
+    chosen = []
+    for k in keys:
+        pool = list(rng.permutation(groups[k]))
+        chosen.extend(pool[: alloc[k]])
+    rng.shuffle(chosen)
+    return chosen[:n]

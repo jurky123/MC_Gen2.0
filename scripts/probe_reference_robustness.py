@@ -35,7 +35,16 @@ from model.mc_flow_dit import MCFlowDiT  # noqa: E402
 def load(ckpt, dev):
     sd = torch.load(ckpt, map_location="cpu")
     m = MCFlowDiT(ModelConfig.from_dict(sd["model_cfg"]))
-    m.load_state_dict(sd["model"], strict=True)
+    try:
+        m.load_state_dict(sd["model"], strict=True)
+    except RuntimeError:
+        missing = [k for k in m.state_dict() if k not in sd["model"]]
+        if any("ref_null" in k for k in missing):
+            m.load_state_dict(sd["model"], strict=False)
+            m.legacy_null = True
+            print(f"legacy checkpoint: {missing} left at init")
+        else:
+            raise
     m.to(dev).eval()
     return m, sd.get("conditioning", {})
 
@@ -90,7 +99,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", default=str(ROOT / "checkpoints/stylizer_v3/best.pt"))
     ap.add_argument("--pairs", default=str(ROOT / "pairs/stylizer_v3"))
-    ap.add_argument("--ref-size", type=int, default=128)
+    ap.add_argument("--ref-size", type=int, default=0,
+                    help="0 = take from the checkpoint model_cfg")
     ap.add_argument("--n", type=int, default=16)
     ap.add_argument("--steps", type=int, default=20)
     ap.add_argument("--st", type=float, default=2.5)
@@ -107,9 +117,12 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     dev = args.device
     pairs = Path(args.pairs)
+    ckpt_sd = torch.load(args.ckpt, map_location="cpu")
+    ref_size = int(args.ref_size) or int(ckpt_sd["model_cfg"].get("ref_size", 64))
+    print(f"reference size from checkpoint: {ref_size}")
     ds = MmapPairDataset(str(pairs / "ref.uint8.mmap"), str(pairs / "target.uint8.mmap"),
                          str(pairs / "metadata.parquet"), str(pairs / "splits.json"),
-                         split="val", ref_size=args.ref_size, target_size=32,
+                         split="val", ref_size=ref_size, target_size=32,
                          rgba_mode="premultiplied")
     idxs = list(range(min(args.n, len(ds))))
     prompts = [str(ds.df["prompt"].iloc[ds.index[i]]) for i in idxs]
@@ -129,7 +142,7 @@ def main():
             ref0 = aux["reference"][None].to(dev)
             tgt = unpremultiply_rgba_np(to_uint8(x_t, premultiplied=pm).permute(1, 2, 0).cpu().numpy())
             for kind in kinds:
-                ref = perturb(ref0, kind, args.ref_size)
+                ref = perturb(ref0, kind, ref_size)
                 for sr in srs:
                     g = torch.Generator(device=dev).manual_seed(args.seed + k)
                     z = torch.randn(1, 4, 32, 32, generator=g, device=dev)

@@ -23,6 +23,7 @@ data/build/
 data/staging/
 data/processed/
 data/interim/
+data/catalogs/
 *.mmap
 *.parquet
 *.npy

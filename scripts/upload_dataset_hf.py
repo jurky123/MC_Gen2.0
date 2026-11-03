@@ -5,6 +5,7 @@ Usage:
     python scripts/upload_dataset_hf.py --dry-run      # preview sizes
     python scripts/upload_dataset_hf.py                # push everything
     python scripts/upload_dataset_hf.py --only stage1_32_rgba
+    python scripts/upload_dataset_hf.py --skip-embeddings   # skip *.f32.mmap (fast core push)
 
 Large uploads use the Xet backend (``pip install "huggingface_hub[hf_xet]"``),
 which is chunked and resumable: re-running only uploads what changed.
@@ -20,11 +21,24 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = [
     ("data/build/stage1_32_rgba", "data/build/stage1_32_rgba"),
     ("data/build/mc_text2image32", "data/build/mc_text2image32"),
+    ("data/build/mc_text2image32_wl", "data/build/mc_text2image32_wl"),
+    ("data/build/stage2_32", "data/build/stage2_32"),
     ("data/processed/minecraft_16x_finetune32", "data/processed/minecraft_16x_finetune32"),
     ("data/processed/modrinth32", "data/processed/modrinth32"),
 ]
 
-IGNORE_PATTERNS = ["**/__pycache__/**", "**/*.tmp", "**/*.log", "**/.cache/**", "**/.DS_Store"]
+IGNORE_PATTERNS = [
+    "__pycache__", "**/__pycache__/**",
+    "*.tmp", "**/*.tmp",
+    "*.log", "**/*.log",
+    "**/.cache/**", "**/.DS_Store",
+    "*.bak", "*.bak_*", "*.bak.*",
+    "**/*.bak", "**/*.bak_*", "**/*.bak.*",
+    "*.part", "*.incomplete",
+    "**/*.part", "**/*.incomplete",
+]
+
+EMBED_IGNORE = ["text_embeddings.f32.mmap", "**/text_embeddings.f32.mmap"]
 
 
 def dir_size(path: Path) -> int:
@@ -49,13 +63,18 @@ def main():
     ap.add_argument("--no-card", action="store_true", help="skip uploading hf/README.md")
     ap.add_argument("--only", action="append", default=[],
                     help="upload only the named artifact(s); repeatable")
+    ap.add_argument("--skip-embeddings", action="store_true",
+                    help="ignore text_embeddings.f32.mmap (much faster; embeddings are recomputable)")
     args = ap.parse_args()
 
     selected = [a for a in ARTIFACTS if not args.only or Path(a[0]).name in args.only]
     if not selected:
         raise SystemExit(f"no artifacts selected; choose from {[Path(a[0]).name for a in ARTIFACTS]}")
 
+    ignores = IGNORE_PATTERNS + (EMBED_IGNORE if args.skip_embeddings else [])
     print(f"repo: {args.repo_id} ({args.repo_type}, revision={args.revision})")
+    if args.skip_embeddings:
+        print("  mode: --skip-embeddings (text_embeddings.f32.mmap not uploaded)")
     total = 0
     for local_rel, dest in selected:
         local = ROOT / local_rel
@@ -89,7 +108,7 @@ def main():
         print(f"uploading {local_rel} -> {dest} ...", flush=True)
         api.upload_folder(folder_path=str(local), path_in_repo=dest,
                           repo_id=args.repo_id, repo_type=args.repo_type,
-                          revision=args.revision, ignore_patterns=IGNORE_PATTERNS,
+                          revision=args.revision, ignore_patterns=ignores,
                           commit_message=f"Upload {dest}")
         print(f"done {dest}", flush=True)
 

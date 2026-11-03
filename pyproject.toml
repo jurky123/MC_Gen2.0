@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mc-texture-gen"
-version = "0.1.0"
+version = "0.3.0"
 description = "Pixel-space Rectified Flow Transformer for Minecraft / voxel-game low-res texture generation"
 requires-python = ">=3.11"
 dependencies = [
@@ -16,18 +16,24 @@ dependencies = [
     "einops",
     "transformers",
     "pyarrow",
+    "pandas",
     "safetensors",
     "fastapi",
     "uvicorn",
 ]
 
 [project.scripts]
-mc-train = "train.train:main"
-mc-sample = "infer.sample:main"
-mc-api = "infer.api:main"
+mcgen = "mcgen.cli:main"
+mcgen-legacy-train = "train.train:main"
+mcgen-legacy-sample = "infer.sample:main"
+mcgen-legacy-api = "infer.api:main"
 
 [tool.setuptools]
-packages = ["data", "model", "train", "infer", "eval"]
+packages = ["mcgen", "data", "model", "train", "infer", "eval"]
+py-modules = ["config"]
+
+[project.optional-dependencies]
+test = ["pytest", "httpx"]
 
 [tool.setuptools.package-dir]
 "" = "src"

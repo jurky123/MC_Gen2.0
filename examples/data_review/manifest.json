@@ -1,0 +1,9 @@
+{
+  "purpose": "Small deterministic processing review set; not a representative dataset or benchmark",
+  "sampling": "Handpicked one verified MIT-licensed project;7 kept bucket textures,4 rejected parts,3 known missed parts. Filename-only synthetic cases are separately marked.",
+  "assets": 14,
+  "source_archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+  "policy_version": "resource_text_v1",
+  "policy_sha256": "b906d981e236a21a21b4e9d7492daea0723d62660f5d8cd9c14c1a3b668a2484",
+  "current_training": "Scratch generator, file-information supervision only. Images/labels here reflect the current v1 rules, including disclosed omissions."
+}

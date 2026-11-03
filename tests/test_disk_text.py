@@ -36,3 +36,17 @@ def test_fail_closed_identity_index_and_completion(tmp_path):
     meta['complete']=True;atomic_json(tmp_path/'metadata.json',meta)
     atomic_json(tmp_path/'prompts.json',['changed','two',''])
     with pytest.raises(ValueError,match='index'):DiskTextEncoder(tmp_path)
+
+def test_merged_cache_routes_exact_features_in_original_order(tmp_path):
+    from mcgen.disk_text import MergedDiskTextEncoder
+    a=tmp_path/'a';b=tmp_path/'b';a.mkdir();b.mkdir()
+    av,am=make_cache(a);bv,bm=make_cache(b)
+    atomic_json(b/'prompts.json',['three','four',''])
+    meta=json.loads((b/'metadata.json').read_text());meta['prompts_sha256']=file_hash(b/'prompts.json');atomic_json(b/'metadata.json',meta)
+    encoder=MergedDiskTextEncoder([DiskTextEncoder(a),DiskTextEncoder(b)])
+    x,m=encoder.encode(['four','one','','three','four'],'cpu')
+    assert torch.equal(x,torch.stack([bv[1],av[0],av[2],bv[0],bv[1]]))
+    assert torch.equal(m,torch.stack([bm[1],am[0],am[2],bm[0],bm[1]]))
+    with pytest.raises(KeyError):encoder.encode(['not cached'],'cpu')
+    meta['text_identity']='other';atomic_json(b/'metadata.json',meta)
+    with pytest.raises(ValueError,match='Incompatible'):MergedDiskTextEncoder([DiskTextEncoder(a),DiskTextEncoder(b)])

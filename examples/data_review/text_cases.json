@@ -1,0 +1,255 @@
+[
+  {
+    "filename": "sun_gem.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "sun gem",
+      "candidate_text": "sun gem",
+      "original_tokens": [
+        "sun",
+        "gem"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "soul_crystal.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "soul crystal",
+      "candidate_text": "soul crystal",
+      "original_tokens": [
+        "soul",
+        "crystal"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "glowing_sapphire_hoe.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "glowing sapphire hoe",
+      "candidate_text": "glowing sapphire hoe",
+      "original_tokens": [
+        "glowing",
+        "sapphire",
+        "hoe"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "rabbage.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "rabbage",
+      "candidate_text": "rabbage",
+      "original_tokens": [
+        "rabbage"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "TitanBase_sword.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "titan base sword",
+      "candidate_text": "titan base sword",
+      "original_tokens": [
+        "titan",
+        "base",
+        "sword"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "jade_gem.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "jade gem",
+      "candidate_text": "jade gem",
+      "original_tokens": [
+        "jade",
+        "gem"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "cactus_bow_pulling_0.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "cactus bow",
+      "candidate_text": "cactus bow",
+      "original_tokens": [
+        "cactus",
+        "bow",
+        "pulling",
+        "0"
+      ],
+      "removed_technical_tokens": [
+        "pulling",
+        "0"
+      ],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "oak_bow_pulling_2_spruce_arrow.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "oak bow spruce arrow",
+      "candidate_text": "oak bow spruce arrow",
+      "original_tokens": [
+        "oak",
+        "bow",
+        "pulling",
+        "2",
+        "spruce",
+        "arrow"
+      ],
+      "removed_technical_tokens": [
+        "pulling",
+        "2"
+      ],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "gem4.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "gem 4",
+      "candidate_text": "gem 4",
+      "original_tokens": [
+        "gem",
+        "4"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "item.sun_gem.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "sun gem",
+      "candidate_text": "sun gem",
+      "original_tokens": [
+        "item",
+        "sun",
+        "gem"
+      ],
+      "removed_technical_tokens": [
+        "item"
+      ],
+      "resource_paths": [],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "body_tinkers_thinking_burnt_ashes.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": null,
+      "candidate_text": "body tinkers thinking burnt ashes",
+      "original_tokens": [
+        "body",
+        "tinkers",
+        "thinking",
+        "burnt",
+        "ashes"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [
+        "modular_tool_component"
+      ],
+      "decision": "quarantine",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  },
+  {
+    "filename": "sensing_spell_book_e.png",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": null,
+      "candidate_text": "sensing spell book e",
+      "original_tokens": [
+        "sensing",
+        "spell",
+        "book",
+        "e"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [],
+      "reasons": [
+        "possible_emissive_normal_or_specular_map"
+      ],
+      "decision": "quarantine",
+      "provenance": "resource_file_information_only",
+      "path_verified": false
+    },
+    "kind": "synthetic_filename_only_no_corresponding_image"
+  }
+]

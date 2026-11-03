@@ -1,0 +1,657 @@
+[
+  {
+    "id": "review-00",
+    "image": "images/00_molten_diamond_bucket.png",
+    "image_sha256": "a3731badd71336774ae073ea9d9f3de8867f726a06d89d031e5b6afd681ccf17",
+    "target_hash": "12fc556c938dac1a5a6f40a5620110f0dd5d57567089ddef6162a983c299a95a",
+    "file_information": {
+      "filename": "molten_diamond_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_diamond_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten diamond bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten diamond bucket",
+      "candidate_text": "molten diamond bucket",
+      "original_tokens": [
+        "molten",
+        "diamond",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_diamond_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-01",
+    "image": "images/01_molten_brass_bucket.png",
+    "image_sha256": "bd45cecc3417243d08a855abcc116509938f76a855873ee8e8ea4a74272c165d",
+    "target_hash": "131b49e68f936eba6caa1bf3c300e66b25fa9f1fe0ae7b189be610eac1a26039",
+    "file_information": {
+      "filename": "molten_brass_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_brass_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten brass bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten brass bucket",
+      "candidate_text": "molten brass bucket",
+      "original_tokens": [
+        "molten",
+        "brass",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_brass_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-02",
+    "image": "images/02_molten_copper_bucket.png",
+    "image_sha256": "830aeda0bb15e8fed262a5dc944a2d50ddb388e2cd159b06a14be2d789f4d07a",
+    "target_hash": "00333e79db2608f6143d4bf56af7432002a9d3245d698ae77c548a057a18e747",
+    "file_information": {
+      "filename": "molten_copper_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_copper_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten copper bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten copper bucket",
+      "candidate_text": "molten copper bucket",
+      "original_tokens": [
+        "molten",
+        "copper",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_copper_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-03",
+    "image": "images/03_molten_gold_bucket.png",
+    "image_sha256": "0d9850d6c12ca8c8a9b33386cde9b632ef107ff1f81e96992e8678e029ac0cc0",
+    "target_hash": "b0f93a3dcfff8f9531d92788369b6cc285fd715c72df3f0cc5f67ace6ac2561c",
+    "file_information": {
+      "filename": "molten_gold_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_gold_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten gold bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten gold bucket",
+      "candidate_text": "molten gold bucket",
+      "original_tokens": [
+        "molten",
+        "gold",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_gold_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-04",
+    "image": "images/04_molten_iron_bucket.png",
+    "image_sha256": "79033a702eb2cd5e28e30b6e50761a8a92ab1375fea09061af9ffd61fa7ca6de",
+    "target_hash": "a61a3f44dc035cc42450084ba0b7299e961207aeba48fb516c099653ebc95197",
+    "file_information": {
+      "filename": "molten_iron_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_iron_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten iron bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten iron bucket",
+      "candidate_text": "molten iron bucket",
+      "original_tokens": [
+        "molten",
+        "iron",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_iron_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-05",
+    "image": "images/05_molten_netherite_bucket.png",
+    "image_sha256": "b0a7c30f5499ada265e428e8d398355cdedefde5415917d5d8b332f8c783fcfc",
+    "target_hash": "c6a854ee6d2dac97f9b8dcbb14ad50dd8f5f875baf6bc1b4279908b66e673ded",
+    "file_information": {
+      "filename": "molten_netherite_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_netherite_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten netherite bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten netherite bucket",
+      "candidate_text": "molten netherite bucket",
+      "original_tokens": [
+        "molten",
+        "netherite",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_netherite_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-06",
+    "image": "images/06_molten_zinc_bucket.png",
+    "image_sha256": "cea310c94b8c1b93973fa23828a97dc26e285dd93d98d8fc26efecdd2ec4b088",
+    "target_hash": "8cac7ac094892351377fa06ec68fbdcb9f51a945077a061fce5a9d1ad41ef57b",
+    "file_information": {
+      "filename": "molten_zinc_bucket.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/molten_zinc_bucket.png"
+      ],
+      "visible_pixels": 146
+    },
+    "old_filename_text": "molten zinc bucket",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "molten zinc bucket",
+      "candidate_text": "molten zinc bucket",
+      "original_tokens": [
+        "molten",
+        "zinc",
+        "bucket"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/molten_zinc_bucket.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-07",
+    "image": "images/07_spruce_sword_blade.png",
+    "image_sha256": "52dbbe7dc2ad459f9aed3bb2c9c9f61846b02cd090ad2faf1a44f66338ecbf8c",
+    "target_hash": "1c8329586ce1c207b70aae8a1f9e7c3c03647498e32f1e9e3f04151a284d5465",
+    "file_information": {
+      "filename": "spruce_sword_blade.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/spruce_sword_blade.png"
+      ],
+      "visible_pixels": 46
+    },
+    "old_filename_text": "spruce sword blade",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": null,
+      "candidate_text": "spruce sword blade",
+      "original_tokens": [
+        "spruce",
+        "sword",
+        "blade"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/spruce_sword_blade.png"
+      ],
+      "reasons": [
+        "tool_component"
+      ],
+      "decision": "quarantine",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-08",
+    "image": "images/08_acacia_sword_guard.png",
+    "image_sha256": "74e718ba93915730a6a8a6f525dfe8e2fe33a2f727b5c7869e850882fcf4f4d6",
+    "target_hash": "47fd190b5b07a70580931c50204a69a535703b5138125f31f5631863c7373602",
+    "file_information": {
+      "filename": "acacia_sword_guard.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/acacia_sword_guard.png"
+      ],
+      "visible_pixels": 26
+    },
+    "old_filename_text": "acacia sword guard",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": null,
+      "candidate_text": "acacia sword guard",
+      "original_tokens": [
+        "acacia",
+        "sword",
+        "guard"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/acacia_sword_guard.png"
+      ],
+      "reasons": [
+        "assembly_component"
+      ],
+      "decision": "quarantine",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-09",
+    "image": "images/09_diamond_tool_grip.png",
+    "image_sha256": "f2ecf39efecccb8ea51158724a7322904b55bd353e5e2657866a098eb657a4a4",
+    "target_hash": "a38e6271902fa929120d4af2a4a6237122e7d4df65643a997caed346457db6ed",
+    "file_information": {
+      "filename": "diamond_tool_grip.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/diamond_tool_grip.png"
+      ],
+      "visible_pixels": 7
+    },
+    "old_filename_text": "diamond tool grip",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": null,
+      "candidate_text": "diamond tool grip",
+      "original_tokens": [
+        "diamond",
+        "tool",
+        "grip"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/diamond_tool_grip.png"
+      ],
+      "reasons": [
+        "assembly_component",
+        "insufficient_visible_content"
+      ],
+      "decision": "quarantine",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-10",
+    "image": "images/10_bamboo_sword_blade.png",
+    "image_sha256": "f6696cc1e27b6e9067f726e2d86a08953d62c1a984148c073cff5b0e954cd4f0",
+    "target_hash": "a5a716373a0131337a63ebd8bb01018c7f341c638e266791f05de143eb282778",
+    "file_information": {
+      "filename": "bamboo_sword_blade.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/bamboo_sword_blade.png"
+      ],
+      "visible_pixels": 46
+    },
+    "old_filename_text": "bamboo sword blade",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": null,
+      "candidate_text": "bamboo sword blade",
+      "original_tokens": [
+        "bamboo",
+        "sword",
+        "blade"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/bamboo_sword_blade.png"
+      ],
+      "reasons": [
+        "tool_component"
+      ],
+      "decision": "quarantine",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "review_example",
+      "note": "用于查看当前保留/隔离行为；不是人工精标。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-11",
+    "image": "images/11_acacia_sword_pommel.png",
+    "image_sha256": "6a5f0984f6b19e1724cc18bf027b506f8fe7bfd274296e853fe19472a4a689f7",
+    "target_hash": "95b9ad2b6dcf52ae535eb446bf9d6a2211c5975373c69746e2034bee1edfeca8",
+    "file_information": {
+      "filename": "acacia_sword_pommel.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/acacia_sword_pommel.png"
+      ],
+      "visible_pixels": 9
+    },
+    "old_filename_text": "acacia sword pommel",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "acacia sword pommel",
+      "candidate_text": "acacia sword pommel",
+      "original_tokens": [
+        "acacia",
+        "sword",
+        "pommel"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/acacia_sword_pommel.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "known_component_omission",
+      "note": "剑柄尾部组件仍被保留：当前规则漏收。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-12",
+    "image": "images/12_black_wool_tool_wrap.png",
+    "image_sha256": "c76ce469ccf3527a3dd27a973a595035ea74030014cc3e2ea86843281c61e9a8",
+    "target_hash": "d995204034343c555a9b7de40444892e998c8bf5895d3ec2f69980feaff9a862",
+    "file_information": {
+      "filename": "black_wool_tool_wrap.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/black_wool_tool_wrap.png"
+      ],
+      "visible_pixels": 11
+    },
+    "old_filename_text": "black wool tool wrap",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "black wool tool wrap",
+      "candidate_text": "black wool tool wrap",
+      "original_tokens": [
+        "black",
+        "wool",
+        "tool",
+        "wrap"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/black_wool_tool_wrap.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "known_component_omission",
+      "note": "工具缠绕层仍被保留：当前规则漏收。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  },
+  {
+    "id": "review-13",
+    "image": "images/13_blue_wool_tool_wrap.png",
+    "image_sha256": "173f4c016d51c56a6b6e9a30f1121996744005b02f45a4c1267d14cb395718eb",
+    "target_hash": "da8d16be19b968067c0fab69a64fa6d7e3ccc93482ebc2a934b39068277fb8bc",
+    "file_information": {
+      "filename": "blue_wool_tool_wrap.png",
+      "mod": "create-modular-tools",
+      "paths": [
+        "assets/create_modular_tools/textures/item/blue_wool_tool_wrap.png"
+      ],
+      "visible_pixels": 11
+    },
+    "old_filename_text": "blue wool tool wrap",
+    "recorded_result": {
+      "policy_version": "resource_text_v1",
+      "text": "blue wool tool wrap",
+      "candidate_text": "blue wool tool wrap",
+      "original_tokens": [
+        "blue",
+        "wool",
+        "tool",
+        "wrap"
+      ],
+      "removed_technical_tokens": [],
+      "resource_paths": [
+        "assets/create_modular_tools/textures/item/blue_wool_tool_wrap.png"
+      ],
+      "reasons": [],
+      "decision": "keep",
+      "provenance": "resource_file_information_only",
+      "path_verified": true
+    },
+    "human_review": {
+      "status": "known_component_omission",
+      "note": "工具缠绕层仍被保留：当前规则漏收。"
+    },
+    "source": {
+      "project_id": "11TIcYqC",
+      "mod": "create-modular-tools",
+      "author": "ZLT",
+      "version_url": "https://cdn.modrinth.com/data/11TIcYqC/versions/MSVNRQbL/create_modular_tools-1.0.0%2B1.20.1.jar",
+      "archive_sha256": "9d8e8a275645805a75473e6cf42152b76e124186573d324d56aa00314318c451",
+      "license": "MIT",
+      "license_file": "LICENSE.assets.txt"
+    }
+  }
+]

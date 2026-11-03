@@ -41,3 +41,40 @@ class DiskTextEncoder:
 
     def cache_stats(self):
         return {'hits': self.hits, 'misses': 0, 'entries': len(self.index), 'backend': 'exact_bfloat16_mmap'}
+
+
+class MergedDiskTextEncoder:
+    """Route exact prompt keys across compatible immutable caches, preserving batch order."""
+
+    def __init__(self, encoders):
+        if not encoders:
+            raise ValueError('At least one text cache is required')
+        self.encoders = encoders
+        self.identity = encoders[0].identity
+        self.index = {}
+        shape = encoders[0].features.shape[1:]
+        for i, encoder in enumerate(encoders):
+            if encoder.identity != self.identity or encoder.features.shape[1:] != shape:
+                raise ValueError('Incompatible frozen text caches')
+            for prompt in encoder.index:
+                self.index.setdefault(prompt, i)
+
+    def encode(self, prompts, output_device):
+        if not prompts:
+            raise ValueError('empty prompt batch')
+        groups = {}
+        for position, prompt in enumerate(prompts):
+            groups.setdefault(self.index[prompt], []).append((position, prompt))
+        features = masks = None
+        for cache, batch in groups.items():
+            x, m = self.encoders[cache].encode([p for _, p in batch], output_device)
+            if features is None:
+                features = x.new_empty((len(prompts), *x.shape[1:]))
+                masks = m.new_empty((len(prompts), *m.shape[1:]))
+            positions = [i for i, _ in batch]
+            features[positions], masks[positions] = x, m
+        return features, masks
+
+    def cache_stats(self):
+        return {'backend': 'merged_exact_bfloat16', 'entries': len(self.index),
+                'hits': sum(e.hits for e in self.encoders), 'misses': 0}

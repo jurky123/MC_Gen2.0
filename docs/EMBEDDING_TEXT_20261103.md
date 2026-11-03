@@ -19,6 +19,6 @@
 
 ![训练期间保存的生成时间线](images/checkpoints/history.png)
 
-本机推理文件：`checkpoints/mcgen-step4128.pt`。导出仅移除优化器，全部生成器张量、配置和文本身份与原始 4128 快照逐项一致。权重目前未随 Git 发布。[选版和哈希](models/step4128.json) · [验证记录](models/validation_metrics.json) · [训练损失变化](models/training_loss_transition.json)。
+本机推理文件：`checkpoints/mcgen-step4128.pt`。导出仅移除优化器，全部生成器张量、配置和文本身份与原始 4128 快照逐项一致。权重已通过 [Hugging Face](https://huggingface.co/datasets/Risposta/MC_Gen/tree/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128) 发布，Git 仓库不存放大权重。[选版和哈希](models/step4128.json) · [验证记录](models/validation_metrics.json) · [训练损失变化](models/training_loss_transition.json)。
 
-README 展示采用另一组固定 16 条精选提示和统一种子，全部复制自该检查点的原始输出。[展示清单](images/showcase/manifest.json)可核验图片哈希；绘图仅放大和排版。
+README 当前展示采用训练集、测试集各 16 条真实标签和统一种子，全部来自该检查点的原始输出。[展示清单](images/showcase/manifest.json)可核验图片哈希；绘图仅放大和排版。

@@ -53,16 +53,23 @@ flowchart LR
 
 ## 开始使用
 
+[下载 4128 步检查点](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt)（约 326 MB） · [SHA256 校验](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt)
+
+Qwen3-VL-Embedding-8B 需单独下载，脚本会固定版本并校验文件。
+
 ```bash
 pip install -e '.[embedding]'
 
-# 需先准备对应的生成器检查点与 Qwen Embedding 模型
-mcgen sample --checkpoint checkpoints/mcgen-step4128.pt \
+curl -L --fail --create-dirs -o checkpoints/mcgen-step4128.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt
+python scripts/download_qwen_vl_embedding.py --out ../Qwen3-VL-Embedding-8B
+MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
+  --checkpoint checkpoints/mcgen-step4128.pt \
   --prompt 'diamond sword' --seed 20261112 \
   --steps 32 --text-scale 2 --out outputs/diamond_sword.png --device cuda:0
 ```
 
-当前仓库提供代码、展示原图与少量可核验的数据样本；生成器权重、完整数据和特征缓存不随 Git 提交发布。
+生成器权重通过 Hugging Face 分发；Git 仓库提供代码、展示原图与少量可核验的数据样本，完整数据和特征缓存不随 Git 提交。
 
 [安装、模型准备与更多命令](docs/USAGE.md) · [文本与数据处理](docs/RESOURCE_TEXT_20261103.md) · [项目进度](PROGRESS.md)
 

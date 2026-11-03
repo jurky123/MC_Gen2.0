@@ -1,0 +1,18 @@
+{
+  "repo_id": "Risposta/MC_Gen",
+  "repo_type": "dataset",
+  "revision": "85470a51e497cea27ceb4d639e822440f660ac1a",
+  "commit_url": "https://huggingface.co/datasets/Risposta/MC_Gen/commit/85470a51e497cea27ceb4d639e822440f660ac1a",
+  "folder_url": "https://huggingface.co/datasets/Risposta/MC_Gen/tree/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128",
+  "download_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt",
+  "sha256_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt",
+  "file_size": 326227394,
+  "sha256": "790d2264f5e3559894dba726b99a7109185dca2f40d009065bccdea4c29369e2",
+  "verified": true,
+  "uploaded_files": [
+    "mcgen-step4128.pt",
+    "SHA256SUMS.txt",
+    "metadata.json",
+    "README.md"
+  ]
+}

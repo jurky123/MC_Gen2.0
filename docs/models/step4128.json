@@ -22,5 +22,14 @@
   "dataset_sources": [
     "https://huggingface.co/datasets/OVAWARE/16xModdedMinecraft",
     "https://huggingface.co/datasets/Risposta/MC_Gen"
-  ]
+  ],
+  "artifact_type": "inference_only",
+  "contains_optimizer": false,
+  "hosting": "Hugging Face dataset repository",
+  "hf_repo_id": "Risposta/MC_Gen",
+  "hf_repo_type": "dataset",
+  "hf_revision": "85470a51e497cea27ceb4d639e822440f660ac1a",
+  "hf_path": "checkpoints/step4128/mcgen-step4128.pt",
+  "download_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt",
+  "sha256_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt"
 }

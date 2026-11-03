@@ -5,6 +5,7 @@ No visual labels, intermediate-layer concatenation, or image input is used here.
 """
 from dataclasses import asdict
 import json
+import os
 from pathlib import Path
 import unicodedata
 import torch
@@ -30,7 +31,10 @@ class QwenVLEmbedding:
  def __init__(self,cfg,model_cfg,device):
   from transformers import AutoModel,AutoProcessor
   if model_cfg.text_dim!=4096 or model_cfg.text_length!=1:raise ValueError('Qwen VL embedding requires one4096-dimensional token')
-  root=Path(cfg.model);manifest=json.load(open(root/'verified_download.json'))
+  # Only relocate physical files. The saved configuration and all verified
+  # artifact hashes still determine identity, preserving checkpoint/cache checks.
+  root=Path(os.environ.get('MCGEN_EMBEDDING_MODEL') or cfg.model)
+  manifest=json.load(open(root/'verified_download.json'))
   if not manifest['complete'] or manifest['repo']!='Qwen/Qwen3-VL-Embedding-8B' or manifest['revision']!=cfg.revision:raise ValueError('Wrong or unverified embedding model')
   actual={}
   for row in manifest['files']:

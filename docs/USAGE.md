@@ -1,20 +1,31 @@
 # 使用说明
 
-以下命令用于安装、生成、训练和评估。示例中的本机路径需按自己的环境替换；模型权重与数据不随仓库提供。
+以下命令用于安装、生成、训练和评估。示例中的本机路径需按自己的环境替换；当前选用权重通过 Hugging Face 提供，完整数据不随 Git 仓库提供。
 
 ## 当前选用版本
 
-当前选用扩容文生图实验的 **4128 步**。本机推理文件为 `checkpoints/mcgen-step4128.pt`，原始训练快照仍保留；这是人工比较生成效果后的选择，不是自动误差最小的 4644 步。
+当前选用扩容文生图实验的 **4128 步**。[Hugging Face 下载目录](https://huggingface.co/datasets/Risposta/MC_Gen/tree/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128)，推理文件为 `checkpoints/mcgen-step4128.pt`，原始训练快照仍保留；这是人工比较生成效果后的选择，不是自动误差最小的 4644 步。
 
 ```bash
 pip install -e '.[embedding]'
-python scripts/download_qwen_vl_embedding.py --out /home/iflab/models/Qwen3-VL-Embedding-8B
-mcgen sample --checkpoint checkpoints/mcgen-step4128.pt \
+curl -L --fail --create-dirs -o checkpoints/mcgen-step4128.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt
+python scripts/download_qwen_vl_embedding.py --out ../Qwen3-VL-Embedding-8B
+MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
+  --checkpoint checkpoints/mcgen-step4128.pt \
   --prompt 'diamond sword' --seed 20261112 --steps 32 --text-scale 2 \
   --out outputs/diamond_sword.png --device cuda:0
 ```
 
-以上是本机路径示例。编码器的下载目录需与检查点记录一致；编码器文件经过校验，不能把旧 Qwen3-8B 替换到此检查点中。生成器权重目前仅在本地保留，不随 Git 发布。模型配置、文件哈希和数据规模见 [4128 步记录](models/step4128.json)。
+以上命令从项目根目录执行。通过 `MCGEN_EMBEDDING_MODEL=/path/to/Qwen3-VL-Embedding-8B` 可指定其他下载目录；只改变文件位置，仍会校验模型文件和检查点中的编码器身份。不能把旧 Qwen3-8B 替换到此检查点中。生成器权重是推理文件，不含优化器或冻结的 Qwen 模型；若需继续原训练，应使用本地保留的完整训练快照。模型配置、文件哈希和数据规模见 [4128 步记录](models/step4128.json)。
+
+校验下载文件：
+
+```bash
+curl -L --fail -o checkpoints/SHA256SUMS.txt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt
+(cd checkpoints && sha256sum -c SHA256SUMS.txt)
+```
 
 下方通用命令同时保留历史实验的 text/reference/joint 能力；当前推荐的 4128 步模型只用于文生图。
 

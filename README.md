@@ -114,3 +114,7 @@ evaluate 使用同目标、同种子的条件对照和 resize/palette 基线，�
 
 benchmark 固定任务标准、多个种子，导出盲评 CSV。参考图案例须提供 reference、reference_sha256 和 provenance。
 隐藏 `key.json` 完成人工评分后运行 review；未填的评分始终显示待评，不自动冒充质量通过。
+
+## License
+
+Research and study only. Do not use the trained models commercially.

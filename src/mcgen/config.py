@@ -36,10 +36,26 @@ class ModelConfig:
     text_normalization: str = "none"
     reference_encoding: str = "spatial"
     multimodal_adapter: bool = False
+    visual_adapter: bool = False
+    visual_dim: int = 4096
+    visual_grid: int = 8
+    visual_layers: list = field(default_factory=lambda: [2, 5, 8])
 
     def __post_init__(self):
         if type(self.multimodal_adapter) is not bool or (self.multimodal_adapter and (self.conditioning != "text_only" or self.byte_tokens)):
             raise ValueError("multimodal_adapter requires pooled text_only conditioning without byte tokens")
+        if type(self.visual_adapter) is not bool:
+            raise ValueError("visual_adapter must be boolean")
+        if self.visual_adapter and (self.multimodal_adapter or self.conditioning != 'text_only' or self.byte_tokens):
+            raise ValueError('visual_adapter requires the original text_only backbone without another adapter')
+        if type(self.visual_dim) is not int or self.visual_dim < 1 or type(self.visual_grid) is not int or self.visual_grid < 1:
+            raise ValueError('visual dimensions must be positive integers')
+        if (not isinstance(self.visual_layers, list) or not self.visual_layers
+                or any(type(i) is not int or i < 0 for i in self.visual_layers)
+                or len(set(self.visual_layers)) != len(self.visual_layers)):
+            raise ValueError('visual_layers must be distinct nonnegative block indices')
+        if self.visual_adapter and max(self.visual_layers) >= self.depth:
+            raise ValueError('visual adapter layer outside backbone')
         if self.reference_encoding not in ("spatial", "dual"):
             raise ValueError("reference_encoding must be spatial or dual")
         if self.reference_encoding == "dual" and self.conditioning != "separate":
@@ -111,8 +127,8 @@ class TrainConfig:
     task_mix: dict | None = None
 
     def __post_init__(self):
-        if self.trainable not in ("all", "attributes", "embedding_adapter"):
-            raise ValueError("trainable must be all, attributes or embedding_adapter")
+        if self.trainable not in ("all", "attributes", "embedding_adapter", "visual_adapter"):
+            raise ValueError("trainable must be all, attributes, embedding_adapter or visual_adapter")
         if self.task_mix is not None:
             if set(self.task_mix) != {"text", "reference", "joint", "unconditional"}:
                 raise ValueError("task_mix requires text/reference/joint/unconditional probabilities")
@@ -152,13 +168,20 @@ class Experiment:
     conditioning_input: str = "native"
 
     def __post_init__(self):
-        if self.conditioning_input not in ("native", "multimodal_embedding"):
+        if self.conditioning_input not in ("native", "multimodal_embedding", "visual_tokens"):
             raise ValueError("unsupported conditioning_input")
+        if self.conditioning_input == 'visual_tokens' and (not self.model.visual_adapter
+                or self.text.backend != 'qwen3_vl_embedding' or self.train.trainable != 'visual_adapter'):
+            raise ValueError('visual token training requires Qwen and frozen-backbone visual_adapter training')
+        if self.model.visual_adapter and self.conditioning_input != 'visual_tokens':
+            raise ValueError('visual adapter requires the explicit spatial token protocol')
+        if self.train.trainable == 'visual_adapter' and not self.model.visual_adapter:
+            raise ValueError('visual_adapter training requires visual modules')
         if self.conditioning_input == "multimodal_embedding" and (not self.model.multimodal_adapter or self.text.backend != "qwen3_vl_embedding" or self.train.trainable != "embedding_adapter"):
             raise ValueError("multimodal training requires Qwen VL and frozen-backbone embedding_adapter training")
         if self.model.multimodal_adapter and self.conditioning_input != "multimodal_embedding":
             raise ValueError("multimodal adapter requires the explicit multimodal input protocol")
-        if self.model.conditioning == "text_only" and self.task != "text" and self.conditioning_input != "multimodal_embedding":
+        if self.model.conditioning == "text_only" and self.task != "text" and self.conditioning_input not in ("multimodal_embedding", "visual_tokens"):
             raise ValueError("text_only architecture requires text task")
         if self.train.trainable == "attributes" and self.model.reference_encoding != "dual":
             raise ValueError("attribute adapter training requires dual reference encoding")

@@ -1,0 +1,28 @@
+{
+  "regression_tests_passed": 195,
+  "regression_warnings": 2,
+  "inference_export_model_tensors_exact": true,
+  "public_runtime": {
+    "passed": true,
+    "public_runtime_modes": [
+      "text",
+      "joint",
+      "image"
+    ],
+    "native_shape": [
+      16,
+      16,
+      4
+    ],
+    "text_original_raw_tensor_exact": true,
+    "text_encoder_device": "cpu",
+    "generator_and_visual_encoder_device": "cuda:1",
+    "optimizer_excluded": true
+  },
+  "runtime_fix": "Do not mutate inference-tensor masks in place; regression uses inference tensors from both frozen encoders.",
+  "distribution": {
+    "model_only": true,
+    "original_images_uploaded": false,
+    "complete_evaluation_uploaded": false
+  }
+}

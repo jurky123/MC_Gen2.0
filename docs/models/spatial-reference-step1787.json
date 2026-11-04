@@ -1,0 +1,61 @@
+{
+  "artifact_type": "inference_only",
+  "stage": "experimental_spatial_reference",
+  "step": 1787,
+  "base_step": 4128,
+  "selection": "validation_joint_flow_minimum; best and last model tensors are identical",
+  "sha256": "78d60f428dc1b32b4b92f7e762133b112fe910b68d04067b2db22b50d90ace86",
+  "file_size": 347402202,
+  "source_checkpoint_sha256": "b647da6ad8757c1219a54d05498e70166140d844b065f4bb06c1624ef305a77a",
+  "generator_parameters": 86668292,
+  "adapter_parameters": 5259264,
+  "text_identity": "7dc02f153dae1b1d277f4b39812e6e6f9fe56d53fb37e371717da06733114402",
+  "visual_identity": "a87c3ae189e45bff2333821a1b7a6db43126b8eb1140783d80d7ebf6619c5050",
+  "backbone_sha256": "f63e17d093beab69d30bd4b05eb9812b9aa855912c5c739298dd092e7b52bc29",
+  "contains_optimizer": false,
+  "contains_frozen_encoder": false,
+  "training_targets": 5716,
+  "validation_targets": 639,
+  "train_pairs": 11432,
+  "validation_pairs": 1278,
+  "target_exposures": 60.02519244226732,
+  "task_mix": {
+    "joint": 0.8,
+    "image_only": 0.2
+  },
+  "batch_size": 192,
+  "visual_tokens": [
+    64,
+    4096
+  ],
+  "injection_blocks_one_based": [
+    3,
+    6,
+    9
+  ],
+  "image_preprocessing": "256px contain resize, white letterbox, official Qwen visual merger",
+  "evaluation": {
+    "seen": 64,
+    "unseen": 64,
+    "same_text_groups": 16,
+    "seeds": 2,
+    "native_comparison_outputs": 1664,
+    "old_outputs_reused": 768
+  },
+  "limitations": [
+    "Image-only quality is weaker than the previous pooled adapter",
+    "Stable decoration diversity has not been established",
+    "Training budgets and task mixtures differ"
+  ],
+  "hf_repo_id": "Risposta/MC_Gen",
+  "hf_repo_type": "dataset",
+  "hf_path": "checkpoints/spatial-reference-step1787/mcgen-spatial-reference-step1787.pt",
+  "inference_checkpoint": "checkpoints/mcgen-spatial-reference-step1787.pt",
+  "download_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99/checkpoints/spatial-reference-step1787/mcgen-spatial-reference-step1787.pt",
+  "distribution": {
+    "model_only": true,
+    "original_images_uploaded": false,
+    "complete_evaluation_uploaded": false
+  },
+  "hf_revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99"
+}

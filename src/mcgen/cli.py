@@ -63,8 +63,8 @@ def main(argv=None):
     p.add_argument("--checkpoint", required=True)
     p.add_argument("--prompt", default="")
     p.add_argument("--reference")
-    p.add_argument("--conditioning-mode", choices=("native", "multimodal_embedding"), default="native",
-                   help="experimental zero-training Qwen image embedding transfer; ref-scale guides the combined embedding")
+    p.add_argument("--conditioning-mode", choices=("native", "multimodal_embedding", "visual_tokens"), default="native",
+                   help="reference input protocol; visual_tokens checkpoints support independent text/ref scales")
     p.add_argument("--out", required=True)
     p.add_argument("--device", default="cpu")
     p.add_argument("--text-device")

@@ -36,6 +36,16 @@ Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 
 [参考图权重与用法](docs/USAGE.md#参考图生成实验) · [样本与来源](examples/reference_generation/README.md) · [完整对照下载](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/evaluations/reference-step2151)
 
+**独立视觉 token 实验：新旧方案对照**
+
+![独立视觉 token 与旧版参考图方案对照](docs/images/spatial_reference/comparison.png)
+
+依次为：纯文本、旧版纯图、新版纯图、旧版图文、新版图文。这里只展示生成结果。
+
+新版图文联合更接近配对 MC 原图，纯参考图弱于旧版；装饰多样性尚未稳定改善。两版训练预算不同，旧版继续保留。
+
+[实验权重与用法](docs/USAGE.md#空间参考图实验) · [评估结论](docs/SPATIAL_REFERENCE_EVALUATION_20261104.md)
+
 ## 生成方式
 
 ```mermaid

@@ -47,7 +47,27 @@ MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
 
 [权重与 SHA256](https://huggingface.co/datasets/Risposta/MC_Gen/tree/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151) · [完整896张对照](https://huggingface.co/datasets/Risposta/MC_Gen/tree/3f99aab1d0f4658197b533590bba4703cb712da7/evaluations/reference-step2151) · [训练与验证记录](REFERENCE_ADAPTER_20261104.md)。
 
-下方通用命令同时保留历史实验的 text/reference/joint 能力；文生图推荐原4128步模型，参考图使用上述实验模型。
+## 空间参考图实验
+
+新增独立视觉 token 通路，保留原文本条件和文生图能力。本轮图文联合更接近配对目标，纯参考图弱于上面的旧版；装饰多样性仍需验证。[评估与比较边界](SPATIAL_REFERENCE_EVALUATION_20261104.md)。
+
+```bash
+curl -L --fail --create-dirs -o checkpoints/mcgen-spatial-reference-step1787.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99/checkpoints/spatial-reference-step1787/mcgen-spatial-reference-step1787.pt
+
+MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
+  --checkpoint checkpoints/mcgen-spatial-reference-step1787.pt \
+  --reference reference.png \
+  --prompt 'redstone helmet' --conditioning-mode visual_tokens \
+  --steps 32 --text-scale 2 --ref-scale 2 --seed 202611042 \
+  --out outputs/spatial_helmet.png --export-scale 8 --device cuda:0
+```
+
+文字和参考图引导分别通过 `--text-scale`、`--ref-scale` 调节。省略 prompt 可试纯参考图；没有参考图时按原文生图方式使用。显存不足时可加 `--text-device cpu`，速度会受 CPU 性能影响。
+
+[权重与校验](https://huggingface.co/datasets/Risposta/MC_Gen/tree/e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99/checkpoints/spatial-reference-step1787) · [训练记录](SPATIAL_REFERENCE_20261104.md)。`reference.png` 使用自己的参考图；本轮不公开原始图片及完整评估包。
+
+下方通用命令同时保留历史实验的 text/reference/joint 能力；文生图推荐原4128步模型，参考图实验按上述各自的输入协议使用。
 
 ## 安装与验证
 

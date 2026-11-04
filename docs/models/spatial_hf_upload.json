@@ -1,0 +1,15 @@
+{
+  "repo_id": "Risposta/MC_Gen",
+  "repo_type": "dataset",
+  "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+  "commit_url": "https://huggingface.co/datasets/Risposta/MC_Gen/commit/e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+  "previous_revision": "3f99aab1d0f4658197b533590bba4703cb712da7",
+  "scope": "inference weights and necessary verification files only",
+  "original_images_uploaded": false,
+  "complete_evaluation_uploaded": false,
+  "verified_weight": {
+    "path": "checkpoints/spatial-reference-step1787/mcgen-spatial-reference-step1787.pt",
+    "size": 347402202,
+    "sha256": "78d60f428dc1b32b4b92f7e762133b112fe910b68d04067b2db22b50d90ace86"
+  }
+}

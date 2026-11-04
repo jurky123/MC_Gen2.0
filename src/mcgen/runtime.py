@@ -43,6 +43,10 @@ class Runtime:
             raise ValueError("text encoder artifacts changed since training")
         if self.config.model.multimodal_adapter and state.get("multimodal_identity") != self.encoder.embedding.multimodal_identity:
             raise ValueError("multimodal encoder protocol changed since adapter training")
+        self.visual_identity = state.get('visual_identity')
+        self.visual_encoder = None
+        if self.config.model.visual_adapter and not self.visual_identity:
+            raise ValueError('visual adapter checkpoint has no visual encoder identity')
         self.metadata = {"format": FORMAT, "step": state["step"],
                          "catalog_fingerprint": state["catalog_fingerprint"],
                          "text_identity": state["text_identity"],
@@ -51,8 +55,9 @@ class Runtime:
                          "style": self.config.style, "alpha_mode": self.config.alpha_mode,
                          "conditioning_input": self.config.conditioning_input,
                          "multimodal_adapter": self.config.model.multimodal_adapter,
+                         "visual_adapter": self.config.model.visual_adapter,
                          "reference_encoding": self.config.model.reference_encoding,
-                         "reference_routing": "pooled_embedding" if self.config.model.multimodal_adapter else ("text:attributes; image-only:shape" if self.config.model.reference_encoding == "dual" else "shape")}
+                         "reference_routing": "visual_tokens" if self.config.model.visual_adapter else ("pooled_embedding" if self.config.model.multimodal_adapter else ("text:attributes; image-only:shape" if self.config.model.reference_encoding == "dual" else "shape"))}
 
     def generate(self, prompts, references=None, seeds=None, conditioning_mode="native", **sampling):
         if not prompts:
@@ -60,8 +65,13 @@ class Runtime:
         seeds = list(range(len(prompts))) if seeds is None else seeds
         if references is not None and len(references) != len(prompts):
             raise ValueError("one reference or None required per prompt")
-        if conditioning_mode not in ("native", "multimodal_embedding"):
+        if conditioning_mode not in ("native", "multimodal_embedding", "visual_tokens"):
             raise ValueError("unknown conditioning mode")
+        has_reference = references is not None and any(r is not None for r in references)
+        if conditioning_mode == 'visual_tokens' or (self.config.model.visual_adapter and has_reference):
+            if conditioning_mode == 'multimodal_embedding':
+                raise ValueError('visual adapter uses independent spatial reference tokens')
+            return self._generate_visual(prompts, references, seeds, sampling)
         if conditioning_mode == "multimodal_embedding":
             return self._generate_multimodal(prompts, references, seeds, sampling)
         if self.config.model.multimodal_adapter and references is not None and any(r is not None for r in references):
@@ -88,6 +98,33 @@ class Runtime:
                                                and sampling.get("text_scale", 2.) > 0 else "shape" for p in prompts]
             tensors = sample(self.model, text, mask, ref, present, seeds=seeds, **sampling)
         return [decode(x) for x in tensors]  # Raw output; alpha policy is an explicit export operation.
+
+    def _generate_visual(self, prompts, references, seeds, sampling):
+        if not self.config.model.visual_adapter:
+            raise ValueError('checkpoint has no spatial visual adapter')
+        if references is None or not any(r is not None for r in references):
+            raise ValueError('visual token mode requires a reference')
+        if sampling.get('reference_mode') is not None:
+            raise ValueError('visual tokens do not use attributes/shape modes')
+        from .tasks import conditioned_prompts
+        from .visual_tokens import VisualTokenEncoder
+        text, mask = self.encoder.encode(conditioned_prompts(prompts, self.config), self.device)
+        # Frozen encoders can return inference tensors; do not mutate them
+        # outside their inference_mode scope.
+        mask = mask & torch.tensor([bool(p.strip()) for p in prompts], device=self.device)[:, None]
+        if self.visual_encoder is None:
+            self.visual_encoder = VisualTokenEncoder(self.config.text, self.device)
+            if self.visual_encoder.identity != self.visual_identity:
+                self.visual_encoder = None
+                raise ValueError('visual encoder protocol changed since adapter training')
+        ids = [i for i, ref in enumerate(references) if ref is not None]
+        encoded = self.visual_encoder.encode([references[i] for i in ids], self.device)
+        features = encoded.new_zeros((len(prompts), *encoded.shape[1:]))
+        features[ids] = encoded
+        present = torch.tensor([r is not None for r in references], device=self.device)
+        with torch.inference_mode():
+            tensors = sample(self.model, text, mask, features, present, seeds=seeds, **sampling)
+        return [decode(x) for x in tensors]
 
     def _generate_multimodal(self, prompts, references, seeds, sampling):
         """Pooled multimodal conditioning, optionally using a trained adapter.

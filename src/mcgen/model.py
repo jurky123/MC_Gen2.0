@@ -104,6 +104,9 @@ class PixelFlow(nn.Module):
         self.output = nn.Linear(w, 4)
         nn.init.zeros_(self.output.weight)
         nn.init.zeros_(self.output.bias)
+        if cfg.visual_adapter:
+            from .reference_adapter import SpatialReferenceAdapter
+            self.visual_adapter = SpatialReferenceAdapter(cfg)
 
     def context(self, text, text_mask, reference, ref_present, reference_mode=None):
         b = text.shape[0]
@@ -135,6 +138,18 @@ class PixelFlow(nn.Module):
         null_t = self.text_null.expand(b, -1, -1)
         valid_t = torch.ones(b, 1, dtype=torch.bool, device=h.device)
         if self.cfg.conditioning == "text_only":
+            if self.cfg.visual_adapter and reference is not None:
+                if reference.shape != (b, self.cfg.visual_grid**2, self.cfg.visual_dim):
+                    raise ValueError('reference tokens differ from visual adapter contract')
+                present = (torch.ones(b, dtype=torch.bool, device=h.device) if ref_present is None
+                           else ref_present.to(device=h.device, dtype=torch.bool))
+                if present.shape != (b,):
+                    raise ValueError('one reference presence flag required per sample')
+                if reference_mode is not None:
+                    raise ValueError('visual tokens do not use attributes/shape modes')
+                if bool(present.any()):
+                    ref = self.visual_adapter.project(reference)
+                    return torch.cat((null_t, h), 1), torch.cat((valid_t, text_mask), 1), (ref, present)
             if reference is not None and (ref_present is None or bool(ref_present.any())):
                 raise ValueError("text_only model does not accept references")
             return torch.cat((null_t, h), 1), torch.cat((valid_t, text_mask), 1)
@@ -172,6 +187,8 @@ class PixelFlow(nn.Module):
         freq = torch.exp(-math.log(10000) * torch.arange(self.cfg.width // 2, device=x.device) / (self.cfg.width // 2))
         phase = t[:, None].float() * freq[None] * 1000
         time = self.time(torch.cat((phase.cos(), phase.sin()), -1))
-        for block in self.blocks:
-            tokens = block(tokens, time, *context)
+        for i, block in enumerate(self.blocks):
+            tokens = block(tokens, time, *context[:2])
+            if self.cfg.visual_adapter and len(context) == 3:
+                tokens = self.visual_adapter.inject(i, tokens, *context[2])
         return self.output(self.norm(tokens)).transpose(1, 2).reshape_as(x)

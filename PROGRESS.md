@@ -25,3 +25,5 @@ MC_Gen2.0 最初尝试了多阶段预训练、VLM 标注，以及 Minecraft 素�
 [生成展示与使用说明](README.md) · [4128 步权重](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/step4128)
 
 参考图适配已完成 2,382 步：冻结原生成器，仅训练新增条件适配器，原文生图输出保持一致。已扩大到训练内、训练外各 64 个新物品的双种子对照，并比较两版参考图；常见工具和装备能成形，浅色过亮及复杂造型不稳仍明显。[试验方案与结果](docs/REFERENCE_ADAPTER_20261104.md)
+
+独立视觉 token 实验已完成 1,787 步，约 60 次目标曝光，原文生图输出保持一致。新旧对照中，图文联合更接近配对目标，纯参考图弱于旧版，装饰多样性尚未稳定改善；两版训练预算不同。发布代码、实验权重和简要结论，原始图片与完整评估保留本地。[方案与运行说明](docs/SPATIAL_REFERENCE_20261104.md) · [评估结论](docs/SPATIAL_REFERENCE_EVALUATION_20261104.md)

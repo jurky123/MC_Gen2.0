@@ -21,7 +21,7 @@ class GenerateRequest(BaseModel):
     text_scale: float = Field(default=2., ge=0, le=8)
     ref_scale: float = Field(default=2., ge=0, le=8)
     reference_mode: Literal["attributes", "shape"] | None = None
-    conditioning_mode: Literal["native", "multimodal_embedding"] = "native"
+    conditioning_mode: Literal["native", "multimodal_embedding", "visual_tokens"] = "native"
     solver: str = "heun"
     export_scale: int = Field(default=1, ge=1, le=16)
     palette_colors: int = Field(default=0, ge=0, le=256)

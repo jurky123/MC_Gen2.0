@@ -1,0 +1,61 @@
+# Exact archived training configuration; relocate the encoder with MCGEN_EMBEDDING_MODEL.
+model:
+  size: 16
+  width: 512
+  depth: 12
+  heads: 8
+  ref_size: 16
+  text_dim: 4096
+  text_length: 1
+  conditioning: text_only
+  byte_tokens: false
+  text_normalization: layernorm
+  reference_encoding: spatial
+  multimodal_adapter: false
+  visual_adapter: true
+  visual_dim: 4096
+  visual_grid: 8
+  visual_layers:
+  - 2
+  - 5
+  - 8
+text:
+  backend: qwen3_vl_embedding
+  model: /home/iflab/models/Qwen3-VL-Embedding-8B
+  revision: 2c4565515e0f265c6511776e7193b22c0968ddc7
+  layers:
+  - -1
+  instruction: ''
+  chat_template: true
+  dtype: bfloat16
+  cache_mb: 0
+train:
+  trainable: visual_adapter
+  steps: 1787
+  batch_size: 192
+  accumulation: 1
+  lr: 0.0001
+  weight_decay: 0.01
+  warmup: 50
+  schedule_start: 0
+  seed: 2026110310
+  text_dropout: 0.15
+  ref_dropout: 0.3
+  paired_fraction: 0.7
+  seam_weight: 0.0
+  precision: bfloat16
+  eval_every: 298
+  val_samples: 64
+  grad_clip: 1.0
+  task_mix:
+    text: 0.0
+    reference: 0.2
+    joint: 0.8
+    unconditional: 0.0
+task: joint
+asset_type: item
+schema_version: 3
+style: ''
+alpha_mode: continuous
+target_scope: all
+conditioning_input: visual_tokens

@@ -23,3 +23,5 @@ MC_Gen2.0 最初尝试了多阶段预训练、VLM 标注，以及 Minecraft 素�
 当前已发布训练集、测试集真实标签的生成展示，以及 Hugging Face 推理权重。这是恢复基础文生图能力的阶段成果；复杂描述和少见物品仍有错误，参考图能力尚未赋予。
 
 [生成展示与使用说明](README.md) · [4128 步权重](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/step4128)
+
+参考图适配已完成 2,382 步：冻结原生成器，仅训练新增条件适配器，原文生图输出保持一致。已扩大到训练内、训练外各 64 个新物品的双种子对照，并比较两版参考图；常见工具和装备能成形，浅色过亮及复杂造型不稳仍明显。[试验方案与结果](docs/REFERENCE_ADAPTER_20261104.md)

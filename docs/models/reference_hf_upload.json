@@ -1,0 +1,20 @@
+{
+  "repo_id": "Risposta/MC_Gen",
+  "repo_type": "dataset",
+  "revision": "3f99aab1d0f4658197b533590bba4703cb712da7",
+  "commit_url": "https://huggingface.co/datasets/Risposta/MC_Gen/commit/3f99aab1d0f4658197b533590bba4703cb712da7",
+  "download_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151/mcgen-reference-step2151.pt",
+  "sha256_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151/SHA256SUMS.txt",
+  "evaluation_url": "https://huggingface.co/datasets/Risposta/MC_Gen/tree/3f99aab1d0f4658197b533590bba4703cb712da7/evaluations/reference-step2151",
+  "verified": true,
+  "files": {
+    "checkpoints/reference-step2151/mcgen-reference-step2151.pt": {
+      "bytes": 345142454,
+      "sha256": "8a4599f2d12c93b1392f95edd184fe792dbb8960603676e0330a736d5b3f56b4"
+    },
+    "evaluations/reference-step2151/evaluation.zip": {
+      "bytes": 34356885,
+      "sha256": "7f748842e6f6db6b5eaeb4a7129cfbbe442776c46778160bc3492183d0846781"
+    }
+  }
+}

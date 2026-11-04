@@ -63,6 +63,8 @@ def main(argv=None):
     p.add_argument("--checkpoint", required=True)
     p.add_argument("--prompt", default="")
     p.add_argument("--reference")
+    p.add_argument("--conditioning-mode", choices=("native", "multimodal_embedding"), default="native",
+                   help="experimental zero-training Qwen image embedding transfer; ref-scale guides the combined embedding")
     p.add_argument("--out", required=True)
     p.add_argument("--device", default="cpu")
     p.add_argument("--text-device")
@@ -153,6 +155,7 @@ def main(argv=None):
         runtime = Runtime(args.checkpoint, args.device, args.text_device)
         ref = Image.open(args.reference).convert("RGBA") if args.reference else None
         image = runtime.generate([args.prompt], [ref] if ref else None, seeds=[args.seed], steps=args.steps,
+                                 conditioning_mode=args.conditioning_mode,
                                  text_scale=args.text_scale, ref_scale=args.ref_scale, solver=args.solver,
                                  reference_mode=args.reference_mode)[0]
         out.parent.mkdir(parents=True, exist_ok=True)

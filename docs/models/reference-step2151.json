@@ -1,0 +1,53 @@
+{
+  "artifact_type": "inference_only",
+  "stage": "experimental_reference_conditioning",
+  "step": 2151,
+  "base_step": 4128,
+  "selection": "validation_mean_flow_minimum; qualitative quality remains experimental",
+  "source_checkpoint_sha256": "6550d88191ed57ac8782799913de500ce4ef67cef02c6ae8ba3e49d9f52535f5",
+  "sha256": "8a4599f2d12c93b1392f95edd184fe792dbb8960603676e0330a736d5b3f56b4",
+  "file_size": 345142454,
+  "generator_parameters": 86137348,
+  "adapter_parameters": 4728320,
+  "backbone_frozen": true,
+  "text_identity": "7dc02f153dae1b1d277f4b39812e6e6f9fe56d53fb37e371717da06733114402",
+  "multimodal_identity": "febb9a86dbec30e575cb394d2f54ce56ba007ebc9d1108325c9deac9bd8e55fd",
+  "backbone_sha256": "f63e17d093beab69d30bd4b05eb9812b9aa855912c5c739298dd092e7b52bc29",
+  "contains_optimizer": false,
+  "contains_frozen_encoder": false,
+  "training_pairs": {
+    "train": 11432,
+    "val": 1278
+  },
+  "target_counts": {
+    "train": 5716,
+    "val": 639
+  },
+  "trained_steps": 2382,
+  "task_mix": {
+    "image_only": 0.5,
+    "image_text": 0.5
+  },
+  "evaluation": {
+    "new_targets": 128,
+    "seen": 64,
+    "unseen": 64,
+    "seeds": 2,
+    "native_outputs": 896,
+    "paired_reference_targets": 32,
+    "text_generation_exact": true
+  },
+  "limitations": [
+    "Color and brightness errors",
+    "Unstable complex silhouettes",
+    "Seed and reference sensitivity"
+  ],
+  "hf_repo_id": "Risposta/MC_Gen",
+  "hf_repo_type": "dataset",
+  "hf_path": "checkpoints/reference-step2151/mcgen-reference-step2151.pt",
+  "inference_checkpoint": "checkpoints/mcgen-reference-step2151.pt",
+  "download_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151/mcgen-reference-step2151.pt",
+  "hf_revision": "3f99aab1d0f4658197b533590bba4703cb712da7",
+  "sha256_url": "https://huggingface.co/datasets/Risposta/MC_Gen/resolve/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151/SHA256SUMS.txt",
+  "evaluation_url": "https://huggingface.co/datasets/Risposta/MC_Gen/tree/3f99aab1d0f4658197b533590bba4703cb712da7/evaluations/reference-step2151"
+}

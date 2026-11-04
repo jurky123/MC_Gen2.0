@@ -66,6 +66,12 @@ def test_api_and_runtime_match_for_both_tasks(tmp_path):
             assert np.array_equal(actual, expected)
         assert client.post("/generate", json={"prompt": "x", "solver": "invalid"}).status_code == 422
         assert client.post("/generate", json={}).status_code == 422
+        # The explicit experiment mode must reach Runtime rather than silently
+        # running the legacy spatial-reference route on an unsupported model.
+        response = client.post("/generate", json={"prompt": "bottle", "reference_png": encoded,
+                                                 "conditioning_mode": "multimodal_embedding"})
+        assert response.status_code == 422
+        assert "Qwen VL text-only" in response.json()["detail"]
 
 
 def test_tile_loss_does_not_touch_items():

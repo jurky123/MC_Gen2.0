@@ -27,7 +27,27 @@ curl -L --fail -o checkpoints/SHA256SUMS.txt \
 (cd checkpoints && sha256sum -c SHA256SUMS.txt)
 ```
 
-下方通用命令同时保留历史实验的 text/reference/joint 能力；当前推荐的 4128 步模型只用于文生图。
+## 参考图生成（实验）
+
+参考图实验采用 **2151 步适配器 + 冻结的4128步底座**，支持纯参考图和图文联合，也保留原文生图输出。色偏、浅色过亮和复杂造型不稳仍存在。[真实抽样对照](../examples/reference_generation/README.md)。
+
+```bash
+curl -L --fail --create-dirs -o checkpoints/mcgen-reference-step2151.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151/mcgen-reference-step2151.pt
+
+MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
+  --checkpoint checkpoints/mcgen-reference-step2151.pt \
+  --reference examples/reference_generation/inputs/test_03_reference.png \
+  --prompt 'orange diamond axe' --conditioning-mode multimodal_embedding \
+  --steps 32 --ref-scale 2 --seed 202611042 \
+  --out outputs/reference_axe.png --export-scale 8 --device cuda:0
+```
+
+省略 `--prompt` 即为纯参考图生成。没有参考图时，省略 `--conditioning-mode`，按原文生图方式使用。此模式中 `--ref-scale` 引导整个图像/图文 embedding，不提供独立的文字引导调节。
+
+[权重与 SHA256](https://huggingface.co/datasets/Risposta/MC_Gen/tree/3f99aab1d0f4658197b533590bba4703cb712da7/checkpoints/reference-step2151) · [完整896张对照](https://huggingface.co/datasets/Risposta/MC_Gen/tree/3f99aab1d0f4658197b533590bba4703cb712da7/evaluations/reference-step2151) · [训练与验证记录](REFERENCE_ADAPTER_20261104.md)。
+
+下方通用命令同时保留历史实验的 text/reference/joint 能力；文生图推荐原4128步模型，参考图使用上述实验模型。
 
 ## 安装与验证
 

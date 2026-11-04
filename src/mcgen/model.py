@@ -71,6 +71,11 @@ class PixelFlow(nn.Module):
         w = cfg.width
         self.input = nn.Linear(4, w)
         self.text = nn.Linear(cfg.text_dim, w)
+        if cfg.multimodal_adapter:
+            self.image_adapter = nn.Sequential(nn.LayerNorm(cfg.text_dim), nn.Linear(cfg.text_dim, 1024),
+                                               nn.GELU(), nn.Linear(1024, w))
+            nn.init.zeros_(self.image_adapter[-1].weight)
+            nn.init.zeros_(self.image_adapter[-1].bias)
         if cfg.byte_tokens:
             self.byte_embedding = nn.Embedding(258, cfg.text_dim, padding_idx=0)
             self.byte_position = nn.Parameter(torch.randn(1, cfg.text_length, cfg.text_dim) * 0.01)
@@ -119,7 +124,12 @@ class PixelFlow(nn.Module):
         # original computation. No trainable parameters or cached projections.
         if self.cfg.text_normalization == "layernorm":
             h = F.layer_norm(h, (h.shape[-1],))
+        adapter_input = h
         h = self.text(h) + self.type_embedding[0]
+        if self.cfg.multimodal_adapter and ref_present is not None:
+            active = ref_present.bool() & text_mask.any(-1)
+            if active.any():
+                h = h + self.image_adapter(adapter_input) * active[:, None, None]
         # Masked tokens are erased, so null conditions cannot leak their values.
         h = h.masked_fill(~text_mask[..., None], 0)
         null_t = self.text_null.expand(b, -1, -1)

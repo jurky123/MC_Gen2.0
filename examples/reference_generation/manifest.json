@@ -1,0 +1,618 @@
+{
+  "checkpoint_step": 2151,
+  "base_step": 4128,
+  "checkpoint_sha256": "8a4599f2d12c93b1392f95edd184fe792dbb8960603676e0330a736d5b3f56b4",
+  "selection": "First six samples per split from the pre-generation fixed expanded sample; failures retained.",
+  "preview": {
+    "file": "../../docs/images/reference_generation/preview.png",
+    "sha256": "1a113f956dd482b32d79efeea7f637611bb3940c850aea9451f64f24cd80f12c"
+  },
+  "items": [
+    {
+      "case_id": "train_00",
+      "split": "train",
+      "category": "sword",
+      "prompt": "snow diamond sword",
+      "source_filename": "snow_diamond_sword.png",
+      "lineage": "mc:7dB6Zo75",
+      "split_group": "project:mc:7dB6Zo75",
+      "target_hash": "084b895a12d7bb14019af2a05369914ed022a3679c79c746c913c45b88b9ad17",
+      "reference_generator": "flux",
+      "reference_sha256": "85ca6fa08b7d193cc9b867a2451e9070d3383e0a1329a0b38a3b88a74d4aad77",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/train_00_reference.png",
+      "target_file": "inputs/train_00_target.png",
+      "exported_reference_sha256": "f9cb8c15e6a2144c0fa56c4a7bf6c4ae1bc62ada28685263295e78df8c8f665c",
+      "exported_target_sha256": "76ac721c312b5c7e4c116cbaf7245d2c9d10c2278e328c5d67156e4bfd08f855",
+      "files": {
+        "reference": {
+          "file": "inputs/train_00_reference.png",
+          "sha256": "f9cb8c15e6a2144c0fa56c4a7bf6c4ae1bc62ada28685263295e78df8c8f665c"
+        },
+        "target": {
+          "file": "inputs/train_00_target.png",
+          "sha256": "76ac721c312b5c7e4c116cbaf7245d2c9d10c2278e328c5d67156e4bfd08f855"
+        },
+        "text_seed1": {
+          "file": "generated/train_00_text_s0.png",
+          "sha256": "19f984279b5a3b30af40234563809aacba427121c4a4d97ee182c8f59385a2a8"
+        },
+        "image_seed1": {
+          "file": "generated/train_00_image_s0.png",
+          "sha256": "81884050e7342fb7e1bd8de884c10345e2d02b6d72134706afd569b0c7caabc4"
+        },
+        "joint_seed1": {
+          "file": "generated/train_00_joint_s0.png",
+          "sha256": "55617fd8fa1f4a57f13996246a11317c64bd5b3f0976e16669d3673a39c5cdfa"
+        },
+        "image_seed2": {
+          "file": "generated/train_00_image_s1.png",
+          "sha256": "dddfbb9979eae73ed3524e96f1f5bfac08554f79d76371234ae9c8fb3383f33b"
+        },
+        "joint_seed2": {
+          "file": "generated/train_00_joint_s1.png",
+          "sha256": "355cc8a50483dcae1e175c32243ed142c9689915bd551507137117b898cddf08"
+        }
+      }
+    },
+    {
+      "case_id": "train_01",
+      "split": "train",
+      "category": "pickaxe",
+      "prompt": "wooden pickaxe white",
+      "source_filename": "wooden_pickaxe_white.png",
+      "lineage": "mc:FXHkJAKx",
+      "split_group": "project:mc:FXHkJAKx",
+      "target_hash": "89abaf4f7af2a569ff45da40472cd3ae9414d2da9871fbb2091513b45e9855ff",
+      "reference_generator": "flux",
+      "reference_sha256": "146cd25331bd1ca197d8ca92635c216b06e4c9a6139c26bd7da634b24629a193",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/train_01_reference.png",
+      "target_file": "inputs/train_01_target.png",
+      "exported_reference_sha256": "73da172f549c1d8a4cce99a1fdf903d57a3cc40be5bcc2f2b32e8821e3478cfe",
+      "exported_target_sha256": "6e0b682209ca607020f72940b2d265b97843bb6fbf0c53e6e0b09f5f693e8090",
+      "files": {
+        "reference": {
+          "file": "inputs/train_01_reference.png",
+          "sha256": "73da172f549c1d8a4cce99a1fdf903d57a3cc40be5bcc2f2b32e8821e3478cfe"
+        },
+        "target": {
+          "file": "inputs/train_01_target.png",
+          "sha256": "6e0b682209ca607020f72940b2d265b97843bb6fbf0c53e6e0b09f5f693e8090"
+        },
+        "text_seed1": {
+          "file": "generated/train_01_text_s0.png",
+          "sha256": "22a97b371f222ce7f6858de9a06013f2034b767956177de7809239b3021ebbeb"
+        },
+        "image_seed1": {
+          "file": "generated/train_01_image_s0.png",
+          "sha256": "8d8722529ed769fda5d61669d65020d462c2f5352171b4001415c17c6d42a1af"
+        },
+        "joint_seed1": {
+          "file": "generated/train_01_joint_s0.png",
+          "sha256": "4dde22c9df70838dd3f0dc8fd2ef7538a5a854f18df94321cb98480d191e79ea"
+        },
+        "image_seed2": {
+          "file": "generated/train_01_image_s1.png",
+          "sha256": "935641289f02de0b080f82bd97f5443d0698d3364c00fc1c5bfb91c36dfa5a64"
+        },
+        "joint_seed2": {
+          "file": "generated/train_01_joint_s1.png",
+          "sha256": "9ac9ac867d5e11305a4df80f3e0dbf8bf595ddd1c3d7976c9213ecceac0eacc4"
+        }
+      }
+    },
+    {
+      "case_id": "train_02",
+      "split": "train",
+      "category": "shield",
+      "prompt": "honey crystal shield",
+      "source_filename": "honey_crystal_shield.png",
+      "lineage": "mc:38tpSycf",
+      "split_group": "project:mc:38tpSycf",
+      "target_hash": "79eaeb908e6a0575a2802587a8e62c51349a317807edd1293d3cf3ea862df15d",
+      "reference_generator": "qwen",
+      "reference_sha256": "2bb38e7dedcd70ee77ccf1dd49371cb52157ea3cb5825dba6f4ec683647151e7",
+      "generator_license": "Qwen Research License (non-commercial; research/eval only)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/train_02_reference.png",
+      "target_file": "inputs/train_02_target.png",
+      "exported_reference_sha256": "2bb38e7dedcd70ee77ccf1dd49371cb52157ea3cb5825dba6f4ec683647151e7",
+      "exported_target_sha256": "7a83d0df4d6108ab7618a41a729ce997d8caef232612a51f997aa6978725652e",
+      "files": {
+        "reference": {
+          "file": "inputs/train_02_reference.png",
+          "sha256": "2bb38e7dedcd70ee77ccf1dd49371cb52157ea3cb5825dba6f4ec683647151e7"
+        },
+        "target": {
+          "file": "inputs/train_02_target.png",
+          "sha256": "7a83d0df4d6108ab7618a41a729ce997d8caef232612a51f997aa6978725652e"
+        },
+        "text_seed1": {
+          "file": "generated/train_02_text_s0.png",
+          "sha256": "8b786740df6b3c418baa491cd7a22f82dfaba53e1952dd39470359ebc69aca29"
+        },
+        "image_seed1": {
+          "file": "generated/train_02_image_s0.png",
+          "sha256": "b473403399910bee143598a4c50a9d465cfb78fb563e6759cd4d1ece9353041f"
+        },
+        "joint_seed1": {
+          "file": "generated/train_02_joint_s0.png",
+          "sha256": "1f23243a0c34973486714e97358d5265cac9fe9aa32d23ea5855763fb489a378"
+        },
+        "image_seed2": {
+          "file": "generated/train_02_image_s1.png",
+          "sha256": "8f34a9824d8d2386a3f5a8f880e008bb8b570e1c2150bd047b96e248c084f6a7"
+        },
+        "joint_seed2": {
+          "file": "generated/train_02_joint_s1.png",
+          "sha256": "9f495601d75b77ca8f1f1bddeb95916d2d366b0035ad5829b60947a30516f540"
+        }
+      }
+    },
+    {
+      "case_id": "train_03",
+      "split": "train",
+      "category": "gem",
+      "prompt": "zesyaadeneme gem",
+      "source_filename": "zesyaadeneme_gem.png",
+      "lineage": "mc:QoqxuhBI",
+      "split_group": "project:mc:QoqxuhBI",
+      "target_hash": "e2310f126e24f6550772a335a15ee219f55ee708f5ad590434de9d9b567585ca",
+      "reference_generator": "qwen",
+      "reference_sha256": "07aec68237ff849e4aa801253cb5232d3b0acddfc5f434ac1373cb4e6d968253",
+      "generator_license": "Qwen Research License (non-commercial; research/eval only)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/train_03_reference.png",
+      "target_file": "inputs/train_03_target.png",
+      "exported_reference_sha256": "07aec68237ff849e4aa801253cb5232d3b0acddfc5f434ac1373cb4e6d968253",
+      "exported_target_sha256": "05b2790301d9c09d14b7e90fbaa541455cdf55cc1b8bc1daed39ebbf28761983",
+      "files": {
+        "reference": {
+          "file": "inputs/train_03_reference.png",
+          "sha256": "07aec68237ff849e4aa801253cb5232d3b0acddfc5f434ac1373cb4e6d968253"
+        },
+        "target": {
+          "file": "inputs/train_03_target.png",
+          "sha256": "05b2790301d9c09d14b7e90fbaa541455cdf55cc1b8bc1daed39ebbf28761983"
+        },
+        "text_seed1": {
+          "file": "generated/train_03_text_s0.png",
+          "sha256": "e27cacf31a1d041d9596234066d3eeeb3a9b8d7f0fc27189bf37cb6c1921cda8"
+        },
+        "image_seed1": {
+          "file": "generated/train_03_image_s0.png",
+          "sha256": "e3e9156011749fe1ec42779866d362e2796536193c48c87e427df3cd5be801e1"
+        },
+        "joint_seed1": {
+          "file": "generated/train_03_joint_s0.png",
+          "sha256": "1b5b06e6d70697b3eb52e6796d86f33ca784f0c283ae7eea579085335b2d7cfc"
+        },
+        "image_seed2": {
+          "file": "generated/train_03_image_s1.png",
+          "sha256": "53c3d7675e97f1a7f20752793a81dcebeb45652763f62c222c78f29b1a37ce8a"
+        },
+        "joint_seed2": {
+          "file": "generated/train_03_joint_s1.png",
+          "sha256": "807a6782eee3965a5e27a9cb68325b5c757c6c023b4f82310b12f03b7510df34"
+        }
+      }
+    },
+    {
+      "case_id": "train_04",
+      "split": "train",
+      "category": "axe",
+      "prompt": "red diamond axe",
+      "source_filename": "red_diamond_axe.png",
+      "lineage": "mc:EFzlSsqP",
+      "split_group": "project:mc:EFzlSsqP",
+      "target_hash": "d4ad028215e98f2bca867ce3566416a2bb1b76371a53f252230431365cf6ee55",
+      "reference_generator": "qwen",
+      "reference_sha256": "a0a53a1573dc5affb96eb2fe6fa5ad55ee779d0092defe179aadbd988b5c25d1",
+      "generator_license": "Qwen Research License (non-commercial; research/eval only)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/train_04_reference.png",
+      "target_file": "inputs/train_04_target.png",
+      "exported_reference_sha256": "a0a53a1573dc5affb96eb2fe6fa5ad55ee779d0092defe179aadbd988b5c25d1",
+      "exported_target_sha256": "6c1b203e93b6c31086c341bb39a99bac49280d5fd387b1605a9f0945180674ab",
+      "files": {
+        "reference": {
+          "file": "inputs/train_04_reference.png",
+          "sha256": "a0a53a1573dc5affb96eb2fe6fa5ad55ee779d0092defe179aadbd988b5c25d1"
+        },
+        "target": {
+          "file": "inputs/train_04_target.png",
+          "sha256": "6c1b203e93b6c31086c341bb39a99bac49280d5fd387b1605a9f0945180674ab"
+        },
+        "text_seed1": {
+          "file": "generated/train_04_text_s0.png",
+          "sha256": "a02cb867140141de905da1872256ea29876fdb7009ef7c95ebd612d00e6f8767"
+        },
+        "image_seed1": {
+          "file": "generated/train_04_image_s0.png",
+          "sha256": "64e99baa845e9a2f00071842b56f63f7ad50056174650737b963714bf5cffccc"
+        },
+        "joint_seed1": {
+          "file": "generated/train_04_joint_s0.png",
+          "sha256": "434b4afb5a3ab09fbf2c9aef2ab339f6c019fe1e36d3720226c5074ac7f0b2a5"
+        },
+        "image_seed2": {
+          "file": "generated/train_04_image_s1.png",
+          "sha256": "ca96ac44003e0d30bdd83b4a7bd43c3f2c5591bd9b417168c7ec69f25e02e6a3"
+        },
+        "joint_seed2": {
+          "file": "generated/train_04_joint_s1.png",
+          "sha256": "cd3740e44ed1be34d066cb24d330fc1545c259556ce4b6f9dfd718e19f6aecee"
+        }
+      }
+    },
+    {
+      "case_id": "train_05",
+      "split": "train",
+      "category": "helmet",
+      "prompt": "redstone helmet",
+      "source_filename": "redstone_helmet.png",
+      "lineage": "mc:rwm973MN",
+      "split_group": "project:mc:rwm973MN",
+      "target_hash": "4bba5849c9ed04d1585ce4a0655de4c350f71af2544739d40063df0e96a83e09",
+      "reference_generator": "flux",
+      "reference_sha256": "da1e4254a2855c2f86687e0221612743d660901b39b8abf14b286587ed6e4606",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/train_05_reference.png",
+      "target_file": "inputs/train_05_target.png",
+      "exported_reference_sha256": "449cc395b6cead79509c4fd3efb7e197018d0abb8a5b51f514d5a0c87f2ca314",
+      "exported_target_sha256": "a3df75a76d8303d0845e1e121b3e817799b39611e759597122c54b509a9d32a4",
+      "files": {
+        "reference": {
+          "file": "inputs/train_05_reference.png",
+          "sha256": "449cc395b6cead79509c4fd3efb7e197018d0abb8a5b51f514d5a0c87f2ca314"
+        },
+        "target": {
+          "file": "inputs/train_05_target.png",
+          "sha256": "a3df75a76d8303d0845e1e121b3e817799b39611e759597122c54b509a9d32a4"
+        },
+        "text_seed1": {
+          "file": "generated/train_05_text_s0.png",
+          "sha256": "a51bba3e5abda0f0ada738b8ecaf963b5f700f9df4b69a48311308fc815d90c0"
+        },
+        "image_seed1": {
+          "file": "generated/train_05_image_s0.png",
+          "sha256": "dfda3b079a67aded32f190ce9e3ee9d81a9306e526bbed6dbcd4547d880e6357"
+        },
+        "joint_seed1": {
+          "file": "generated/train_05_joint_s0.png",
+          "sha256": "e3271ff9931430fb8c53b8f010a352ee7bdf066cece6fb3b09ff29d8bc8788c5"
+        },
+        "image_seed2": {
+          "file": "generated/train_05_image_s1.png",
+          "sha256": "b490c5af112f62d1b30421de3261742fba3f558d00d51a2c2d59a33b8b22ee92"
+        },
+        "joint_seed2": {
+          "file": "generated/train_05_joint_s1.png",
+          "sha256": "f5c27d7aa73f28ec36f84dfe7dd6092321a543014c75973f5cb40b02be6fe910"
+        }
+      }
+    },
+    {
+      "case_id": "test_00",
+      "split": "test",
+      "category": "sword",
+      "prompt": "tofu metal sword",
+      "source_filename": "tofu_metal_sword.png",
+      "source_mod": "tofucraftreload",
+      "lineage": "mc:69rMY8bC",
+      "split_group": "project:mc:69rMY8bC",
+      "target_hash": "75613ba9850ed8aeaa545adf890128716f88cd569ee32a72f5c102a3a1080cae",
+      "reference_generator": "flux",
+      "reference_sha256": "f5a6135a48b1193bbf6247f8171bd3caa2bcc09b7e8af7ed281f85ad3b71339e",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": false,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/test_00_reference.png",
+      "target_file": "inputs/test_00_target.png",
+      "exported_reference_sha256": "e4f6f1a9507584032ca2441188b05f0ff75e7b7269166baa30f3c921e802d7c0",
+      "exported_target_sha256": "2b5bb10ec684e753a8759ddcae8f7c82f00df4a533b8b85cfbe415f8d03ce0e5",
+      "files": {
+        "reference": {
+          "file": "inputs/test_00_reference.png",
+          "sha256": "e4f6f1a9507584032ca2441188b05f0ff75e7b7269166baa30f3c921e802d7c0"
+        },
+        "target": {
+          "file": "inputs/test_00_target.png",
+          "sha256": "2b5bb10ec684e753a8759ddcae8f7c82f00df4a533b8b85cfbe415f8d03ce0e5"
+        },
+        "text_seed1": {
+          "file": "generated/test_00_text_s0.png",
+          "sha256": "d86ce196afaf5afa7ceaaa99b73a90c3d0aa2c7e3d2d4b2a8024712059833c9e"
+        },
+        "image_seed1": {
+          "file": "generated/test_00_image_s0.png",
+          "sha256": "f2f2f43c77d690c95a593e3e7405e4683b16d7b72e698f72401038865d95fb98"
+        },
+        "joint_seed1": {
+          "file": "generated/test_00_joint_s0.png",
+          "sha256": "d839310529e6ccb93731fe5a0f346b64da90016b65878563c6d18a032c66efb2"
+        },
+        "image_seed2": {
+          "file": "generated/test_00_image_s1.png",
+          "sha256": "f05749b6fa8337e540cf0558cdab69392d2a6270de06492f834e8265de58c78d"
+        },
+        "joint_seed2": {
+          "file": "generated/test_00_joint_s1.png",
+          "sha256": "1c2e6b5c3224e5843998b7b9abf1a790019ddc3aea528a820825aa72bf13ce48"
+        }
+      }
+    },
+    {
+      "case_id": "test_01",
+      "split": "test",
+      "category": "pickaxe",
+      "prompt": "diamond pickaxe",
+      "source_filename": "diamond_pickaxe.png",
+      "source_mod": "agonysupreme",
+      "lineage": "mc:AcJWH8uB",
+      "split_group": "project:mc:AcJWH8uB",
+      "target_hash": "54f82fd9983ba3067e565c1cc6d86a3d9c160d13cb3844575bdbf1dc81fd2093",
+      "reference_generator": "qwen",
+      "reference_sha256": "9e7905aebce613586acbc60a71bbef532ab266ea2870a96dcde1627a589f4913",
+      "generator_license": "Qwen Research License (non-commercial; research/eval only)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/test_01_reference.png",
+      "target_file": "inputs/test_01_target.png",
+      "exported_reference_sha256": "9e7905aebce613586acbc60a71bbef532ab266ea2870a96dcde1627a589f4913",
+      "exported_target_sha256": "08f2a0ba57a6b72950a5355c1b6361ac92b89f94b675a1b1e730131379a99269",
+      "files": {
+        "reference": {
+          "file": "inputs/test_01_reference.png",
+          "sha256": "9e7905aebce613586acbc60a71bbef532ab266ea2870a96dcde1627a589f4913"
+        },
+        "target": {
+          "file": "inputs/test_01_target.png",
+          "sha256": "08f2a0ba57a6b72950a5355c1b6361ac92b89f94b675a1b1e730131379a99269"
+        },
+        "text_seed1": {
+          "file": "generated/test_01_text_s0.png",
+          "sha256": "e4580393c9292ca77bf1cefe004ea6221e13135acc90f5b354d575082ccb3e9e"
+        },
+        "image_seed1": {
+          "file": "generated/test_01_image_s0.png",
+          "sha256": "acb4dbf8cab88dc491e7ae785a9f639f1dbe4a2d69daaddcceff6340a620ed84"
+        },
+        "joint_seed1": {
+          "file": "generated/test_01_joint_s0.png",
+          "sha256": "44ca6852e3f5be078f86a739c3650182dcac9aaaf93d412bb05b955932f7e917"
+        },
+        "image_seed2": {
+          "file": "generated/test_01_image_s1.png",
+          "sha256": "7d303682a3c3d47bf6d983c78bf36afc0cbfa9c507b8a954d3a3be6f5aaa1596"
+        },
+        "joint_seed2": {
+          "file": "generated/test_01_joint_s1.png",
+          "sha256": "d657f408f5536a8a838e51fc9cff68ecc875961715e953489fcd0c5b2688d56b"
+        }
+      }
+    },
+    {
+      "case_id": "test_02",
+      "split": "test",
+      "category": "gem",
+      "prompt": "orange diamond chestplate",
+      "source_filename": "orange_diamond_chestplate.png",
+      "source_mod": "colorful-diamonds-mod",
+      "lineage": "mc:J1FUBOoT",
+      "split_group": "project:mc:J1FUBOoT",
+      "target_hash": "2edd724cb56d5345e8345c82113abba7be33f07f393c4051df96eec5b625a099",
+      "reference_generator": "flux",
+      "reference_sha256": "15dc093820b8fdbd8155e1fcf242069e129109a3bc4375de8bad8a3557f326d1",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/test_02_reference.png",
+      "target_file": "inputs/test_02_target.png",
+      "exported_reference_sha256": "a105f76ab8b1eee3358a7e31a7109be41b32aa368de64d21e445631f846e02c7",
+      "exported_target_sha256": "1d0227e974db1d25f4d5cb718e1f545e1ab87d8230c31602afe55b9a358d0011",
+      "files": {
+        "reference": {
+          "file": "inputs/test_02_reference.png",
+          "sha256": "a105f76ab8b1eee3358a7e31a7109be41b32aa368de64d21e445631f846e02c7"
+        },
+        "target": {
+          "file": "inputs/test_02_target.png",
+          "sha256": "1d0227e974db1d25f4d5cb718e1f545e1ab87d8230c31602afe55b9a358d0011"
+        },
+        "text_seed1": {
+          "file": "generated/test_02_text_s0.png",
+          "sha256": "391b61bbb7100b9c486a0d4383b769b316665f0e193908328ad1918ecc161903"
+        },
+        "image_seed1": {
+          "file": "generated/test_02_image_s0.png",
+          "sha256": "e0424fe67878f1f9ccd5f0cd3bd1749818dd2d0b283ea2e8eecb6b0dedcdcb2d"
+        },
+        "joint_seed1": {
+          "file": "generated/test_02_joint_s0.png",
+          "sha256": "974cdd3c07c99d6d00c61c6fecfeab0e5ed3880a1b5db11f40606f900628a85b"
+        },
+        "image_seed2": {
+          "file": "generated/test_02_image_s1.png",
+          "sha256": "51491df7f1c5a8446b94eb9595d1ce2751e0db71b27b8bd50373c411aa21cae7"
+        },
+        "joint_seed2": {
+          "file": "generated/test_02_joint_s1.png",
+          "sha256": "1ab8e0227994a6e1ae268f50189a11d8c9b890cc3fd89ae09d44648f95f3dc8f"
+        }
+      }
+    },
+    {
+      "case_id": "test_03",
+      "split": "test",
+      "category": "axe",
+      "prompt": "orange diamond axe",
+      "source_filename": "orange_diamond_axe.png",
+      "source_mod": "colorful-diamonds-mod",
+      "lineage": "mc:J1FUBOoT",
+      "split_group": "project:mc:J1FUBOoT",
+      "target_hash": "43d245a7ab1d780eb80b2d55ba72cd82edf5f82e661139969a7758596bb7943d",
+      "reference_generator": "flux",
+      "reference_sha256": "036bd7c23b10af39ac1c99bbe40ee3e426f52df0050b4008a2da743030e2f2ad",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/test_03_reference.png",
+      "target_file": "inputs/test_03_target.png",
+      "exported_reference_sha256": "a7fe8f92236f71c9d5367df8163788fea5cab28057d188c542a761a319970410",
+      "exported_target_sha256": "8f50d37e5cc076f00b5e912e05aa3059aa79411819ac59eeaa67afaae0c56c65",
+      "files": {
+        "reference": {
+          "file": "inputs/test_03_reference.png",
+          "sha256": "a7fe8f92236f71c9d5367df8163788fea5cab28057d188c542a761a319970410"
+        },
+        "target": {
+          "file": "inputs/test_03_target.png",
+          "sha256": "8f50d37e5cc076f00b5e912e05aa3059aa79411819ac59eeaa67afaae0c56c65"
+        },
+        "text_seed1": {
+          "file": "generated/test_03_text_s0.png",
+          "sha256": "5adab4c40cffaf4ca7cb9222db8a43105c3c10bbf89fcf699893b39d8be99dd8"
+        },
+        "image_seed1": {
+          "file": "generated/test_03_image_s0.png",
+          "sha256": "cdb654f322c62fbae11c7b103e8b87af962757072d428edadd52e3983de3c96b"
+        },
+        "joint_seed1": {
+          "file": "generated/test_03_joint_s0.png",
+          "sha256": "a58deb6c380793bbb2e89e90ffe31a9e6555a6a9b01fa88113147bc683f36176"
+        },
+        "image_seed2": {
+          "file": "generated/test_03_image_s1.png",
+          "sha256": "31dede74c9c84be25b51cd9cac376b8d5a43edb2976c39478bd78c42d9079cc9"
+        },
+        "joint_seed2": {
+          "file": "generated/test_03_joint_s1.png",
+          "sha256": "98b43c5dd6c3da0a914351fee56f334bd3f5249d50c0fb25c9f647f7d36822d5"
+        }
+      }
+    },
+    {
+      "case_id": "test_04",
+      "split": "test",
+      "category": "helmet",
+      "prompt": "redstone helmet",
+      "source_filename": "redstone_helmet.png",
+      "source_mod": "more-tools-and-armor",
+      "lineage": "mc:wax1l3ez",
+      "split_group": "project:mc:wax1l3ez",
+      "target_hash": "a9ee7f404a3e97ef368385f6cff471abe3814ded49083e118b20c5d331fbb883",
+      "reference_generator": "flux",
+      "reference_sha256": "76b8969cb37641d804e1efcacccf0f9bd44a6fb204653fd00c7bf98799173160",
+      "generator_license": "Apache-2.0 (black-forest-labs/FLUX.2-klein-4B)",
+      "prompt_seen_in_base_training": true,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/test_04_reference.png",
+      "target_file": "inputs/test_04_target.png",
+      "exported_reference_sha256": "26b82a66ba06a629688616231435649ab4e3273ec98bd9c3e253e26bca20c033",
+      "exported_target_sha256": "ec1a692c51f7a88b7deba07bdc861cb6d80e654dd25d871ababcc9a5f630c796",
+      "files": {
+        "reference": {
+          "file": "inputs/test_04_reference.png",
+          "sha256": "26b82a66ba06a629688616231435649ab4e3273ec98bd9c3e253e26bca20c033"
+        },
+        "target": {
+          "file": "inputs/test_04_target.png",
+          "sha256": "ec1a692c51f7a88b7deba07bdc861cb6d80e654dd25d871ababcc9a5f630c796"
+        },
+        "text_seed1": {
+          "file": "generated/test_04_text_s0.png",
+          "sha256": "a51bba3e5abda0f0ada738b8ecaf963b5f700f9df4b69a48311308fc815d90c0"
+        },
+        "image_seed1": {
+          "file": "generated/test_04_image_s0.png",
+          "sha256": "b85458df57eac545b3354737e636e3d635afb90eaece6fc5fed1c5f50b9fbb27"
+        },
+        "joint_seed1": {
+          "file": "generated/test_04_joint_s0.png",
+          "sha256": "8c58ce750971378738884377a72c0d2e7d18e4c09c227d5a0cd18ff01d5a40bb"
+        },
+        "image_seed2": {
+          "file": "generated/test_04_image_s1.png",
+          "sha256": "5398afad06449de59463257c901a2113c26065902a8d7d0f7259ae62d430db82"
+        },
+        "joint_seed2": {
+          "file": "generated/test_04_joint_s1.png",
+          "sha256": "8976d478d79a20f4ae1070c6fa7a00a7fd452952b7b3d86404eb6e8775634d24"
+        }
+      }
+    },
+    {
+      "case_id": "test_05",
+      "split": "test",
+      "category": "ingot",
+      "prompt": "tungsten ingot new",
+      "source_filename": "tungsten_ingot_new.png",
+      "source_mod": "chemicalcraft",
+      "lineage": "mc:jcHBChfe",
+      "split_group": "project:mc:jcHBChfe",
+      "target_hash": "684b77d713b38c491a00e59ad6d2247019c47f2cbee2ec3fcfb131d00d6661bd",
+      "reference_generator": "qwen",
+      "reference_sha256": "85046b7e80a4aec4d6e6a5ca7cdf148f73a24fefc50bf259f35dcead17eafbcb",
+      "generator_license": "Qwen Research License (non-commercial; research/eval only)",
+      "prompt_seen_in_base_training": false,
+      "selection_seed": 202611044,
+      "generation_seed": 202611042,
+      "reference_file": "inputs/test_05_reference.png",
+      "target_file": "inputs/test_05_target.png",
+      "exported_reference_sha256": "85046b7e80a4aec4d6e6a5ca7cdf148f73a24fefc50bf259f35dcead17eafbcb",
+      "exported_target_sha256": "37501c2cc11ddd776dafb989fdec675a7e9f441510a5fd952efed3323a21ede5",
+      "files": {
+        "reference": {
+          "file": "inputs/test_05_reference.png",
+          "sha256": "85046b7e80a4aec4d6e6a5ca7cdf148f73a24fefc50bf259f35dcead17eafbcb"
+        },
+        "target": {
+          "file": "inputs/test_05_target.png",
+          "sha256": "37501c2cc11ddd776dafb989fdec675a7e9f441510a5fd952efed3323a21ede5"
+        },
+        "text_seed1": {
+          "file": "generated/test_05_text_s0.png",
+          "sha256": "24253de612330425361d7934c3f24ee4ef337ea36f94ca6a55805c662fe92035"
+        },
+        "image_seed1": {
+          "file": "generated/test_05_image_s0.png",
+          "sha256": "97e627eb3b8fbaa24bd013a337343d28b40c6867ce0edc71bff6f251730fe4f6"
+        },
+        "joint_seed1": {
+          "file": "generated/test_05_joint_s0.png",
+          "sha256": "9cfd968fc1c4282264180454acd92841a9d17b3563f8aa5d3a304210f03e6e7e"
+        },
+        "image_seed2": {
+          "file": "generated/test_05_image_s1.png",
+          "sha256": "55c75097276d4136eaf1cdceb76c0d5879cb6ba95b4e23dbf8b22a5e40258a19"
+        },
+        "joint_seed2": {
+          "file": "generated/test_05_joint_s1.png",
+          "sha256": "51d511762b074acf342b95cdba403ada3c9b0b7733400fdd38d04f5398f9623b"
+        }
+      }
+    }
+  ]
+}

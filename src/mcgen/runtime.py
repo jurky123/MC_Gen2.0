@@ -41,21 +41,31 @@ class Runtime:
         self.encoder = TextEncoder(self.config.text, self.config.model, text_device or device)
         if self.encoder.identity != state["text_identity"]:
             raise ValueError("text encoder artifacts changed since training")
+        if self.config.model.multimodal_adapter and state.get("multimodal_identity") != self.encoder.embedding.multimodal_identity:
+            raise ValueError("multimodal encoder protocol changed since adapter training")
         self.metadata = {"format": FORMAT, "step": state["step"],
                          "catalog_fingerprint": state["catalog_fingerprint"],
                          "text_identity": state["text_identity"],
                          "text_backend": self.config.text.backend,
                          "task": self.config.task, "asset_type": self.config.asset_type,
                          "style": self.config.style, "alpha_mode": self.config.alpha_mode,
+                         "conditioning_input": self.config.conditioning_input,
+                         "multimodal_adapter": self.config.model.multimodal_adapter,
                          "reference_encoding": self.config.model.reference_encoding,
-                         "reference_routing": "text:attributes; image-only:shape" if self.config.model.reference_encoding == "dual" else "shape"}
+                         "reference_routing": "pooled_embedding" if self.config.model.multimodal_adapter else ("text:attributes; image-only:shape" if self.config.model.reference_encoding == "dual" else "shape")}
 
-    def generate(self, prompts, references=None, seeds=None, **sampling):
+    def generate(self, prompts, references=None, seeds=None, conditioning_mode="native", **sampling):
         if not prompts:
             raise ValueError("at least one prompt is required (empty string supports image-only)")
         seeds = list(range(len(prompts))) if seeds is None else seeds
         if references is not None and len(references) != len(prompts):
             raise ValueError("one reference or None required per prompt")
+        if conditioning_mode not in ("native", "multimodal_embedding"):
+            raise ValueError("unknown conditioning mode")
+        if conditioning_mode == "multimodal_embedding":
+            return self._generate_multimodal(prompts, references, seeds, sampling)
+        if self.config.model.multimodal_adapter and references is not None and any(r is not None for r in references):
+            raise ValueError("use conditioning_mode=multimodal_embedding for this adapter checkpoint")
         if references is not None and any(r is not None for r in references) and self.config.task == "text":
             raise ValueError("text-only checkpoint was not trained for reference conditioning")
         if self.config.task == "reference" and (references is None or any(r is None for r in references)):
@@ -78,3 +88,27 @@ class Runtime:
                                                and sampling.get("text_scale", 2.) > 0 else "shape" for p in prompts]
             tensors = sample(self.model, text, mask, ref, present, seeds=seeds, **sampling)
         return [decode(x) for x in tensors]  # Raw output; alpha policy is an explicit export operation.
+
+    def _generate_multimodal(self, prompts, references, seeds, sampling):
+        """Pooled multimodal conditioning, optionally using a trained adapter.
+
+        ref_scale guides the complete image/text embedding. There are no separate
+        image and text guidance terms and no spatial-reference branch in this mode.
+        """
+        if (self.config.text.backend != "qwen3_vl_embedding" or
+                self.config.model.conditioning != "text_only" or self.config.task not in ("text", "joint")):
+            raise ValueError("multimodal embedding transfer requires a Qwen VL text-only checkpoint")
+        if references is None or any(r is None for r in references):
+            raise ValueError("multimodal embedding requires a reference for every sample")
+        if sampling.get("reference_mode") is not None:
+            raise ValueError("reference_mode applies only to spatial reference checkpoints")
+        from .tasks import conditioned_prompts
+        texts = conditioned_prompts(prompts, self.config)
+        text, mask = self.encoder.encode_multimodal(texts, references, self.device)
+        sampling.pop("reference_mode", None)
+        sampling["text_scale"] = sampling.pop("ref_scale", 2.)
+        if self.config.model.multimodal_adapter:
+            sampling["embedding_adapter"] = True
+        with torch.inference_mode():
+            tensors = sample(self.model, text, mask, seeds=seeds, **sampling)
+        return [decode(x) for x in tensors]

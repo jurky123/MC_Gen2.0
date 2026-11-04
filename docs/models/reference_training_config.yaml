@@ -1,0 +1,54 @@
+# Archived reference adapter training configuration.
+model:
+  size: 16
+  width: 512
+  depth: 12
+  heads: 8
+  ref_size: 16
+  text_dim: 4096
+  text_length: 1
+  conditioning: text_only
+  byte_tokens: false
+  text_normalization: layernorm
+  reference_encoding: spatial
+  multimodal_adapter: true
+text:
+  backend: qwen3_vl_embedding
+  model: /home/iflab/models/Qwen3-VL-Embedding-8B
+  revision: 2c4565515e0f265c6511776e7193b22c0968ddc7
+  layers:
+  - -1
+  instruction: ''
+  chat_template: true
+  dtype: bfloat16
+  cache_mb: 0
+train:
+  trainable: embedding_adapter
+  steps: 2382
+  batch_size: 384
+  accumulation: 1
+  lr: 0.0002
+  weight_decay: 0.01
+  warmup: 100
+  schedule_start: 0
+  seed: 2026110310
+  text_dropout: 0.15
+  ref_dropout: 0.3
+  paired_fraction: 0.7
+  seam_weight: 0.0
+  precision: bfloat16
+  eval_every: 239
+  val_samples: 256
+  grad_clip: 1.0
+  task_mix:
+    text: 0.0
+    reference: 0.5
+    joint: 0.5
+    unconditional: 0.0
+task: joint
+asset_type: item
+schema_version: 3
+style: ''
+alpha_mode: continuous
+target_scope: all
+conditioning_input: multimodal_embedding

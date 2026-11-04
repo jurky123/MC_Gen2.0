@@ -21,6 +21,7 @@ class GenerateRequest(BaseModel):
     text_scale: float = Field(default=2., ge=0, le=8)
     ref_scale: float = Field(default=2., ge=0, le=8)
     reference_mode: Literal["attributes", "shape"] | None = None
+    conditioning_mode: Literal["native", "multimodal_embedding"] = "native"
     solver: str = "heun"
     export_scale: int = Field(default=1, ge=1, le=16)
     palette_colors: int = Field(default=0, ge=0, le=256)
@@ -59,7 +60,8 @@ def create_app(checkpoint, device="cpu", text_device=None):
             with lock:
                 result = app.state.runtime.generate([req.prompt], [ref] if ref else None,
                     seeds=[req.seed], steps=req.steps, text_scale=req.text_scale,
-                    ref_scale=req.ref_scale, solver=req.solver, reference_mode=req.reference_mode)[0]
+                    ref_scale=req.ref_scale, solver=req.solver, reference_mode=req.reference_mode,
+                    conditioning_mode=req.conditioning_mode)[0]
             image = export(apply_alpha(result, app.state.runtime.config.alpha_mode), req.export_scale, req.palette_colors)
         except (ValueError, UnidentifiedImageError) as exc:
             raise HTTPException(422, str(exc)) from exc
@@ -68,6 +70,7 @@ def create_app(checkpoint, device="cpu", text_device=None):
         return {"png_base64": base64.b64encode(buf.getvalue()).decode(),
                 "native_size": app.state.runtime.config.model.size, "seed": req.seed,
                 "export_scale": req.export_scale, "palette_colors": req.palette_colors,
+                "conditioning_mode": req.conditioning_mode,
                 "model": app.state.runtime.metadata}
 
     return app

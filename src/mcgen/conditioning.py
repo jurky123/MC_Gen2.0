@@ -84,6 +84,11 @@ class TextEncoder:
         return (torch.stack([found[p][0][:length] for p in prompts]).to(output_device),
                 torch.stack([found[p][1][:length] for p in prompts]).to(output_device))
 
+    def encode_multimodal(self, prompts, images, output_device):
+        if getattr(self, "embedding", None) is None:
+            raise ValueError("multimodal embedding requires Qwen3-VL-Embedding")
+        return self.embedding.encode_multimodal(prompts, images, output_device)
+
     def cache_stats(self):
         if getattr(self, "embedding", None) is not None:
             return self.embedding.cache_stats()

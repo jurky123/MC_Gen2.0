@@ -4,9 +4,9 @@
 
 
 
-Text-to-Image · 16×16 RGBA · 81.4M Generator
+Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 
-[生成方式](#生成方式) · [数据与规模](#数据与规模) · [开始使用](#开始使用) · [数据处理抽样](examples/data_review/README.md)
+[参考图效果](#参考图生成实验) · [生成方式](#生成方式) · [数据与规模](#数据与规模) · [开始使用](#开始使用) · [数据处理抽样](examples/data_review/README.md)
 
 </div>
 
@@ -15,16 +15,27 @@ Text-to-Image · 16×16 RGBA · 81.4M Generator
 [PDF 原图](docs/images/showcase/showcase.pdf) · [样本与提示词](docs/images/showcase/manifest.json)
 
 
-使用原始文件名提取文本标注生成，计划未来实现参考图生成。
+使用原始文件名提取文本标注生成。现提供参考图生成实验版，支持纯参考图和图文联合输入。
 
-相比MC_Gen上一版，使用了Flow Matching进行训练，并把文本编码器换成了Qwen的8B文本编码模型。并且用了更多数据。
+相比MC_Gen上一版，使用了Flow Matching进行训练，并把编码器换成了Qwen3-VL-Embedding-8B。并且用了更多数据。
 尝试使用VLM精标注，但是很难得到不错的标注，所以还是恢复了文件名提取文本标注。提示词尽量使用形容词+名词的形式。
 原因主要猜测还是对于MC素材这种低像素风格目前的VLM能力不强，所以没法从低分辨率信息得到精确描述。
 训练数据已上传huggingface：https://huggingface.co/datasets/Risposta/MC_Gen
-之前使用flux和qwen_image生成了一些高清图片-MC素材的图片对，计划后续阶段用来进行获取参考图的能力，从而利用现在的其他高清文生图模型来制造高质量文本与MC素材的数据对，再用于提高文生图的能力。
+参考图实验使用之前由flux和qwen_image生成的高清图片-MC素材配对，冻结原文生图模型，只训练新增适配器。
 展示图使用GPT 6.1sol制作（GPT审美还是太差了）
 
 如果觉得存在侵犯知识版权的问题可以联系我删除checkpoint
+
+## 参考图生成（实验）
+
+![参考图实验：训练内与训练未见样本的真实对照](docs/images/reference_generation/preview.png)
+
+每组依次为：**参考图、MC 原图、纯文本、纯参考图、图文联合**。固定抽样，保留失败结果。
+
+已完成训练内、训练未见各64个新物品的双种子对照，共896张输出。常见物品能成形，浅色过亮、色偏和复杂造型不稳仍明显。原有文生图输出保持一致。
+
+[参考图权重与用法](docs/USAGE.md#参考图生成实验) · [样本与来源](examples/reference_generation/README.md) · [完整对照下载](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/evaluations/reference-step2151)
+
 ## 生成方式
 
 ```mermaid
@@ -39,7 +50,7 @@ flowchart LR
 
 ## 数据与规模
 
-| 项目 | 当前版本 |
+| 项目 | 文生图基础模型 |
 | --- | --- |
 | 输出 | 16×16，RGBA 透明背景 |
 | 生成器 | **81,409,028 参数（约 81.4M）**，512 宽、12 层 Transformer |
@@ -54,7 +65,7 @@ flowchart LR
 
 ## 开始使用
 
-(https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt)（约 326 MB） · [SHA256 校验](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt)
+[下载文生图权重](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/mcgen-step4128.pt)（约 326 MB） · [SHA256 校验](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt)
 
 Qwen3-VL-Embedding-8B 需单独下载，脚本会固定版本并校验文件。
 

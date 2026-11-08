@@ -1,0 +1,40 @@
+{
+  "repo_id": "Risposta/MC_Gen",
+  "repo_type": "dataset",
+  "revision": "c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2",
+  "commit_url": "https://huggingface.co/datasets/Risposta/MC_Gen/commit/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2",
+  "folder_url": "https://huggingface.co/datasets/Risposta/MC_Gen/tree/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000",
+  "verified_files": [
+    "README.md",
+    "SHA256SUMS.txt",
+    "mcgen-reference-five-task-text-step8000.pt",
+    "metadata.json"
+  ],
+  "checkpoint_sha256": "f6f3e0697ec14a148aca53e030c65900dcdc127389cda6e8eac3d1e72bd0a73b",
+  "metadata": {
+    "name": "reference-five-task-text-step8000",
+    "artifact_type": "experimental_inference_checkpoint",
+    "step": 8000,
+    "time_mlp_frozen": false,
+    "parent_step": null,
+    "frozen_continuation_updates": 0,
+    "source_checkpoint_sha256": "ab3de1784c7869f222bb18b822a277263c1c1143605d9cb0dcaea4efe3b28948",
+    "sha256": "f6f3e0697ec14a148aca53e030c65900dcdc127389cda6e8eac3d1e72bd0a73b",
+    "bytes": 347402138,
+    "filename": "mcgen-reference-five-task-text-step8000.pt",
+    "model_parameters": 86668292,
+    "visual_adapter_parameters": 5259264,
+    "text_identity": "7dc02f153dae1b1d277f4b39812e6e6f9fe56d53fb37e371717da06733114402",
+    "visual_identity": "a87c3ae189e45bff2333821a1b7a6db43126b8eb1140783d80d7ebf6619c5050",
+    "native_size": 16,
+    "source_diagnostic_only": false,
+    "optimizer_included": false,
+    "encoder_included": false,
+    "model_tensors_exact": true,
+    "hf_repo": "Risposta/MC_Gen",
+    "hf_repo_type": "dataset",
+    "hf_prefix": "checkpoints/reference-five-task-text-step8000"
+  },
+  "previous_releases_preserved": true,
+  "repo_visibility_unchanged": true
+}

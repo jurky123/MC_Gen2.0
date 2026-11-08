@@ -30,6 +30,8 @@ Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 
 ## 近期参考图结果
 
+当前保留 **8,000步文字最佳版本（未冻结时间MLP）**：[下载权重](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/mcgen-reference-five-task-text-step8000.pt) · [校验文件](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/SHA256SUMS.txt) · [使用说明](docs/USAGE.md#five-task-reference-8000)。
+
 ![五任务与时间MLP冻结：验证和训练样本的实际生成对照](docs/images/time_freeze_reference/comparison.png)
 
 对比本轮 **8,000步**与冻结时间MLP后续训4,000步的 **12,000步**结果。依次为高清参考、MC原图、两版文生图、两版图文生成。固定取4个验证、2个训练目标，保留失败结果。

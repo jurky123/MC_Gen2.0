@@ -4,7 +4,9 @@
 
 ## 当前选用版本
 
-当前选用扩容文生图实验的 **4128 步**。[Hugging Face 下载目录](https://huggingface.co/datasets/Risposta/MC_Gen/tree/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128)，推理文件为 `checkpoints/mcgen-step4128.pt`，原始训练快照仍保留；这是人工比较生成效果后的选择，不是自动误差最小的 4644 步。
+文生图基础模型保留扩容实验的 **4128 步**。[Hugging Face 下载目录](https://huggingface.co/datasets/Risposta/MC_Gen/tree/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128)，推理文件为 `checkpoints/mcgen-step4128.pt`，原始训练快照仍保留；这是人工比较生成效果后的选择，不是自动误差最小的 4644 步。
+
+参考图实验按本次选择保留 **[8,000步五任务版本](#five-task-reference-8000)**，下载和命令见下方。
 
 ```bash
 pip install -e '.[embedding]'
@@ -26,6 +28,28 @@ curl -L --fail -o checkpoints/SHA256SUMS.txt \
   https://huggingface.co/datasets/Risposta/MC_Gen/resolve/85470a51e497cea27ceb4d639e822440f660ac1a/checkpoints/step4128/SHA256SUMS.txt
 (cd checkpoints && sha256sum -c SHA256SUMS.txt)
 ```
+
+<a id="five-task-reference-8000"></a>
+
+## 五任务参考图：8000步
+
+按本次选择保留 **8,000步文字最佳检查点**，支持文生图、纯参考图和图文联合。这个检查点未冻结时间MLP；12,000步冻结续训仅作为[对照](../examples/time_freeze_reference/README.md)。较早版本完整保留，复杂轮廓与装饰仍不稳定。
+
+```bash
+curl -L --fail --create-dirs -o checkpoints/mcgen-reference-five-task-text-step8000.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/mcgen-reference-five-task-text-step8000.pt
+
+MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
+  --checkpoint checkpoints/mcgen-reference-five-task-text-step8000.pt \
+  --reference examples/time_freeze_reference/inputs/val_00_reference.png \
+  --prompt "Tiger's-eye battleaxe" --conditioning-mode visual_tokens \
+  --steps 24 --text-scale 1 --ref-scale 1 --seed 2026110907 \
+  --out outputs/five_task_axe.png --export-scale 8 --device cuda:0
+```
+
+Qwen3-VL-Embedding-8B需单独下载，方法见上文。省略prompt为纯参考图；文生图省略reference和conditioning-mode。下载文件仅包含推理权重，本地完整训练快照及优化器继续保留。
+
+[权重与SHA256](https://huggingface.co/datasets/Risposta/MC_Gen/tree/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000) · [少量真实样本](../examples/time_freeze_reference/README.md) · [实验记录](FIVE_TASK_REFERENCE_20261108.md)
 
 ## 参考图生成（实验）
 

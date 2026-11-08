@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>MC Pair Studio · 训练配对筛选</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='10' height='10' fill='%2323835d'/%3E%3Crect x='18' y='4' width='10' height='10' fill='%2397c5ad'/%3E%3Crect x='4' y='18' width='10' height='10' fill='%2397c5ad'/%3E%3Crect x='18' y='18' width='10' height='10' fill='%2323835d'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="MC Pair Studio 首页"><span class="pixel-logo"><i></i><i></i><i></i><i></i></span><span>MC Pair Studio<small>训练配对筛选</small></span></a>
+    <div class="top-actions"><span class="save-status" id="save-status" role="status"><i></i>正在连接</span><button class="button subtle" id="shortcuts">快捷键 <kbd>?</kbd></button><button class="button primary" id="export-button">导出训练清单 <span id="export-count">0</span><span aria-hidden="true">↗</span></button></div>
+  </header>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-top"><span class="eyebrow">REVIEW WORKSPACE</span><h2>配对工作台</h2><p>把合适的参考，交给下一轮训练。</p></div>
+      <nav class="status-nav" aria-label="审核筛选">
+        <button data-state="pending" class="active"><span><i class="status-dot pending"></i>待审核</span><b id="count-pending">—</b></button>
+        <button data-state="keep"><span><i class="status-dot keep"></i>配对可用</span><b id="count-keep">—</b></button>
+        <button data-state="reject"><span><i class="status-dot reject"></i>已排除</span><b id="count-reject">—</b></button>
+        <button data-state="unsure"><span><i class="status-dot unsure"></i>稍后决定</span><b id="count-unsure">—</b></button>
+        <button data-state="all"><span><i class="status-dot all"></i>全部配对</span><b id="count-all">—</b></button>
+      </nav>
+      <button class="selected-nav" id="selected-filter"><span>✓&nbsp; 本次训练已选</span><b id="selected-sidebar-count">0</b></button>
+      <div class="queue-heading"><span>当前队列 <b id="queue-count">0</b></span><span id="queue-page">1 / 1</span></div>
+      <div class="queue-list" id="queue-list" aria-label="物品列表"></div>
+      <div class="queue-pagination"><button class="button subtle" id="page-prev" aria-label="上一页">← 上一页</button><button class="button subtle" id="page-next" aria-label="下一页">下一页 →</button></div>
+      <div class="sidebar-footer"><span class="local-dot"></span><div>图片与选择保留本机<small>刷新或关闭后，筛选进度仍在。</small></div></div>
+    </aside>
+    <main>
+      <section class="page-heading"><div><span class="eyebrow">CURATE YOUR NEXT TRAINING SET</span><h1>挑选真正匹配的配对<span class="heading-dot">.</span></h1><p>对照 MC 原图审查参考细节，再单独决定是否用于本次训练。</p></div><div class="dataset-label"><span class="dataset-icon">▦</span><div>MC 高清参考图配对集<small id="dataset-size">正在读取本地数据…</small></div></div></section>
+      <section class="stats" aria-label="筛选统计">
+        <div class="stat-card"><span>待审核配对</span><strong id="stat-pending">—</strong><small>从这里开始逐项查看</small></div>
+        <div class="stat-card"><span>已确认可用</span><strong id="stat-keep">—</strong><small>可用不等于已选入训练</small></div>
+        <div class="stat-card selected-stat"><span><i class="status-dot keep"></i>用于本次训练</span><strong id="stat-selected">0<em>对</em></strong><small id="stat-selected-targets">涉及 0 个 MC 物品</small></div>
+        <div class="stat-card"><span>审核进度</span><strong id="stat-progress">0<em>%</em></strong><div class="progress-track"><i id="progress-fill"></i></div></div>
+      </section>
+      <section class="filterbar" aria-label="搜索和筛选"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索文件名或文本标签…" aria-label="搜索文件名或文本标签"><kbd>/</kbd></label><select id="split" aria-label="数据划分"><option value="train">训练配对</option><option value="val">验证配对</option><option value="all">全部划分</option></select><select id="category" aria-label="文件名分组"><option value="">全部文件名分组</option></select><select id="selection-filter" aria-label="训练使用状态"><option value="all">全部选用状态</option><option value="yes">已选入训练</option><option value="no">未选入训练</option></select><div class="view-toggle" aria-label="显示方式"><button data-view="focus" class="active" title="逐项筛选">▣ <span>逐项</span></button><button data-view="grid" title="缩略图浏览">▦ <span>浏览</span></button></div></section>
+      <section id="loading" class="empty-state"><span class="spinner"></span><h2>正在读取配对</h2><p>高清参考图和原生像素图会在这里并排显示。</p></section>
+      <section id="empty" class="empty-state" hidden><span class="empty-symbol">✓</span><h2>这个筛选条件下没有更多物品</h2><p>可以切换审核状态，或从左侧查看已选训练配对。</p><button class="button" id="show-all">查看全部配对</button></section>
+      <section id="focus-view" hidden><div class="item-heading"><div><div class="item-title"><h2 id="item-prompt"></h2><span id="item-split" class="badge"></span></div><p class="filename" id="item-filename"></p></div><div class="item-navigation"><span id="item-position"></span><button id="item-prev" class="icon-button" aria-label="上一个物品" title="上一个物品 ←">←</button><button id="item-next" class="icon-button" aria-label="下一个物品" title="下一个物品 →">→</button></div></div><div class="review-workspace"><article class="target-card"><div class="card-heading"><span>MC 原图</span><span class="tiny-label" id="native-size">16 × 16</span></div><button class="image-stage target-stage checker" id="target-zoom" title="放大查看 MC 原图"><img id="target-image" alt="MC 目标原图"><span class="zoom-hint">↗ 放大</span><span class="pixel-grid" id="pixel-grid" hidden></span></button><div class="target-controls"><label><input id="show-grid" type="checkbox">像素网格</label><div class="background-picker" aria-label="背景"><button data-background="checker" class="active checker" title="透明棋盘背景"></button><button data-background="white" title="白色背景"></button><button data-background="dark" title="深色背景"></button></div></div><div class="target-note"><span>↳</span><p>以这张原图为准，检查参考图是否保留了主要设计、配色和部件。</p></div></article><div id="reference-cards" class="reference-cards"></div></div><footer class="review-actions"><div class="batch-actions"><button class="button primary" id="choose-both">✓ 选入这两对 <kbd>A</kbd></button><button class="button danger-outline" id="reject-both">排除这两对 <kbd>X</kbd></button><button class="button subtle" id="skip-item">稍后决定 <kbd>S</kbd></button></div><div class="review-options"><label><input id="auto-next" type="checkbox" checked>处理完自动下一项</label><button class="button subtle" id="undo">↶ 撤销 <kbd>U</kbd></button></div></footer><p class="selection-explainer"><span class="info-icon">i</span>只有勾选“用于本次训练”的可用配对会进入训练清单。仅标记“可用”不会自动加入。</p></section>
+      <section id="grid-view" hidden><div class="grid-heading"><span id="grid-title">当前页物品</span><div><span id="bulk-count"></span><button class="button primary small" id="bulk-choose">选入训练</button><button class="button danger-outline small" id="bulk-reject">排除</button></div></div><div id="grid-items" class="grid-items"></div></section>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="zoom-dialog" class="zoom-dialog"><div class="dialog-heading"><h2 id="zoom-title">查看图片</h2><button class="icon-button" data-close="zoom-dialog" aria-label="关闭图片">×</button></div><div class="zoom-content checker"><img id="zoom-image" alt="放大图片"></div></dialog>
+  <dialog id="help-dialog"><div class="dialog-heading"><h2>让筛选快一点</h2><button class="icon-button" data-close="help-dialog" aria-label="关闭快捷键">×</button></div><p class="muted">逐项模式下使用。输入备注时不会触发快捷键。</p><dl class="shortcuts"><div><dt>第一张参考：选入 / 排除</dt><dd><kbd>1</kbd> / <kbd>2</kbd></dd></div><div><dt>第二张参考：选入 / 排除</dt><dd><kbd>3</kbd> / <kbd>4</kbd></dd></div><div><dt>两对全部选入训练</dt><dd><kbd>A</kbd></dd></div><div><dt>两对全部排除</dt><dd><kbd>X</kbd></dd></div><div><dt>稍后决定</dt><dd><kbd>S</kbd></dd></div><div><dt>上一个 / 下一个物品</dt><dd><kbd>←</kbd> / <kbd>→</kbd></dd></div><div><dt>撤销上次操作</dt><dd><kbd>U</kbd></dd></div><div><dt>搜索</dt><dd><kbd>/</kbd></dd></div></dl></dialog>
+  <dialog id="export-dialog"><div class="dialog-heading"><div><span class="eyebrow">READY FOR THE NEXT RUN</span><h2>导出本次训练清单</h2></div><button class="icon-button" data-close="export-dialog" aria-label="关闭导出">×</button></div><div class="export-selection"><strong id="export-pairs">0</strong><span>个已明确选用的训练配对<small id="export-targets"></small></span></div><p class="muted">训练数据只包含你明确选中的配对。验证集不会被改成训练集，原始图片与已有实验也不会被修改。</p><label class="field-label" for="validation-policy">验证集范围</label><select id="validation-policy"><option value="exclude_rejected">沿用原验证集，去掉我已排除的配对</option><option value="approved_only">只使用我已确认可用的验证配对</option></select><div class="export-footer"><button class="button primary" id="create-export">生成训练清单 ↗</button><span id="export-progress" class="muted"></span></div><div id="export-result" hidden><div class="export-success">✓ 训练清单已保存到本机</div><p id="export-summary"></p><div class="download-actions"><a id="download-selection" class="button primary" download>下载 selection.json</a><a id="download-archive" class="button" download>下载清单包</a></div><details class="training-details"><summary>在服务器上用于训练</summary><p class="muted">以下清单已在服务器保存，无需从浏览器传回。</p><code id="selection-path"></code><button class="button small" id="copy-path">复制清单位置</button><p class="muted">用它准备独立训练目录，复用原缓存并保持原始划分。</p><pre id="training-command"></pre></details></div></dialog>
+</body>
+</html>

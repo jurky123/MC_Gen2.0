@@ -6,7 +6,7 @@
 
 Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 
-[参考图效果](#参考图生成实验) · [生成方式](#生成方式) · [数据与规模](#数据与规模) · [开始使用](#开始使用) · [数据处理抽样](examples/data_review/README.md)
+[近期结果](#近期参考图结果) · [参考图效果](#参考图生成实验) · [生成方式](#生成方式) · [数据与规模](#数据与规模) · [开始使用](#开始使用) · [数据处理抽样](examples/data_review/README.md)
 
 </div>
 
@@ -21,10 +21,22 @@ Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 尝试使用VLM精标注，但是很难得到不错的标注，所以还是恢复了文件名提取文本标注。提示词尽量使用形容词+名词的形式。
 原因主要猜测还是对于MC素材这种低像素风格目前的VLM能力不强，所以没法从低分辨率信息得到精确描述。
 训练数据已上传huggingface：https://huggingface.co/datasets/Risposta/MC_Gen
-参考图实验使用之前由flux和qwen_image生成的高清图片-MC素材配对，冻结原文生图模型，只训练新增适配器。
+
+[参考图配对数据与标注](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/data/reference-20261107)：高质量主数据与无损16×16训练版本，附真实数据预览。
+参考图实验使用flux和qwen_image生成的高清图片-MC素材配对。早期冻结底座训练适配器，近期加入粗标/精标五任务训练与时间MLP冻结续训。
 展示图使用GPT 6.1sol制作（GPT审美还是太差了）
 
 如果觉得存在侵犯知识版权的问题可以联系我删除checkpoint
+
+## 近期参考图结果
+
+![五任务与时间MLP冻结：验证和训练样本的实际生成对照](docs/images/time_freeze_reference/comparison.png)
+
+对比本轮 **8,000步**与冻结时间MLP后续训4,000步的 **12,000步**结果。依次为高清参考、MC原图、两版文生图、两版图文生成。固定取4个验证、2个训练目标，保留失败结果。
+
+常见物品能够成形，复杂轮廓与装饰仍不稳定。后期失稳的16,000步版本未采用，较早权重完整保留。
+
+[样本、文本与来源](examples/time_freeze_reference/README.md) · [训练方案](docs/FIVE_TASK_REFERENCE_20261108.md) · [稳定性诊断](docs/FIVE_TASK_INSTABILITY_20261108.md)
 
 ## 参考图生成（实验）
 
@@ -94,6 +106,8 @@ MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
 生成器权重通过 Hugging Face 分发；Git 仓库提供代码、展示原图与少量可核验的数据样本，完整数据和特征缓存不随 Git 提交。
 
 [安装、模型准备与更多命令](docs/USAGE.md) · [文本与数据处理](docs/RESOURCE_TEXT_20261103.md) · [项目进度](PROGRESS.md)
+
+[手工筛选训练配对](docs/PAIR_REVIEW.md)：本地网页对照MC原图与两版高清参考图，分别审核并选择是否用于训练，自动保存并导出训练清单。
 
 ## License
 

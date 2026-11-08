@@ -30,7 +30,8 @@ def flow_loss(predicted, image, noisy, t, noise, tileable, seam_weight):
 class Trainer:
     def __init__(self, config, catalog, output, device="cpu", text_device=None, resume=None, initialize=None, encoder=None):
         if config.conditioning_input == 'visual_tokens':
-            raise ValueError('use scripts/train_visual_reference.py for frozen-backbone spatial adaptation')
+            script = 'train_curated_mixed.py' if config.train.trainable == 'joint_finetune' else 'train_visual_reference.py'
+            raise ValueError(f'use scripts/{script} for this spatial-reference training protocol')
         if config.conditioning_input == "multimodal_embedding":
             raise ValueError("use scripts/train_reference_adapter.py for pooled multimodal adapter training")
         if resume and initialize:

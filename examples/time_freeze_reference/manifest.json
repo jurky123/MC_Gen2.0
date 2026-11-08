@@ -1,0 +1,385 @@
+{
+  "source_checkpoint_step": 8000,
+  "time_frozen_checkpoint_step": 12000,
+  "time_frozen_updates": 4000,
+  "seed": 2026110907,
+  "steps": 24,
+  "cfg": 1.0,
+  "precision": "float32",
+  "selection": "first4 validation and first2 training monitoring cases; no output-quality filtering",
+  "scope": "held out of reference fine-tuning, not a claim about base pretraining",
+  "items": [
+    {
+      "id": "val_00",
+      "source_id": "original_gear_blur500__GEAR500_0132",
+      "split": "val",
+      "short_caption": "Tiger's-eye battleaxe",
+      "detail_caption": "Tiger's-eye battleaxe. A gold-orange double-headed battleaxe surrounds a dark brown central socket. The large left blade curves downward inside a pale rim, and the lower-right blade ends in a gold pointed edge. A small upper loop and long red-brown segmented handle add to the ornate diagonal outline",
+      "source_family": "original_gear_blur500",
+      "target_hash": "ce7d04fd94a19cfbe66bf154a7dc35bcea2aef603c2e0d0261f4aac622c563ea",
+      "source_reference_sha256": "0fa86cca29c05ec4f00c1b6a7e57dac5c9ce8b2a7719ce73c439873a0069a655",
+      "provenance": {
+        "id": "GEAR500_0132",
+        "candidate_id": "CAND_0624",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 995915,
+        "rgba_byte_offset": 4079267840,
+        "file_name": "battleaxe_tigers_eye.png",
+        "mod_slug": "spartanawakens",
+        "author": "AquexTheSeal",
+        "license": "LicenseRef-All-Rights-Reserved",
+        "project_id": "8GGz5v9L",
+        "version_url": "https://cdn.modrinth.com/data/8GGz5v9L/versions/ff6cjGfa/spartanawakens-1.16.5-1.1.2.jar",
+        "weak_prompt": "battleaxe tigers eye, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "113264120fc1a5d88b40e4a77610ceadcb0462c755a953ffe3b09bc90b751eeb",
+        "source_png_sha256": "db11749182304196c60c68371855d996114b841e503b681ad6cbc1e69201a28d",
+        "replacement_for_tool_refusal": null
+      },
+      "inputs": {
+        "reference": {
+          "file": "inputs/val_00_reference.png",
+          "sha256": "44dd674d19adbcdde76acabbea932cf66cd31d22e3f97ded765f19aea2dc0545"
+        },
+        "target": {
+          "file": "inputs/val_00_target.png",
+          "sha256": "8a1153dfe0457887d5eeb41359356eb7a20e8748961f3e3ed757d297de0d700b"
+        },
+        "source32": {
+          "file": "inputs/val_00_source32.png",
+          "sha256": "db11749182304196c60c68371855d996114b841e503b681ad6cbc1e69201a28d"
+        }
+      },
+      "outputs": {
+        "text_8000": {
+          "file": "generated/val_00_text_step8000.png",
+          "sha256": "99c9e2c371401b060b90bffb6d45f68f75bee6ff12993bd7b8749be645faff2f"
+        },
+        "text_12000": {
+          "file": "generated/val_00_text_step12000.png",
+          "sha256": "c509d988ab9c6b7a64f30612bae8f3a203fde829eb591baf55d9c324ba1c2421"
+        },
+        "joint_8000": {
+          "file": "generated/val_00_joint_step8000.png",
+          "sha256": "d5d7e7bce2286d4d7ee18b5972464aa701e15d503c9585e220c5f8c625fe5b49"
+        },
+        "joint_12000": {
+          "file": "generated/val_00_joint_step12000.png",
+          "sha256": "b3187ed642b61fcc4307ed5fbdb63fbc1780233df99cc4234c46cc9fd0c83f12"
+        }
+      },
+      "target16_is_exact_2x_collapse": true
+    },
+    {
+      "id": "val_01",
+      "source_id": "original_gear_blur500__GEAR500_0203",
+      "split": "val",
+      "short_caption": "Dragonbone bow",
+      "detail_caption": "Dragonbone bow. A pale ivory bow curves from lower left toward upper right, with several short bone spines projecting from its broad upper limb, a dark gray central grip and a thin dark diagonal string enclosing an open triangular center. Preserve this complete standalone asset in the same orientation and quantity, retaining the distinctive silhouette, dominant palette, openings and stated structural details",
+      "source_family": "original_gear_blur500",
+      "target_hash": "aa7b05c43bbbb89b8ab8aa0e67ac9d0f41cf281eeb949af9594ddfafc2dde83c",
+      "source_reference_sha256": "cabffbfd32bccdd5559c74ea87582d5d1284c7c480365bbc99350e4905805ed8",
+      "provenance": {
+        "id": "GEAR500_0203",
+        "candidate_id": "CAND_0811",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 690286,
+        "rgba_byte_offset": 2827411456,
+        "file_name": "dragonbone_bow.png",
+        "mod_slug": "iceandfire-ce",
+        "author": "IAFEnvoy",
+        "license": "LGPL-3.0-or-later",
+        "project_id": "VpmCsizY",
+        "version_url": "https://cdn.modrinth.com/data/VpmCsizY/versions/T1QiMrAW/IceAndFireCE-1.0-beta.9-1.21.1-neoforge.jar",
+        "weak_prompt": "dragonbone bow, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "52a5316aa0867138c9175ac5ec8ad4f57dc61a541d3ffea029649a264879c016",
+        "source_png_sha256": "5dacd6f422fb1846e5b77c2aaa25a41cdcab3eb9b0c66869949f9be71024cbac",
+        "replacement_for_tool_refusal": null
+      },
+      "inputs": {
+        "reference": {
+          "file": "inputs/val_01_reference.png",
+          "sha256": "9c93d7d1d243e3ff5d8398152804190eb851df51ccbcf594a6d2c8470bdd4c2d"
+        },
+        "target": {
+          "file": "inputs/val_01_target.png",
+          "sha256": "e42f34201fc3bd1b0ffde7117aa59775e239feb5b8282c899eb4fa6a8817284d"
+        },
+        "source32": {
+          "file": "inputs/val_01_source32.png",
+          "sha256": "2231fe407470d960f3309e0820f80532497f3471d946d113bf1289e1c3951fa3"
+        }
+      },
+      "outputs": {
+        "text_8000": {
+          "file": "generated/val_01_text_step8000.png",
+          "sha256": "30cfc146b5b07bb2569995b465b46a8187896899786bd5af600e7a706bfd3613"
+        },
+        "text_12000": {
+          "file": "generated/val_01_text_step12000.png",
+          "sha256": "5812936b968d7a7b4ab3bb2d65609c32320f8f67e682b3594d83457ccf3c1f04"
+        },
+        "joint_8000": {
+          "file": "generated/val_01_joint_step8000.png",
+          "sha256": "f708b4409e52385d872a93725ac84b5a61f13b5148896566a45be1d14b9fed6d"
+        },
+        "joint_12000": {
+          "file": "generated/val_01_joint_step12000.png",
+          "sha256": "b7ae6f62b45fefb2e9dbad55e83fff3d9cdc2d7da70ecd580cad865deb60ec2f"
+        }
+      },
+      "target16_is_exact_2x_collapse": true
+    },
+    {
+      "id": "val_02",
+      "source_id": "original_gear_blur500__GEAR500_0085",
+      "split": "val",
+      "short_caption": "Chess-board knight chestplate",
+      "detail_caption": "Chess-board knight chestplate. A front-facing tunic-like knight armor with dark maroon cloth hanging down both sides, large cream-white shoulder plates and gold fasteners. Silver-gray diagonal and horizontal strips cross the central dark breast. The wide rectangular cloth outline reaches below the compact metal chest section. Keep the entire asset visible, preserving the shown silhouette, main color placement, component positions and all clearly open spaces",
+      "source_family": "original_gear_blur500",
+      "target_hash": "9849592b21bf3d4e4f1c124ca3f0b7d30b616c391b0cec85d1213ddfd0015972",
+      "source_reference_sha256": "aca02f652a4cb2cefcd0799042509d23cae9b1fae30798849ef2145a9abfaac6",
+      "provenance": {
+        "id": "GEAR500_0085",
+        "candidate_id": "CAND_0122",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 655847,
+        "rgba_byte_offset": 2686349312,
+        "file_name": "chess_board_knight_chestplate.png",
+        "mod_slug": "fantasy_armor",
+        "author": "kenddie",
+        "license": "LicenseRef-All-Rights-Reserved",
+        "project_id": "oVmpjYQ5",
+        "version_url": "https://cdn.modrinth.com/data/oVmpjYQ5/versions/3UOqHYfq/fantasy_armor-forge-0.9-1.20.1.jar",
+        "weak_prompt": "chess board knight chestplate, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "8e9158ff7aeaaaf5031a784c79b337b2fe3c403e99091183ce64d1fe5bdc2b24",
+        "source_png_sha256": "90d2f51228fe6b800dfa3af6f512048f150c3204d5d6313b71c36f729ca88beb",
+        "replacement_for_tool_refusal": null
+      },
+      "inputs": {
+        "reference": {
+          "file": "inputs/val_02_reference.png",
+          "sha256": "0d8b05c5a4837b605fbe048da4a04d23b5fb0c6408f3e134b2d95e243151bbd5"
+        },
+        "target": {
+          "file": "inputs/val_02_target.png",
+          "sha256": "51606a89ba2427c4c4209b657d636844479c255eebc90c6a6009c4854dff890d"
+        },
+        "source32": {
+          "file": "inputs/val_02_source32.png",
+          "sha256": "90d2f51228fe6b800dfa3af6f512048f150c3204d5d6313b71c36f729ca88beb"
+        }
+      },
+      "outputs": {
+        "text_8000": {
+          "file": "generated/val_02_text_step8000.png",
+          "sha256": "e84bfc80464e3503646b8c4e7731540c04f64a8ecaaed7078afaf565be61c487"
+        },
+        "text_12000": {
+          "file": "generated/val_02_text_step12000.png",
+          "sha256": "5548a5715fdcae222dcad5b2a003e24cd3e912fba4b069c868bc909eaeeaae89"
+        },
+        "joint_8000": {
+          "file": "generated/val_02_joint_step8000.png",
+          "sha256": "fbf5d07df3a685a6b1cb17bbc994b84e5475f0ac51f0f54e30b41b74fd0cd2dd"
+        },
+        "joint_12000": {
+          "file": "generated/val_02_joint_step12000.png",
+          "sha256": "c1bf01540ea17781c169dcdf5e5a41c70bf79d75161a1b704d7db2cab487a91c"
+        }
+      },
+      "target16_is_exact_2x_collapse": true
+    },
+    {
+      "id": "val_03",
+      "source_id": "original_gear_blur500__GEAR500_0302",
+      "split": "val",
+      "short_caption": "Soul hunter crossbow",
+      "detail_caption": "Soul hunter crossbow. A dark magenta crossbow frame surrounds a blue-and-black diagonal center, with white and cyan bands across the body, pointed pink outer tips and a red-white mounted projectile extending toward the upper left. Preserve this complete standalone asset in the same orientation and quantity, retaining the distinctive silhouette, dominant palette, openings and stated structural details",
+      "source_family": "original_gear_blur500",
+      "target_hash": "632be5b83cc90a2f3286298f5e8a13d19acf8dfac4dfcf33a057f513c90ea77e",
+      "source_reference_sha256": "5e6954cb77b7a901a7c12fed7843cb89db434917823bcca872681026ea841f47",
+      "provenance": {
+        "id": "GEAR500_0302",
+        "candidate_id": "CAND_0823",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 808638,
+        "rgba_byte_offset": 3312181248,
+        "file_name": "soul_hunter_crossbow_firework.png",
+        "mod_slug": "mcdw",
+        "author": "Chronos_Sacaria",
+        "license": "LicenseRef-Timefall-Development-License-1.2",
+        "project_id": "FZmGDE43",
+        "version_url": "https://cdn.modrinth.com/data/FZmGDE43/versions/S2yuB3CX/mcdw-9.0.4.jar",
+        "weak_prompt": "soul hunter crossbow firework, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "31bb9cf3201da6520e3ced6d2ce5f6a7ab3f0b2ad5349a9f888732875a416716",
+        "source_png_sha256": "654f3b8cfb41202296f54035da0b12faa73f0f49dfe3095431e28c1161aef4d7",
+        "replacement_for_tool_refusal": null
+      },
+      "inputs": {
+        "reference": {
+          "file": "inputs/val_03_reference.png",
+          "sha256": "1f1f4f6d818004dd19e04c020833fa2ca076cc18b435613903c12722bda5eb39"
+        },
+        "target": {
+          "file": "inputs/val_03_target.png",
+          "sha256": "f5ed81147aa6104a2acd922cd57478857c87b5de3bb706afd4dab459b4844317"
+        },
+        "source32": {
+          "file": "inputs/val_03_source32.png",
+          "sha256": "654f3b8cfb41202296f54035da0b12faa73f0f49dfe3095431e28c1161aef4d7"
+        }
+      },
+      "outputs": {
+        "text_8000": {
+          "file": "generated/val_03_text_step8000.png",
+          "sha256": "411497c74cee61364b5da4a1841287ff6d17b6f84b98dc335c0de1e665403d29"
+        },
+        "text_12000": {
+          "file": "generated/val_03_text_step12000.png",
+          "sha256": "cfc14a9df06a5dbf8d450ab652b4aad8dee31e57ab743354e8fa472dfd62809f"
+        },
+        "joint_8000": {
+          "file": "generated/val_03_joint_step8000.png",
+          "sha256": "7f3ce8a8faab9376a42bc26f8e57fd37f374d83758d54f60bda7233e6a94ce21"
+        },
+        "joint_12000": {
+          "file": "generated/val_03_joint_step12000.png",
+          "sha256": "8f8091861ba42a7213aff77f5d792f0d6e038feeb0f7a001868840aec3de7ed1"
+        }
+      },
+      "target16_is_exact_2x_collapse": true
+    },
+    {
+      "id": "train_04",
+      "source_id": "original_gear_blur500__GEAR500_0163",
+      "split": "train",
+      "short_caption": "Fire dragon priest helmet",
+      "detail_caption": "Fire dragon priest helmet. A frontal near-black horned helmet with two large tall horns rising at the outer upper sides. A broad dark brow and narrow charcoal bands sit above a deep open face area, with thick cheek guards descending on both sides. Keep the dramatic wide upper horn silhouette",
+      "source_family": "original_gear_blur500",
+      "target_hash": "3aaca8666a72a0addbdc99e4fd93da8e82adc05535e7583cd5a42d068437e55f",
+      "source_reference_sha256": "a5d4c3ae804d624aaeb40e952e0bb1e157987f5174d603d8058316efdce39014",
+      "provenance": {
+        "id": "GEAR500_0163",
+        "candidate_id": "CAND_0056",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 761950,
+        "rgba_byte_offset": 3120947200,
+        "file_name": "fire_dragon_priest_helmet.png",
+        "mod_slug": "ice-and-fire-spellbooks",
+        "author": "AceTheEldritchKing",
+        "license": "MIT",
+        "project_id": "aw5e7yPa",
+        "version_url": "https://cdn.modrinth.com/data/aw5e7yPa/versions/yGm7ayHS/ice_and_fire_spellbooks-2.3.1-1.20.1.jar",
+        "weak_prompt": "fire dragon priest helmet, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "2f27592697b45d01b1bdc56c80d8a21719c28e8979a100ef7ef52c1dbbe9f7f4",
+        "source_png_sha256": "302b8a8c368930ea21722f4e47b0dc9a8f2783e3eca4363805e2fd179bd19198",
+        "replacement_for_tool_refusal": null
+      },
+      "inputs": {
+        "reference": {
+          "file": "inputs/train_04_reference.png",
+          "sha256": "bd04023210d1b562eac36091b5ad19d583bfae02c00bd9179bdf23af808b395d"
+        },
+        "target": {
+          "file": "inputs/train_04_target.png",
+          "sha256": "2bef0690c1d9a47a4f411bbef14d1071c7485791e54868279e263aecd241b97e"
+        },
+        "source32": {
+          "file": "inputs/train_04_source32.png",
+          "sha256": "302b8a8c368930ea21722f4e47b0dc9a8f2783e3eca4363805e2fd179bd19198"
+        }
+      },
+      "outputs": {
+        "text_8000": {
+          "file": "generated/train_04_text_step8000.png",
+          "sha256": "926f4a18d6227ba3de2ae50fafc47e808f51716019559b5a741fcdcb436ee7ec"
+        },
+        "text_12000": {
+          "file": "generated/train_04_text_step12000.png",
+          "sha256": "b2ffaf88fc04c1247c0b6d6fe7466b5f2771f59d478a6727030301483ebfcc5d"
+        },
+        "joint_8000": {
+          "file": "generated/train_04_joint_step8000.png",
+          "sha256": "6506e1d744003e78953ef06cec6f3b560368da6124ebc69c2132ebe3ebe604b3"
+        },
+        "joint_12000": {
+          "file": "generated/train_04_joint_step12000.png",
+          "sha256": "d7427255b51ccb0c2dd2804cb99695b35724f7e410e897d30f04b73fb0c69d4b"
+        }
+      },
+      "target16_is_exact_2x_collapse": true
+    },
+    {
+      "id": "train_05",
+      "source_id": "original_gear_blur500__GEAR500_0343",
+      "split": "train",
+      "short_caption": "Cold crystal helmet",
+      "detail_caption": "Cold crystal helmet. A blue crystal helmet shown in an asymmetric three-quarter view, with layered faceted blue plates forming a large curved upper projection toward the right. A bright cyan rectangular face accent sits above a deep black lower opening. Dark blue edges and a flared lower rim frame the opening",
+      "source_family": "original_gear_blur500",
+      "target_hash": "91ba4ebcbcaa8a663ce51aa6bf0711065ac470838cde9dc7aa50def36663d211",
+      "source_reference_sha256": "0e40f634c9c49cb8b01bf74bb433b84da188d89746e1a0721c38982c6808d8f1",
+      "provenance": {
+        "id": "GEAR500_0343",
+        "candidate_id": "CAND_0095",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 534082,
+        "rgba_byte_offset": 2187599872,
+        "file_name": "cold_crystal_helmet.png",
+        "mod_slug": "confluence",
+        "author": "westernat233",
+        "license": "LGPL-3.0-only",
+        "project_id": "9kp7blvl",
+        "version_url": "https://cdn.modrinth.com/data/9kp7blvl/versions/Vtd8PeOW/ConfluenceOtherworld-1.1.3.jar",
+        "weak_prompt": "cold crystal helmet, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "64b6816075810610efea7154c729c6249b788c33a08b42928769867fbfc6b3ee",
+        "source_png_sha256": "07b64e1434cde31170471dfc08931b3390f65438198175416c0d729e3647f9b6",
+        "replacement_for_tool_refusal": null
+      },
+      "inputs": {
+        "reference": {
+          "file": "inputs/train_05_reference.png",
+          "sha256": "d9fe7181a5aa9d4d99a0595cbe43d8bcc37ada977b0524a004d2a0352ebced54"
+        },
+        "target": {
+          "file": "inputs/train_05_target.png",
+          "sha256": "0d3233eb24650c9db4c3d01eb70435b6ef4da18adb2520ad6494e940fa2b9707"
+        },
+        "source32": {
+          "file": "inputs/train_05_source32.png",
+          "sha256": "07b64e1434cde31170471dfc08931b3390f65438198175416c0d729e3647f9b6"
+        }
+      },
+      "outputs": {
+        "text_8000": {
+          "file": "generated/train_05_text_step8000.png",
+          "sha256": "3bc59b0156e4fe050dedb5767c88d02f220198c442aedb9df942533f396c9811"
+        },
+        "text_12000": {
+          "file": "generated/train_05_text_step12000.png",
+          "sha256": "e1b68825dc3c977f313e71749f9320871b47c8e8056b52f4c0f35a8f8b72f380"
+        },
+        "joint_8000": {
+          "file": "generated/train_05_joint_step8000.png",
+          "sha256": "2945d57a88e9a62fc1f0c9ed3e0daa2c6aea27ac731ee4367444b236c70354c5"
+        },
+        "joint_12000": {
+          "file": "generated/train_05_joint_step12000.png",
+          "sha256": "b9526bf0da0f9e9501d4fe5be7841741790d050ada7ce6932e4831e53590a631"
+        }
+      },
+      "target16_is_exact_2x_collapse": true
+    }
+  ]
+}

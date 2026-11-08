@@ -24,6 +24,7 @@ from mcgen.reference_adapter import initialize_visual_adapter, backbone_digest
 from mcgen.runtime import load_checkpoint, save_checkpoint
 from mcgen.sampling import sample
 from mcgen.tasks import conditioned_prompts
+from mcgen.pair_selection import selected_indices
 
 TEXT_CACHE = 'outputs/qwen_vl_embedding_large_20261103/features'
 
@@ -58,6 +59,12 @@ def prepare(root):
 
 class Data:
     def __init__(self, root, partial=False):
+        selection_file = root/'selection.json'
+        self.selection_sha256 = file_hash(selection_file) if selection_file.exists() else None
+        if self.selection_sha256 is not None:
+            # Retain original feature indices; a reviewed subset may have no
+            # selected samples in the first cache chunk used by ordinary probes.
+            partial = False
         self.audit = json.loads((root/'data_audit.json').read_text())
         self.cfg = Experiment.load(root/'config.yaml')
         pairs_hash = file_hash(root/'pairs.json')
@@ -79,6 +86,7 @@ class Data:
             if hashlib.sha256(np.asarray(self.features[start:start+64]).tobytes()).hexdigest() != digest:
                 raise ValueError('Spatial cache bytes changed')
         self.rows = json.loads((root/'pairs.json').read_text())
+        allowed = selected_indices(selection_file, root/'pairs.json', self.rows) if self.selection_sha256 else None
         if partial:
             self.rows = self.rows[:64]
         if not partial and len(self.rows) != meta['shape'][0]:
@@ -101,7 +109,7 @@ class Data:
         for split in ('train', 'val'):
             groups = defaultdict(list)
             for i, row in enumerate(self.rows):
-                if row['split'] == split:
+                if row['split'] == split and (allowed is None or i in allowed):
                     groups[row['target_hash']].append(i)
             self.groups[split] = list(groups.values())
         train_hashes = {self.rows[g[0]]['target_hash'] for g in self.groups['train']}
@@ -213,8 +221,9 @@ def probe(root, device):
     chosen = min((r for r in valid if r['images_per_second'] >= fastest*.97), key=lambda r: r['batch_size'])
     cfg = data.cfg
     cfg.train.batch_size = chosen['batch_size']
-    targets = data.audit['unique_targets']['train']
+    targets = len(data.groups['train'])
     cfg.train.steps = math.ceil(targets*60/cfg.train.batch_size)
+    cfg.train.warmup = min(cfg.train.warmup, cfg.train.steps-1)
     cfg.train.eval_every = math.ceil(targets*10/cfg.train.batch_size)
     (root/'config.yaml').write_text(yaml.safe_dump(cfg.to_dict(), sort_keys=False))
     atomic_json(root/'batch_budget.json', {'measurements': results, 'chosen': chosen,
@@ -235,6 +244,13 @@ def choose_panels(data):
             if candidates:
                 used.add(candidates[0])
                 selected.append(candidates[0])
+        # Reviewed sets may contain only custom names outside these categories.
+        for group in data.groups[split]:
+            if len(used) >= min(6, len(data.groups[split])):
+                break
+            if group[0] not in used:
+                used.add(group[0])
+                selected.append(group[0])
     return selected
 
 
@@ -337,6 +353,7 @@ def train(root, device, stop_after=None):
         state = load_checkpoint(out/'latest.pt')
         if (Experiment.from_dict(state['config']).to_dict() != cfg.to_dict()
                 or state['visual_identity'] != data.visual_identity
+                or state.get('selection_sha256') != data.selection_sha256
                 or state['catalog_fingerprint'] != data.audit['pairs_sha256']):
             raise ValueError('Resume contract changed')
         model.load_state_dict(state['model'], strict=True)
@@ -361,6 +378,7 @@ def train(root, device, stop_after=None):
     target, text, mask, refs = val_batch
     atomic_json(root/'run.json', {'base_checkpoint': data.audit['base_checkpoint'], 'base_sha256': data.audit['base_checkpoint_sha256'],
         'backbone_sha256': digest, 'visual_identity': data.visual_identity, 'text_identity': data.audit['base_text_identity'],
+        'selection_sha256': data.selection_sha256,
         'training_targets': len(data.groups['train']), 'validation_targets': len(data.groups['val']),
         'validation_pair_indices': val_ids, 'panel_pair_indices': panel_ids,
         'trainable_parameters': sum(p.numel() for p in model.parameters() if p.requires_grad),
@@ -376,6 +394,7 @@ def train(root, device, stop_after=None):
             'optimizer': opt.state_dict(), 'step': step, 'best_joint': best, 'best_image': best_image,
             'text_identity': data.audit['base_text_identity'], 'visual_identity': data.visual_identity,
             'catalog_fingerprint': data.audit['pairs_sha256'], 'backbone_sha256': digest,
+            'selection_sha256': data.selection_sha256,
             'initialization': {'path': data.audit['base_checkpoint'], 'sha256': data.audit['base_checkpoint_sha256'], 'step': 4128}})
 
     @torch.no_grad()
@@ -427,7 +446,7 @@ def train(root, device, stop_after=None):
         rng = torch.Generator().manual_seed(cfg.train.seed+1000003*update)
         ids = data.draw(cfg.train.batch_size, rng)
         batch = data.batch(ids, device)
-        warm = min(1., (update+1)/cfg.train.warmup)
+        warm = min(1., (update+1)/max(1, cfg.train.warmup))
         progress = max(0., (update-cfg.train.warmup)/max(1, cfg.train.steps-cfg.train.warmup))
         lr = cfg.train.lr*warm*(.1+.9*(1+math.cos(math.pi*progress))/2)
         for group in opt.param_groups:

@@ -127,8 +127,8 @@ class TrainConfig:
     task_mix: dict | None = None
 
     def __post_init__(self):
-        if self.trainable not in ("all", "attributes", "embedding_adapter", "visual_adapter"):
-            raise ValueError("trainable must be all, attributes, embedding_adapter or visual_adapter")
+        if self.trainable not in ("all", "attributes", "embedding_adapter", "visual_adapter", "joint_finetune"):
+            raise ValueError("trainable must be all, attributes, embedding_adapter, visual_adapter or joint_finetune")
         if self.task_mix is not None:
             if set(self.task_mix) != {"text", "reference", "joint", "unconditional"}:
                 raise ValueError("task_mix requires text/reference/joint/unconditional probabilities")
@@ -171,12 +171,14 @@ class Experiment:
         if self.conditioning_input not in ("native", "multimodal_embedding", "visual_tokens"):
             raise ValueError("unsupported conditioning_input")
         if self.conditioning_input == 'visual_tokens' and (not self.model.visual_adapter
-                or self.text.backend != 'qwen3_vl_embedding' or self.train.trainable != 'visual_adapter'):
+                or self.text.backend != 'qwen3_vl_embedding' or self.train.trainable not in ('visual_adapter', 'joint_finetune')):
             raise ValueError('visual token training requires Qwen and frozen-backbone visual_adapter training')
         if self.model.visual_adapter and self.conditioning_input != 'visual_tokens':
             raise ValueError('visual adapter requires the explicit spatial token protocol')
         if self.train.trainable == 'visual_adapter' and not self.model.visual_adapter:
             raise ValueError('visual_adapter training requires visual modules')
+        if self.train.trainable == 'joint_finetune' and (not self.model.visual_adapter or self.conditioning_input != 'visual_tokens'):
+            raise ValueError('joint_finetune requires the explicit spatial reference protocol')
         if self.conditioning_input == "multimodal_embedding" and (not self.model.multimodal_adapter or self.text.backend != "qwen3_vl_embedding" or self.train.trainable != "embedding_adapter"):
             raise ValueError("multimodal training requires Qwen VL and frozen-backbone embedding_adapter training")
         if self.model.multimodal_adapter and self.conditioning_input != "multimodal_embedding":

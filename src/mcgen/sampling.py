@@ -5,7 +5,8 @@ import torch
 
 @torch.no_grad()
 def sample(model, text, mask, reference=None, ref_present=None, *, seeds, steps=20,
-           text_scale=2.0, ref_scale=2.0, solver="heun", reference_mode=None, embedding_adapter=False):
+           text_scale=2.0, ref_scale=2.0, solver="heun", reference_mode=None, embedding_adapter=False,
+           initial_noise=None):
     if steps < 1 or solver not in ("euler", "heun"):
         raise ValueError("positive steps and euler/heun solver required")
     if any(not math.isfinite(v) or v < 0 for v in (text_scale, ref_scale)):
@@ -14,9 +15,16 @@ def sample(model, text, mask, reference=None, ref_present=None, *, seeds, steps=
         raise ValueError("one seed required per prompt")
     device = next(model.parameters()).device
     cfg = model.cfg
-    x = torch.cat([torch.randn(1, 4, cfg.size, cfg.size,
-                              generator=torch.Generator(device=device).manual_seed(int(seed)), device=device)
-                   for seed in seeds], 0)
+    if initial_noise is None:
+        x = torch.cat([torch.randn(1, 4, cfg.size, cfg.size,
+                                  generator=torch.Generator(device=device).manual_seed(int(seed)), device=device)
+                       for seed in seeds], 0)
+    else:
+        if (not isinstance(initial_noise, torch.Tensor) or not initial_noise.is_floating_point()
+                or initial_noise.shape != (len(text), 4, cfg.size, cfg.size)
+                or not bool(torch.isfinite(initial_noise).all())):
+            raise ValueError('initial_noise must be finite floating Bx4xSxS matching the native grid')
+        x = initial_noise.to(device=device, dtype=torch.float32).clone()
     null_mask = torch.zeros_like(mask)
     nn = model.context(text, null_mask, None, None)
     if embedding_adapter and not cfg.multimodal_adapter:

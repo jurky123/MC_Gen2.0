@@ -24,6 +24,7 @@ data/staging/
 data/processed/
 data/interim/
 data/catalogs/
+data/*.zip
 *.mmap
 *.parquet
 *.npy

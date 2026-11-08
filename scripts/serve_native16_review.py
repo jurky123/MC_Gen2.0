@@ -20,7 +20,12 @@ class GalleryHandler(SimpleHTTPRequestHandler):
                     'five-task-evaluation', 'five-task-evaluation/',
                     'five-task-evaluation/index.html',
                     'five-task-diagnosis', 'five-task-diagnosis/',
-                    'five-task-diagnosis/index.html'):
+                    'five-task-diagnosis/index.html',
+                    'five-task-broad-replay', 'five-task-broad-replay/',
+                    'five-task-broad-replay/index.html',
+                    'five-task-broad-replay-evaluation', 'five-task-broad-replay-evaluation/',
+                    'five-task-broad-replay-evaluation/index.html',
+                    'replay-evaluation', 'replay-evaluation/', 'replay-evaluation/index.html'):
             permitted = True
         else:
             parts = PurePosixPath(name).parts
@@ -39,7 +44,8 @@ class GalleryHandler(SimpleHTTPRequestHandler):
             permitted |= (len(parts) == 3 and parts[0] == 'recovery-evaluation'
                           and parts[1] in ('inputs', 'native', 'panels')
                           and parts[2].endswith('.png'))
-            permitted |= (len(parts) == 3 and parts[0] in ('five-task', 'five-task-evaluation')
+            permitted |= (len(parts) == 3 and parts[0] in ('five-task', 'five-task-evaluation',
+                          'five-task-broad-replay', 'five-task-broad-replay-evaluation', 'replay-evaluation')
                           and parts[1] in ('inputs', 'native', 'panels')
                           and parts[2].endswith('.png'))
             permitted |= (len(parts) == 3 and parts[0] == 'five-task-diagnosis'

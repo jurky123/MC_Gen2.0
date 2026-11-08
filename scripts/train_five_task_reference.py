@@ -166,17 +166,82 @@ def evaluate(model, data, root, step, device, valid, panels, controls):
         entries.append(([previous/f'common_{j:02d}_before_s0.png', previous/f'common_{j:02d}_last_s0.png', path], COMMON[j], 'Pure T2I | CFG2 | FP32 | fixed prompt and noise'))
     draw_sheet(directory/'common_text.png', f'Update{step} | common T2I | FP32 regression', ['Original270', 'Previous8000', 'Current'], entries)
     score['common_text_drift_from_source'] = {'mean_uint8': float(np.mean(drifts)), 'max_uint8': int(np.max(drifts))}
+    if data.replay is not None:
+        recipe = json.loads((root/'recipe.json').read_text())
+        broad = evaluate_broad_text(model, data, directory, recipe, device)
+        score['broad_text'] = broad
+        score['paired_text_generation_mae'] = score['text_generation_mae']
+        score['text_generation_mae'] = .5*(score['paired_text_generation_mae']+broad['generation_mae'])
+        score['text_selection_policy'] = 'equal weight paired-text and broad-text validation generation MAE'
     atomic_json(directory/'metrics.json', score)
     atomic_json(root/'validation_latest.json', score)
     return score
 
 
+@torch.inference_mode()
+def evaluate_broad_text(model, data, directory, recipe, device):
+    replay = data.replay
+    ids = replay.validation_indices(recipe['broad_text_flow_samples'])
+    flow = {}
+    for level in (.1, .5, .9, .99):
+        errors = defaultdict(list)
+        for start in range(0, len(ids), 32):
+            selected = ids[start:start+32]
+            target, h, mask, _, _ = replay.batch(selected, ['text']*len(selected), device, split='val')
+            eps = torch.randn(target.shape, generator=torch.Generator(device=device).manual_seed(2026110823+start), device=device)
+            x = target*(1-level)+eps*level
+            for name, text, m in [('real', h, mask), ('shuffled', h.roll(1, 0), mask.roll(1, 0)),
+                                  ('null', h, torch.zeros_like(mask))]:
+                with torch.autocast('cuda', dtype=torch.bfloat16):
+                    pred = model(x, torch.full((len(target),), level, device=device), model.context(text, m, None, None))
+                errors[name].extend((pred.float()-(eps-target)).square().mean((1, 2, 3)).cpu().tolist())
+        flow[str(level)] = {name: float(np.mean(v)) for name, v in errors.items()}
+        flow[str(level)]['gain_over_null'] = flow[str(level)]['null']-flow[str(level)]['real']
+        flow[str(level)]['gain_over_shuffle'] = flow[str(level)]['shuffled']-flow[str(level)]['real']
+    generation_ids = ids[:recipe['broad_text_generation_samples']]
+    entries, metrics, rows = [], [], []
+    for start in range(0, len(generation_ids), 8):
+        selected = generation_ids[start:start+8]
+        target, h, mask, _, _ = replay.batch(selected, ['text']*len(selected), device, split='val')
+        # Match the original common-text regression: FP32 / CFG2 / 32 Heun.
+        values = sample(model, h, mask, seeds=[2026110841]*len(selected), steps=32, text_scale=2.,
+                        initial_noise=fixed_noise(len(selected), 2026110841, device))
+        for j, (idx, image) in enumerate(zip(selected, values)):
+            number = start+j
+            row = replay.datasets['val'].records[idx]
+            truth = decode(target[j])
+            truth_path = directory/f'broad_{number:02d}_target.png'
+            truth_path.parent.mkdir(parents=True, exist_ok=True)
+            Image.fromarray(truth).save(truth_path)
+            path = directory/f'broad_{number:02d}.png'
+            Image.fromarray(decode(image)).save(path)
+            metrics.append(image_metrics(path, truth.repeat(2, 0).repeat(2, 1)))
+            entries.append(([truth_path, path], row['prompt'], 'Original broad validation | no reference'))
+            rows.append({k: row[k] for k in ('id', 'target_hash', 'prompt', 'split')})
+    for start in range(0, len(entries), 8):
+        draw_sheet(directory/f'broad_text_{start//8:02d}.png', 'Broad T2I validation | FP32 | CFG2 | fixed noise',
+                   ['MC target', 'Text only'], entries[start:start+8])
+    atomic_json(directory/'broad_text_cases.json', rows)
+    result = {'flow': flow, 'flow_samples': len(ids), 'generation_samples': len(rows),
+              'generation_mae': float(np.mean([r['premultiplied_mae'] for r in metrics])),
+              'generation_alpha_iou': float(np.mean([r['alpha_iou'] for r in metrics])),
+              'sampling': 'fixed category-balanced original validation targets; no test selection',
+              'interpretation': 'Paired reconstruction metrics are diagnostics, not semantic attribute accuracy.'}
+    atomic_json(directory/'broad_text_metrics.json', result)
+    return result
+
+
 def publish(root, step):
     import html
     import shutil
-    destination = Path('outputs/native16_data_review_20261107/five-task')
+    replay = (root/'text_replay.json').exists()
+    recipe = json.loads((root/'recipe.json').read_text())
+    destination = Path('outputs/native16_data_review_20261107')/('five-task-broad-replay' if replay else 'five-task')
     (destination/'panels').mkdir(parents=True, exist_ok=True)
     body = '''<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>五任务平衡训练</title><style>body{font:16px/1.6 system-ui;background:#111827;color:#e5e7eb;max-width:1120px;margin:24px auto;padding:0 16px}a{color:#93c5fd}img{max-width:100%}details{background:#1f2937;padding:16px;margin:18px 0;border-radius:10px}summary{cursor:pointer}</style><p><a href="/recovery-evaluation/">上一轮完整评估</a> · <a href="/five-task-evaluation/">本轮训练结束后完整评估</a></p><h1>五任务平衡训练：验证集优先</h1><p>每对配对同时构造粗标/精标图文生成、粗标/精标文生图、纯参考图五种任务。粗标使用原始名称；旧配对缺精标时如实回退原标签。训练集和划分不变。新增16000次更新，有效batch160；从第一步联合训练。</p><p>对照列为高清参考、MC目标、粗标T2I、精标T2I、粗标图文、精标图文、纯参考。前两图为16个高质量验证目标，第三图为8个旧验证目标，第四图为8个训练目标。常见文生图另外与更早270步、上一轮8000步对照。</p><p>固定参考换文字只检查文字响应；文字与参考冲突时没有配对真值，不将变化幅度当作质量分数。此页不使用测试集选模型；训练完成后另做全部56个测试目标的双种子评估。</p>'''
+    if replay:
+        body = body.replace('新增16000次更新，有效batch160', f'新增{recipe["steps"]}次更新，有效batch{recipe["batch_size"]}')
+        body += '<p>本轮另混入原文生图数据的固定2000个多类型训练目标。下方广域验证沿用原验证划分；高噪声阶段分别比较正确文字、乱序文字和无文字。纯文字最佳由配对与广域验证共同选择。回放用于保留文字覆盖，不代表已经学会参考图编辑。</p>'
     names = [('val_hq_01', '验证集：高质量1'), ('val_hq_02', '验证集：高质量2'),
              ('val_legacy', '验证集：旧数据'), ('train', '训练集'),
              ('text_control', '验证集：固定参考更换文字'), ('common_text', '常见文生图回归')]
@@ -185,8 +250,9 @@ def publish(root, step):
             continue
         scores = json.loads((directory/'metrics.json').read_text())
         current = scores['step']
-        body += f'<details {"open" if current == step else ""}><summary>更新{current}/16000 · 五任务验证MAE {scores["balanced_generation_mae"]:.4f} · 文生图MAE {scores["text_generation_mae"]:.4f}</summary>'
-        for stem, label in names:
+        body += f'<details {"open" if current == step else ""}><summary>更新{current}/{recipe["steps"]} · 五任务验证MAE {scores["balanced_generation_mae"]:.4f} · 文生图MAE {scores["text_generation_mae"]:.4f}</summary>'
+        extra = [(p.stem, f'广域文生图验证 {i+1}') for i, p in enumerate(sorted(directory.glob('broad_text_[0-9][0-9].png')))]
+        for stem, label in names+extra:
             filename = f'{directory.name}_{stem}.png'
             shutil.copy2(directory/f'{stem}.png', destination/'panels'/filename)
             body += f'<h3>{label}</h3><a href="panels/{filename}">原图</a><br><img loading="lazy" src="panels/{filename}">'
@@ -217,6 +283,8 @@ def train(root, device):
     checks = json.loads((root/'checks.json').read_text())
     if not checks['passed']:
         raise ValueError('GPU checks must pass')
+    if data.replay is not None and checks.get('recipe_sha256') != contract:
+        raise ValueError('Replay GPU checks were made for a different recipe')
     micro = checks['chosen']['microbatch']
     print('INITIALIZE_MODEL', 'microbatch', micro, flush=True)
     model, info = initialize(data, device)
@@ -297,7 +365,7 @@ def train(root, device):
             break
         begin = time.monotonic()
         rng = torch.Generator().manual_seed(data.cfg.train.seed+1000003*update)
-        plan = data.five_sampler.sample(recipe['pairs_per_update'], recipe['unconditional_per_update'], rng)
+        plan = data.sample_plan(recipe, rng)
         batch = data.plan_batch(plan, device)
         noisy = noisy_batch(batch[0], data.cfg.train.seed+104729*(update+1), device)
         for group, rate in zip(opt.param_groups, learning_rates(update, recipe)):
@@ -335,7 +403,7 @@ def train(root, device):
         eta = (recipe['steps']-step)*float(np.median(times))+remaining_checks*validation_seconds/max(1, validation_calls)
         if step % 10 == 0 or step == 1:
             atomic_json(root/'status.json', {**metric, 'complete': False, 'planned_steps': recipe['steps'],
-                'microbatch': micro, 'logical_batch': 160, 'elapsed_seconds': time.monotonic()-started,
+                'microbatch': micro, 'logical_batch': recipe['batch_size'], 'elapsed_seconds': time.monotonic()-started,
                 'training_seconds': train_seconds, 'estimated_remaining_seconds': eta,
                 'recent_seconds_per_update': float(np.median(times))})
         if step % 100 == 0:

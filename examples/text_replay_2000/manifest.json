@@ -1,0 +1,129 @@
+{
+  "native_size": 16,
+  "selection": "First fixed selected target for each of12 named replay strata; no visual filtering",
+  "source_catalog_fingerprint": "73026a21f4280e03b7d93322a0ed5bc5395ab614512128e839089ccc8cb6f9cd",
+  "replay_selection_sha256": "8bf493fb66c1f1ab8efd8db31b623c825db15a076a35a13f502bf83ebf98a622",
+  "original_text_unchanged": true,
+  "samples": [
+    {
+      "image": "images/00.png",
+      "source_filename": "quartz_sharpened_netherite_sword.png",
+      "prompt": "quartz sharpened netherite sword",
+      "split": "train",
+      "replay_type": "sword",
+      "target_hash": "e80ad1f0dafafd1230d3d31e9c80fd0a15fb09337df86b89e9c4f7c5f0631706",
+      "png_sha256": "9481aabddd912f00196545b53932a37dd11152ee1308d70c8755505dc37dd747",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/01.png",
+      "source_filename": "wooden_pickaxe_orange.png",
+      "prompt": "wooden pickaxe orange",
+      "split": "train",
+      "replay_type": "pickaxe",
+      "target_hash": "6a382fa29b7a687a621c4df259b9cc4896c56b2e1162f65c457797ebbbb1e86d",
+      "png_sha256": "ddfdb20507a5bcb80a1f5806d343ec10f5569b7dc1b5f9027b3849c756629c23",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/02.png",
+      "source_filename": "brown_glazed_terracotta_helmet.png",
+      "prompt": "brown glazed terracotta helmet",
+      "split": "train",
+      "replay_type": "helmet",
+      "target_hash": "3b12d3ce6310caf1c2a505dc61f41410b8e31497291997badfd00f6452e8ad60",
+      "png_sha256": "20e27e0055ee5e35c1043905e62e83d26f4d3c895f1c2cd243f8de39c9aa1da9",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/03.png",
+      "source_filename": "light_grey_shardplate_chestplate.png",
+      "prompt": "light grey shardplate chestplate",
+      "split": "train",
+      "replay_type": "chestplate",
+      "target_hash": "31a2da8d709aed9be807cc25f01152a5cd2a88217c8d96bd7511f9cb2cf70efd",
+      "png_sha256": "2ae445df3e82d08151a1d0a7754fbb3d593d3a5a962cd5a3fca0b77de0377135",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/04.png",
+      "source_filename": "blue_beetle_ted_boots.png",
+      "prompt": "blue beetle ted boots",
+      "split": "train",
+      "replay_type": "boots",
+      "target_hash": "9baeb0e3b6c0544cd76381c256592d785ead960d237e3a8e7ad74578ab74b576",
+      "png_sha256": "1b0e9b53be05b045bb216e2a9047ae1612293d6685867c407d350f357a63f6b3",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/05.png",
+      "source_filename": "heliodore_gem_3.png",
+      "prompt": "heliodore gem 3",
+      "split": "train",
+      "replay_type": "gem",
+      "target_hash": "43bb8d1dda7d52815186e38b382ba1d976a93f490f412da3e1ccd782dd362420",
+      "png_sha256": "e085badd6845db386c817ba25e3133c4ba06513d3b89b5788f80945fe53fb256",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/06.png",
+      "source_filename": "void_crystal_ingot.png",
+      "prompt": "void crystal ingot",
+      "split": "train",
+      "replay_type": "ingot",
+      "target_hash": "4f22aed7c6c005ea4f4895dcb6758352f93216eb9dd1ae72196c00e269b7200a",
+      "png_sha256": "d97d7330fda4aea69549d0cd0acc401aa57b2b4c0b678f62edfe69d0a18682b9",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/07.png",
+      "source_filename": "diamond_compound_bow_pulling_0.png",
+      "prompt": "diamond compound bow",
+      "split": "train",
+      "replay_type": "bow",
+      "target_hash": "147d5be572c7d65845ac12b920e82da857fe6d1371c5127755bbb6ceb371b0f3",
+      "png_sha256": "d53f15f4fb999f5fdc2f58912d228ae6a3db9954758d7addade6820e56d0f6d4",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/08.png",
+      "source_filename": "sushi_maki.png",
+      "prompt": "sushi maki",
+      "split": "train",
+      "replay_type": "other:food",
+      "target_hash": "9291509ea2e02b1bd1f10a4085c1b029af62e3efdb8efd612cd5f274b8e8b1eb",
+      "png_sha256": "350ca438786992107972fad4c5fdfa8b660d1dc2467a319762dc9d8e388ec4f6",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/09.png",
+      "source_filename": "adze_tconstruct_wood_witch_hazel.png",
+      "prompt": "adze wood witch hazel",
+      "split": "train",
+      "replay_type": "other:plant",
+      "target_hash": "3f01d7b80a47b977429a48a3e45460a0a57d67fda92ee5167aba9dfa6c84fea9",
+      "png_sha256": "b26c6cd0ebf3adedb8678dad1c290254c3cd85d12ae6343b723def01ea8847ef",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/10.png",
+      "source_filename": "smart_barrel.png",
+      "prompt": "smart barrel",
+      "split": "train",
+      "replay_type": "other:container",
+      "target_hash": "b30596b574c78bd04b92429c8de65e039eb96c51b0916eeef9e398bc54577a5f",
+      "png_sha256": "5a2b0b956b54a3a1dd2cb57c93bbdecfe4ca9150d61d606d48315e79f33f9e3b",
+      "caption_supervision": "deterministic_resource_text_only"
+    },
+    {
+      "image": "images/11.png",
+      "source_filename": "mint_chip_ice_cream.png",
+      "prompt": "mint chip ice cream",
+      "split": "train",
+      "replay_type": "other:component",
+      "target_hash": "c200857b212752d090423262169854d8cba680500e3ee40591ece3edbb263048",
+      "png_sha256": "94e92913602142e654641fd38512c300965e3c0539b466286e51c2b755bf1069",
+      "caption_supervision": "deterministic_resource_text_only"
+    }
+  ]
+}

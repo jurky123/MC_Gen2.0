@@ -72,6 +72,8 @@ def main(argv=None):
     p.add_argument("--steps", type=int, default=20)
     p.add_argument("--text-scale", type=float, default=2.)
     p.add_argument("--ref-scale", type=float, default=2.)
+    p.add_argument("--guidance-order", choices=("text_first", "reference_first"), default="text_first",
+                   help="reference_first amplifies text's contribution with the reference already present")
     p.add_argument("--reference-mode", choices=("attributes", "shape"), help="dual checkpoints: default attributes with text, shape for image-only")
     p.add_argument("--solver", choices=("euler", "heun"), default="heun")
     p.add_argument("--export-scale", type=int, default=1)
@@ -157,7 +159,7 @@ def main(argv=None):
         image = runtime.generate([args.prompt], [ref] if ref else None, seeds=[args.seed], steps=args.steps,
                                  conditioning_mode=args.conditioning_mode,
                                  text_scale=args.text_scale, ref_scale=args.ref_scale, solver=args.solver,
-                                 reference_mode=args.reference_mode)[0]
+                                 reference_mode=args.reference_mode, guidance_order=args.guidance_order)[0]
         out.parent.mkdir(parents=True, exist_ok=True)
         export(apply_alpha(image, runtime.config.alpha_mode), args.export_scale, args.palette_colors).save(out)
         atomic_json(out.with_suffix(out.suffix + ".json"), {**runtime.metadata, "request": vars(args)})

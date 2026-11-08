@@ -15,6 +15,8 @@ from prepare_five_task_reference import DEFAULT
 
 def main(root, evaluation, device):
     root = root.resolve()
+    gallery = Path('outputs/native16_data_review_20261107')
+    publish = gallery/('five-task-broad-replay-evaluation' if (root/'text_replay.json').exists() else 'five-task-evaluation')
     handle = (root/'queue.lock').open('w')
     fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
     proof = json.loads((root/'code_verification.json').read_text())
@@ -67,10 +69,10 @@ def main(root, evaluation, device):
             if progress.exists() and json.loads(progress.read_text()).get('phase') == 'complete':
                 continue
             stage('evaluate_'+variant, base+['generate']+common+['--variant', variant, '--device', device])
-        stage('evaluate_render', base+['render']+common)
+        stage('evaluate_render', base+['render']+common+['--publish', str(publish)])
         atomic_json(root/'queue_status.json', {'phase': 'complete', 'updated_unix': time.time(),
-            'training_steps': 16000, 'evaluation': str(evaluation),
-            'url': 'http://localhost:8766/five-task-evaluation/'})
+            'training_steps': json.loads((root/'recipe.json').read_text())['steps'], 'evaluation': str(evaluation),
+            'url': 'http://localhost:8766/'+publish.name+'/'})
     except BaseException as error:
         atomic_json(root/'queue_status.json', {'phase': 'stopped' if stopping[0] else 'failed',
             'error': str(error), 'updated_unix': time.time()})

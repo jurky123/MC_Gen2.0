@@ -6,11 +6,15 @@ import torch
 @torch.no_grad()
 def sample(model, text, mask, reference=None, ref_present=None, *, seeds, steps=20,
            text_scale=2.0, ref_scale=2.0, solver="heun", reference_mode=None, embedding_adapter=False,
-           initial_noise=None):
+           initial_noise=None, guidance_order="text_first"):
     if steps < 1 or solver not in ("euler", "heun"):
         raise ValueError("positive steps and euler/heun solver required")
     if any(not math.isfinite(v) or v < 0 for v in (text_scale, ref_scale)):
         raise ValueError("CFG scales must be finite and nonnegative")
+    if guidance_order not in ("text_first", "reference_first"):
+        raise ValueError("guidance_order must be text_first or reference_first")
+    if embedding_adapter and guidance_order == "reference_first":
+        raise ValueError("reference_first requires separate text and reference conditions")
     if len(seeds) != text.shape[0]:
         raise ValueError("one seed required per prompt")
     device = next(model.parameters()).device
@@ -39,10 +43,17 @@ def sample(model, text, mask, reference=None, ref_present=None, *, seeds, steps=
             tt = model.context(text, mask, reference, ref_present, reference_mode=reference_mode)
         else:
             tt = model.context(text, null_mask, reference, ref_present, reference_mode=reference_mode)
+        if guidance_order == 'reference_first':
+            rn = (model.context(text, null_mask, reference, ref_present, reference_mode=reference_mode)
+                  if text_scale else tt)
 
     def velocity(value, time):
         t = torch.full((value.shape[0],), time, device=device)
         v0 = model(value, t, nn)
+        if has_ref and guidance_order == 'reference_first':
+            vr = model(value, t, rn)
+            vtr = model(value, t, tt) if text_scale else vr
+            return v0+ref_scale*(vr-v0)+text_scale*(vtr-vr)
         vt = model(value, t, tn) if tn is not None else v0
         out = v0 + text_scale * (vt - v0)
         if has_ref:

@@ -23,6 +23,7 @@ class TaskPlan:
     variants: list
     names: list
     pair_slots: list
+    sources: list | None = None
 
     def __len__(self):
         return len(self.ids)
@@ -69,9 +70,37 @@ class FiveTaskData(RecoveryData):
     def __init__(self, root):
         super().__init__(root)
         self.five_sampler = FiveTaskSampler(self.rows)
+        self.replay = None
+        if (root/'text_replay.json').exists():
+            from .text_replay import TextReplayData
+            self.replay = TextReplayData(root, self.cfg, self.encoder.identity)
+            paired_hashes = {p['target_hash'] for p in self.rows}
+            if any(r['target_hash'] in paired_hashes
+                   for ds in self.replay.datasets.values() for r in ds.records):
+                raise ValueError('Replay overlaps paired targets')
+
+    def sample_plan(self, recipe, rng):
+        plan = self.five_sampler.sample(recipe['pairs_per_update'], recipe['unconditional_per_update'], rng)
+        ntext, nnull = recipe.get('replay_text_per_update', 0), recipe.get('replay_null_per_update', 0)
+        if ntext or nnull:
+            if self.replay is None:
+                raise ValueError('Replay requested without a prepared text catalog')
+            from .text_replay import append_replay
+            plan = append_replay(plan, self.replay, ntext, nnull, rng)
+        if len(plan) != recipe['batch_size']:
+            raise ValueError('Task counts do not match the logical batch')
+        return plan
 
     def plan_batch(self, plan, device):
-        return self.batch(plan.ids, plan.tasks, plan.variants, device)
+        if plan.sources is None:
+            return self.batch(plan.ids, plan.tasks, plan.variants, device)
+        from .text_replay import merge_task_batches
+        paired = [j for j, s in enumerate(plan.sources) if s == 'paired']
+        replay = [j for j, s in enumerate(plan.sources) if s == 'replay']
+        a = self.batch([plan.ids[j] for j in paired], [plan.tasks[j] for j in paired],
+            [plan.variants[j] for j in paired], device) if paired else None
+        b = self.replay.batch([plan.ids[j] for j in replay], [plan.tasks[j] for j in replay], device) if replay else None
+        return merge_task_batches(plan, a, b)
 
 
 def configure_trainable(model, freeze_time_mlp=False):

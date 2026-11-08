@@ -132,6 +132,8 @@ class Runtime:
         ref_scale guides the complete image/text embedding. There are no separate
         image and text guidance terms and no spatial-reference branch in this mode.
         """
+        if sampling.get('guidance_order', 'text_first') != 'text_first':
+            raise ValueError('reference_first requires separate text and reference conditions')
         if (self.config.text.backend != "qwen3_vl_embedding" or
                 self.config.model.conditioning != "text_only" or self.config.task not in ("text", "joint")):
             raise ValueError("multimodal embedding transfer requires a Qwen VL text-only checkpoint")

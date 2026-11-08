@@ -25,7 +25,8 @@ def check(root, device, microbatches):
     opt = optimizer(model, recipe)
     ids = [i for i, r in enumerate(data.rows) if r['split'] == 'train'][:8]
     original = model.text.weight.detach().clone()
-    pure = data.batch(ids, ['text']*len(ids), [0]*len(ids), device)
+    pure = (data.replay.batch(data.replay.sample(8, torch.Generator().manual_seed(9917)), ['text']*8, device)
+            if data.replay is not None else data.batch(ids, ['text']*len(ids), [0]*len(ids), device))
     opt.zero_grad(set_to_none=True)
     accumulate_loss(model, pure, noisy_batch(pure[0], 9919, device), 8)
     text_grad = model.text.weight.grad.float().norm().item()
@@ -40,7 +41,7 @@ def check(root, device, microbatches):
             torch.cuda.empty_cache()
             torch.cuda.reset_peak_memory_stats(device)
             for k in range(4):
-                plan = data.five_sampler.sample(31, 5, torch.Generator().manual_seed(1201+k))
+                plan = data.sample_plan(recipe, torch.Generator().manual_seed(1201+k))
                 batch = data.plan_batch(plan, device)
                 noisy = noisy_batch(batch[0], 1301+k, device)
                 opt.zero_grad(set_to_none=True)
@@ -52,8 +53,8 @@ def check(root, device, microbatches):
                 torch.cuda.synchronize(device)
                 timings.append(time.monotonic()-started)
             seconds = statistics.median(timings[1:])
-            result = {'microbatch': micro, 'logical_batch': 160, 'seconds_per_update': seconds,
-                'draws_per_second': 160/seconds, 'peak_reserved_gib': torch.cuda.max_memory_reserved(device)/1024**3}
+            result = {'microbatch': micro, 'logical_batch': recipe['batch_size'], 'seconds_per_update': seconds,
+                'draws_per_second': recipe['batch_size']/seconds, 'peak_reserved_gib': torch.cuda.max_memory_reserved(device)/1024**3}
             measurements.append(result)
             print('PROBE', json.dumps(result), flush=True)
         except torch.cuda.OutOfMemoryError:
@@ -64,10 +65,10 @@ def check(root, device, microbatches):
             break
     good = [x for x in measurements if not x.get('oom')]
     if not good:
-        raise RuntimeError('No feasible logical160 update')
+        raise RuntimeError('No feasible logical batch update')
     fastest = max(x['draws_per_second'] for x in good)
     chosen = min((x for x in good if x['draws_per_second'] >= .97*fastest), key=lambda x: x['microbatch'])
-    plan = data.five_sampler.sample(31, 5, torch.Generator().manual_seed(1471))
+    plan = data.sample_plan(recipe, torch.Generator().manual_seed(1471))
     batch = data.plan_batch(plan, device)
     opt.zero_grad(set_to_none=True)
     parts = accumulate_loss(model, batch, noisy_batch(batch[0], 1481, device), chosen['microbatch'])
@@ -82,7 +83,9 @@ def check(root, device, microbatches):
         'freeze_time_mlp': freeze_time, 'time_weights_unchanged': time_unchanged,
         'measurements': measurements, 'chosen': chosen, 'benchmark_weights_discarded': True,
         'initial_checkpoint_unchanged': file_hash(info['checkpoint']) == info['sha256'],
-        'planned_updates_unchanged': recipe['steps'], 'logical_batch_unchanged': recipe['batch_size']}
+        'planned_updates_unchanged': recipe['steps'], 'logical_batch_unchanged': recipe['batch_size'],
+        'broad_text_gradient_checked': data.replay is not None,
+        'recipe_sha256': file_hash(root/'recipe.json')}
     atomic_json(root/'checks.json', result)
     print(json.dumps(result, indent=2), flush=True)
     if not passed:

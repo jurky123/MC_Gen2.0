@@ -30,15 +30,30 @@ Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 
 ## 近期参考图结果
 
-当前保留 **8,000步文字最佳版本（未冻结时间MLP）**：[下载权重](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/mcgen-reference-five-task-text-step8000.pt) · [校验文件](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/SHA256SUMS.txt) · [使用说明](docs/USAGE.md#five-task-reference-8000)。
+**2000张多类型文生图回放实验**
+
+![回放训练后：固定前4个参考测试目标的实际生成对照](docs/images/text_replay_20261108/overview_test.png)
+
+依次为参考图、MC目标、训练前、文字最佳4000步、参考最佳2000步、最终8000步。固定抽样，保留失败结果。
+
+文生图有小幅恢复，参考图泛化和联合文字控制尚未明显改善。已完成训练内外5504张原生输出对照。
+
+[文生图对照与完整评估](docs/REFERENCE_TEXT_REPLAY_EVALUATION_20261108.md) · [少量回放数据与原标签](examples/text_replay_2000/README.md)
+
+公开参考图权重为上一轮 **8,000步文字最佳版本（未冻结时间MLP）**：[下载权重](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/mcgen-reference-five-task-text-step8000.pt) · [校验文件](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/c14c8a4f1b869d5b57bcff9ebe2c18cd745a97a2/checkpoints/reference-five-task-text-step8000/SHA256SUMS.txt) · [使用说明](docs/USAGE.md#five-task-reference-8000)。
+
+<details>
+<summary>上一轮：时间MLP冻结对照</summary>
 
 ![五任务与时间MLP冻结：验证和训练样本的实际生成对照](docs/images/time_freeze_reference/comparison.png)
 
-对比本轮 **8,000步**与冻结时间MLP后续训4,000步的 **12,000步**结果。依次为高清参考、MC原图、两版文生图、两版图文生成。固定取4个验证、2个训练目标，保留失败结果。
+对比上一轮 **8,000步**与冻结时间MLP后续训4,000步的 **12,000步**结果。依次为高清参考、MC原图、两版文生图、两版图文生成。固定取4个验证、2个训练目标，保留失败结果。
 
 常见物品能够成形，复杂轮廓与装饰仍不稳定。后期失稳的16,000步版本未采用，较早权重完整保留。
 
 [样本、文本与来源](examples/time_freeze_reference/README.md) · [训练方案](docs/FIVE_TASK_REFERENCE_20261108.md) · [稳定性诊断](docs/FIVE_TASK_INSTABILITY_20261108.md)
+
+</details>
 
 ## 参考图生成（实验）
 

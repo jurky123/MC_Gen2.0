@@ -1,0 +1,288 @@
+{
+  "selection": "first2 test and first2 train in fixed evaluation order; no quality filtering",
+  "protocol": {
+    "old_evaluation": "outputs/reference_text_replay2000_review_20261108",
+    "new_evaluation": "outputs/token_full_hq_evaluation_20261109",
+    "old_model": {
+      "step": 4000,
+      "file_sha256": "13fce5f4dbcbda5ee9ab095e44c9572d9b98fb8a5d74e3b740deb3dfaa6a47fb",
+      "model_sha256": "3187eb2d53caf57fcc2237d1a457450680120e3266648f1d71b75245cc69a4d0",
+      "text_identity": "7dc02f153dae1b1d277f4b39812e6e6f9fe56d53fb37e371717da06733114402",
+      "visual_identity": "a87c3ae189e45bff2333821a1b7a6db43126b8eb1140783d80d7ebf6619c5050"
+    },
+    "new_model": {
+      "step": 12000,
+      "file_sha256": "1a2066911607990c0d68d4da4251dbd8dc23ffabdc0ae129827b3c4ff6be4c4a",
+      "model_sha256": "03b275328e97b2afca884da2efc0fa197ac0d876e0b48ef70a54d7897a45271c",
+      "text_identity": "2a5575891df79d6483341b3ff83ab69abae80a73f589abe3a39c07d2333e64f0",
+      "visual_identity": "a87c3ae189e45bff2333821a1b7a6db43126b8eb1140783d80d7ebf6619c5050"
+    },
+    "seeds": [
+      2026110841,
+      2026110842
+    ],
+    "steps": 32,
+    "precision": "float32",
+    "reference_cfg": 1.0,
+    "text_cfg": 2.0,
+    "note": "Each model uses its own correct text representation; not token0 versus trained."
+  },
+  "items": [
+    {
+      "id": "original_gear_blur500__GEAR500_0006",
+      "split": "test",
+      "captions": [
+        "Winter-storm spear",
+        "Winter-storm spear. A short diagonal blue crystalline spear with a broad angular multi-pronged head at upper right and a smaller pale-blue point below the lower-left grip. The brown center handle is visible between the two blue sections. Light blue facets and darker violet edges define the asymmetrical broad crystal head and narrow lower tip"
+      ],
+      "source_family": "original_gear_blur500",
+      "target_hash": "a7f476694b72b68ff8a741206a9afddf2ed074e8cb326ae6f175cdbd87ffcb46",
+      "reference_sha256": "5c71d1c1e1f6338f587102e706cdaf312775a82f45599f2072aa06b132c5338b",
+      "provenance": {
+        "id": "GEAR500_0006",
+        "candidate_id": "CAND_0440",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 845863,
+        "rgba_byte_offset": 3464654848,
+        "file_name": "spear_of_winter_storm.png",
+        "mod_slug": "l2weaponry",
+        "author": "lcy0x1",
+        "license": "LGPL-2.1-only",
+        "project_id": "7q7kOZix",
+        "version_url": "https://cdn.modrinth.com/data/7q7kOZix/versions/LsT3l3jp/l2weaponry-2.5.1.jar",
+        "weak_prompt": "spear of winter storm, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "0487f6ee2961f1167a305250f2193f5e4d6fe48705a7b98e2d409682a4d4787f",
+        "source_png_sha256": "84fbe7cc9e5266660f17f1effa4aaa518d27df1667bead77f2ad14b3a559aa94",
+        "replacement_for_tool_refusal": null
+      },
+      "files": {
+        "reference": {
+          "file": "test_00_reference.png",
+          "sha256": "c9fa6f54c2cdf146f4a499a1e7c4cdda34ffb3ff40530c72abe3f372df97623b"
+        },
+        "target": {
+          "file": "test_00_target.png",
+          "sha256": "818930cb48151132eb4d05304d6cda0ea71db232375587ecefbf581b53d066a5"
+        },
+        "old_text_detail": {
+          "file": "test_00_old_text_detail.png",
+          "sha256": "5fa445fb628828cef9ca8c6957680f2d81d0a457c482e230f03e69edaa42c2e4"
+        },
+        "old_joint_detail": {
+          "file": "test_00_old_joint_detail.png",
+          "sha256": "b0b71280eeeb77e4d2827307617f495edcbb714293bcc65990408b85ea9d98fa"
+        },
+        "old_reference": {
+          "file": "test_00_old_reference.png",
+          "sha256": "09afc8faab7012c8ae15092f30e692c2bbb83546c43d9572da5e859aa094dae5"
+        },
+        "new_text_detail": {
+          "file": "test_00_new_text_detail.png",
+          "sha256": "65e196d89c1d67231bb42daf24e1aeaeaf44a59c5b9a8b658afce18fb34a500e"
+        },
+        "new_joint_detail": {
+          "file": "test_00_new_joint_detail.png",
+          "sha256": "0e7b86fb0415e01160e3c61e283e91e65ae35d91bef36a4dcc99b19027e6cd85"
+        },
+        "new_reference": {
+          "file": "test_00_new_reference.png",
+          "sha256": "3a4b2657f1936e4f95d3bb5ad6290738640b721e0f84ef3f61bcb19f07bae53c"
+        }
+      }
+    },
+    {
+      "id": "original_gear_blur500__GEAR500_0030",
+      "split": "test",
+      "captions": [
+        "Spider carapace knight boots",
+        "Spider carapace knight boots. A matching pair of tall brown-red armored boots, each topped by a dark blue cuff with two small upright points. Layered tan and mauve plates run down the shins into broad blocky feet pointing outward. Keep the separate mirrored boots, cuff spikes and segmented carapace-like leg plating"
+      ],
+      "source_family": "original_gear_blur500",
+      "target_hash": "ddd843cf83b57f6d91befba2e896fa1212d4d18385fea309c7414b42efad381f",
+      "reference_sha256": "f7cfa75fbc043b6d3b05d081bc7ed28beb928dd0a8099c722c5dd9b4ff8e15b4",
+      "provenance": {
+        "id": "GEAR500_0030",
+        "candidate_id": "CAND_0221",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 593686,
+        "rgba_byte_offset": 2431737856,
+        "file_name": "knight_spider_carapace_boots.png",
+        "mod_slug": "tensura-reincarnated",
+        "author": "charismara",
+        "license": "LicenseRef-All-Rights-Reserved",
+        "project_id": "Br0kXPwc",
+        "version_url": "https://cdn.modrinth.com/data/Br0kXPwc/versions/WYOAG1ac/tensura-1.19.2-1.0.2.3.jar",
+        "weak_prompt": "knight spider carapace boots, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "31ad7a1e40ba8ea2f2fcc3f5fc2a84c0b652c9c74b06092eec4e517edf774636",
+        "source_png_sha256": "1e6b6edfbd26cb4da6f638dbe64c6cb7bd8f69fe99d825db66fdda17b1b373d5",
+        "replacement_for_tool_refusal": null
+      },
+      "files": {
+        "reference": {
+          "file": "test_01_reference.png",
+          "sha256": "7cd843aecdd62c1b333b0f4b01c65bd55c7a5cd7cb469ada21b9f4d73d606e96"
+        },
+        "target": {
+          "file": "test_01_target.png",
+          "sha256": "378542957961a9eda90d1f27afdb5bce9fbfbcde790aeff37aaa67b5090439cf"
+        },
+        "old_text_detail": {
+          "file": "test_01_old_text_detail.png",
+          "sha256": "2af81acd0c30c580f8164f7d8691df2540f007413ac92aa26e106483235aaa8b"
+        },
+        "old_joint_detail": {
+          "file": "test_01_old_joint_detail.png",
+          "sha256": "af2e7089747f72ebf3c5e1fd156a9e79ce45e7a9a4e164654209379fb698c63f"
+        },
+        "old_reference": {
+          "file": "test_01_old_reference.png",
+          "sha256": "c5442e795a3c25789ed8d4e1742e63b0b26fca06fc437058cea176ae468c76a0"
+        },
+        "new_text_detail": {
+          "file": "test_01_new_text_detail.png",
+          "sha256": "cdc57b5655949131c8dc2ebbf724355b58077e4c7a9f687a6e26f44437aff2a0"
+        },
+        "new_joint_detail": {
+          "file": "test_01_new_joint_detail.png",
+          "sha256": "e042e1a5657d9c756f15e797b04e8e2ee17d38a05195f08c8dabca899a129b82"
+        },
+        "new_reference": {
+          "file": "test_01_new_reference.png",
+          "sha256": "8280eaef066311c647ad3a6ecf9e32e1cf8b70a11037e6a7a7e93dd631a9105a"
+        }
+      }
+    },
+    {
+      "id": "original_gear_blur500__GEAR500_0163",
+      "split": "train",
+      "captions": [
+        "Fire dragon priest helmet",
+        "Fire dragon priest helmet. A frontal near-black horned helmet with two large tall horns rising at the outer upper sides. A broad dark brow and narrow charcoal bands sit above a deep open face area, with thick cheek guards descending on both sides. Keep the dramatic wide upper horn silhouette"
+      ],
+      "source_family": "original_gear_blur500",
+      "target_hash": "3aaca8666a72a0addbdc99e4fd93da8e82adc05535e7583cd5a42d068437e55f",
+      "reference_sha256": "a5d4c3ae804d624aaeb40e952e0bb1e157987f5174d603d8058316efdce39014",
+      "provenance": {
+        "id": "GEAR500_0163",
+        "candidate_id": "CAND_0056",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 761950,
+        "rgba_byte_offset": 3120947200,
+        "file_name": "fire_dragon_priest_helmet.png",
+        "mod_slug": "ice-and-fire-spellbooks",
+        "author": "AceTheEldritchKing",
+        "license": "MIT",
+        "project_id": "aw5e7yPa",
+        "version_url": "https://cdn.modrinth.com/data/aw5e7yPa/versions/yGm7ayHS/ice_and_fire_spellbooks-2.3.1-1.20.1.jar",
+        "weak_prompt": "fire dragon priest helmet, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "2f27592697b45d01b1bdc56c80d8a21719c28e8979a100ef7ef52c1dbbe9f7f4",
+        "source_png_sha256": "302b8a8c368930ea21722f4e47b0dc9a8f2783e3eca4363805e2fd179bd19198",
+        "replacement_for_tool_refusal": null
+      },
+      "files": {
+        "reference": {
+          "file": "train_00_reference.png",
+          "sha256": "01d38f6355e37507eb65c3f78773b5380c06f9e175d27113c568f83c033ed808"
+        },
+        "target": {
+          "file": "train_00_target.png",
+          "sha256": "2bef0690c1d9a47a4f411bbef14d1071c7485791e54868279e263aecd241b97e"
+        },
+        "old_text_detail": {
+          "file": "train_00_old_text_detail.png",
+          "sha256": "59db9bf85bdf4c0f3086061e971efbe9cb137e7db190981bb2e2cfbb6606e1d0"
+        },
+        "old_joint_detail": {
+          "file": "train_00_old_joint_detail.png",
+          "sha256": "500cb3bd578ef014d3cf9fbd5529a6c49157ffe7c51a812206e9d6caa23d8018"
+        },
+        "old_reference": {
+          "file": "train_00_old_reference.png",
+          "sha256": "c917a4eda44b24795d73051f9ebad264c824a323633e0757166e39f6c06a401c"
+        },
+        "new_text_detail": {
+          "file": "train_00_new_text_detail.png",
+          "sha256": "12b78cf649eb3becc636b478fa3898ffdc5deb82a066c5cef59f01f70b51cd92"
+        },
+        "new_joint_detail": {
+          "file": "train_00_new_joint_detail.png",
+          "sha256": "b8de19ad96b236dc16f62784530efdce40f94f6316c91fb6029e11a09b7064f0"
+        },
+        "new_reference": {
+          "file": "train_00_new_reference.png",
+          "sha256": "d8e4e07edcdb69c73a8dee09ea20a0358cd5fd1733eaed7693449495771262a7"
+        }
+      }
+    },
+    {
+      "id": "original_gear_blur500__GEAR500_0114",
+      "split": "train",
+      "captions": [
+        "Black samurai mask helmet",
+        "Black samurai mask helmet. A frontal black helmet has a large gold U-shaped crest above a low dark red brow band, narrow light eye slots and splayed black cheek flaps on both sides. Preserve this complete standalone asset in the same orientation and quantity, retaining the distinctive silhouette, dominant palette, openings and stated structural details"
+      ],
+      "source_family": "original_gear_blur500",
+      "target_hash": "f88075be3e8a656d93d6a78a117da4bcd941214f5e808ab03eb44c1ac3cf4b4a",
+      "reference_sha256": "004249cfba4a83488b5cb220579cf298649da5a95553a0be4abbc60a41ed5fe7",
+      "provenance": {
+        "id": "GEAR500_0114",
+        "candidate_id": "CAND_0037",
+        "dataset": "Risposta/MC_Gen",
+        "revision": "e1b7f0499c6fd1b9b35e64ca7cdcc8bed65b4d99",
+        "index": 791584,
+        "rgba_byte_offset": 3242328064,
+        "file_name": "black_samurai_helmet_mask_icon.png",
+        "mod_slug": "lets-forge-bronze-and-iron",
+        "author": "szczypikrul",
+        "license": "LicenseRef-All-Rights-Reserved",
+        "project_id": "yjNrwxNh",
+        "version_url": "https://cdn.modrinth.com/data/yjNrwxNh/versions/OHZwRGrf/Lets_Forge_BronzeAndIron_%5B1_20_1%5D_5_0.jar",
+        "weak_prompt": "black samurai helmet mask icon, minecraft pixel art item texture",
+        "text": "a 16x16 pixel art minecraft texture of texture, high quality game sprite",
+        "source_rgba_sha256": "0d749f821e1ed64315eb33e1aa839f5fa1efc31d461f5d48575c5759daba5fea",
+        "source_png_sha256": "bb355f6d55291884cbce6a9523812ef80e43689de5cdf00b374d2df228048e6b",
+        "replacement_for_tool_refusal": null
+      },
+      "files": {
+        "reference": {
+          "file": "train_01_reference.png",
+          "sha256": "e7fccf61c1be04a72644a993d43fdec4f7cfaeb60c1c7831ebc5b21c4abc9d57"
+        },
+        "target": {
+          "file": "train_01_target.png",
+          "sha256": "4b98a98cace54b9d50993ccb64a69c279d1df2c1bee3b1db7c3623ceded5f22a"
+        },
+        "old_text_detail": {
+          "file": "train_01_old_text_detail.png",
+          "sha256": "6062a476926ae8a7666126216cf0b04419ca5f0ffbbf1c962be777399f932363"
+        },
+        "old_joint_detail": {
+          "file": "train_01_old_joint_detail.png",
+          "sha256": "117836e52ab5838ddb3f4aad84da03034926cb63f4ea8dad137e475073269ff9"
+        },
+        "old_reference": {
+          "file": "train_01_old_reference.png",
+          "sha256": "a5df5a8dcf6f7b90a3b20a95bcff09e4bbfbc8e88a8526d0640ad136b243b772"
+        },
+        "new_text_detail": {
+          "file": "train_01_new_text_detail.png",
+          "sha256": "3b4e6dec503031703fe6a1818efcba1575e90583dd41f3f14754726ec1ce7b3e"
+        },
+        "new_joint_detail": {
+          "file": "train_01_new_joint_detail.png",
+          "sha256": "37e0b1a367afc34a8702f0804712adebc4f90f8831df590b0eee4962944b2b6b"
+        },
+        "new_reference": {
+          "file": "train_01_new_reference.png",
+          "sha256": "76e00e0111a4100e33bdfd160cd7ed0c55a9983933a3e60edefe53005a08de53"
+        }
+      }
+    }
+  ]
+}

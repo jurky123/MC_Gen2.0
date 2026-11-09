@@ -9,7 +9,7 @@ import torch
 
 from .catalog import file_hash, read_catalog
 from .dataset import CatalogDataset
-from .disk_text import DiskTextEncoder
+from .disk_text import load_text_cache
 from .tasks import conditioned_prompts
 
 REPLAY_FAMILIES = {
@@ -157,13 +157,15 @@ def select_replay_records(records, pairs):
 
 
 class TextReplayData:
-    def __init__(self, root, cfg, text_identity):
+    def __init__(self, root, cfg, text_identity,encoder=None):
         self.spec = json.loads((Path(root)/'text_replay.json').read_text())
         recipe = json.loads((Path(root)/'recipe.json').read_text())
         if file_hash(Path(root)/'text_replay.json') != recipe['text_replay_sha256']:
             raise ValueError('Replay specification changed after recipe preparation')
         spec = self.spec
-        self.encoder = DiskTextEncoder(spec['features'], text_identity)
+        self.encoder = (encoder if encoder is not None and encoder.root==Path(spec['features']).resolve()
+                        else load_text_cache(spec['features'],text_identity))
+        if self.encoder.identity!=text_identity:raise ValueError('Replay text encoder identity mismatch')
         for name, digest in spec['feature_hashes'].items():
             if file_hash(Path(spec['features'])/name) != digest:
                 raise ValueError('Replay text cache changed: '+name)
@@ -243,9 +245,12 @@ def merge_task_batches(plan, paired_batch, replay_batch):
         if example is None:
             outputs.append(None)
             continue
-        result = example.new_zeros((len(plan), *example.shape[1:]))
+        shape=list(example.shape[1:])
+        if k in (1,2):shape[0]=max(b[k].shape[1] for _,b in blocks)
+        result = example.new_zeros((len(plan), *shape))
         for positions, b in blocks:
             if b[k] is not None:
-                result[positions] = b[k]
+                if k in (1,2):result[positions,:b[k].shape[1]]=b[k]
+                else:result[positions] = b[k]
         outputs.append(result)
     return tuple(outputs)

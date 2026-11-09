@@ -71,6 +71,16 @@ def test_shuffled_replay_rows_keep_target_caption_and_absent_reference_aligned()
     assert torch.count_nonzero(ref[[0, 2]]) == 0 and torch.all(ref[1] == 1)
 
 
+def test_token_sequences_of_different_lengths_merge_without_dropping_words():
+    plan=TaskPlan([0,0],['joint','text'],[0,0],['joint_short','broad_text'],[0,-1],['paired','replay'])
+    paired=(torch.zeros(1,4,2,2),torch.full((1,7,8),2.),torch.ones(1,7,dtype=torch.bool),torch.ones(1,4,8),torch.tensor([True]))
+    replay=(torch.zeros(1,4,2,2),torch.full((1,3,8),3.),torch.ones(1,3,dtype=torch.bool),None,torch.tensor([False]))
+    _,h,m,ref,present=merge_task_batches(plan,paired,replay)
+    assert h.shape==(2,7,8) and m.sum(-1).tolist()==[7,3]
+    assert torch.all(h[0]==2) and torch.all(h[1,:3]==3) and not h[1,3:].any()
+    assert present.tolist()==[True,False] and not ref[1].any()
+
+
 def test_replay_sampling_is_target_uniform_even_with_many_caption_variants():
     data = TextReplayData.__new__(TextReplayData)
     data.groups = [[0], list(range(1, 101))]

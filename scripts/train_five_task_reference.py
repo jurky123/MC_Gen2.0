@@ -237,11 +237,16 @@ def publish(root, step):
     replay = (root/'text_replay.json').exists()
     recipe = json.loads((root/'recipe.json').read_text())
     destination = Path('outputs/native16_data_review_20261107')/('five-task-broad-replay' if replay else 'five-task')
+    destination=Path('outputs/native16_data_review_20261107')/recipe.get('gallery_name',destination.name)
     (destination/'panels').mkdir(parents=True, exist_ok=True)
     body = '''<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>五任务平衡训练</title><style>body{font:16px/1.6 system-ui;background:#111827;color:#e5e7eb;max-width:1120px;margin:24px auto;padding:0 16px}a{color:#93c5fd}img{max-width:100%}details{background:#1f2937;padding:16px;margin:18px 0;border-radius:10px}summary{cursor:pointer}</style><p><a href="/recovery-evaluation/">上一轮完整评估</a> · <a href="/five-task-evaluation/">本轮训练结束后完整评估</a></p><h1>五任务平衡训练：验证集优先</h1><p>每对配对同时构造粗标/精标图文生成、粗标/精标文生图、纯参考图五种任务。粗标使用原始名称；旧配对缺精标时如实回退原标签。训练集和划分不变。新增16000次更新，有效batch160；从第一步联合训练。</p><p>对照列为高清参考、MC目标、粗标T2I、精标T2I、粗标图文、精标图文、纯参考。前两图为16个高质量验证目标，第三图为8个旧验证目标，第四图为8个训练目标。常见文生图另外与更早270步、上一轮8000步对照。</p><p>固定参考换文字只检查文字响应；文字与参考冲突时没有配对真值，不将变化幅度当作质量分数。此页不使用测试集选模型；训练完成后另做全部56个测试目标的双种子评估。</p>'''
     if replay:
         body = body.replace('新增16000次更新，有效batch160', f'新增{recipe["steps"]}次更新，有效batch{recipe["batch_size"]}')
+        if recipe.get('full_text_data'):
+            body=body.replace('五任务平衡训练','多token文本与全量联合训练')
         body += '<p>本轮另混入原文生图数据的固定2000个多类型训练目标。下方广域验证沿用原验证划分；高噪声阶段分别比较正确文字、乱序文字和无文字。纯文字最佳由配对与广域验证共同选择。回放用于保留文字覆盖，不代表已经学会参考图编辑。</p>'
+        if recipe.get('full_text_data'):
+            body=body.replace('固定2000个多类型训练目标',f'全部{recipe["full_text_train_targets"]}个可用训练目标')
     names = [('val_hq_01', '验证集：高质量1'), ('val_hq_02', '验证集：高质量2'),
              ('val_legacy', '验证集：旧数据'), ('train', '训练集'),
              ('text_control', '验证集：固定参考更换文字'), ('common_text', '常见文生图回归')]
@@ -360,6 +365,7 @@ def train(root, device):
     if step == 0:
         print('INITIAL_VALIDATION', flush=True)
         validate()
+        if data.cfg.text.backend=='qwen3_vl_tokens':save('initial.pt')
     for update in range(step, recipe['steps']):
         if stopping[0]:
             break
@@ -371,7 +377,7 @@ def train(root, device):
         for group, rate in zip(opt.param_groups, learning_rates(update, recipe)):
             group['lr'] = rate
         opt.zero_grad(set_to_none=True)
-        losses = accumulate_loss(model, batch, noisy, micro)
+        losses = accumulate_loss(model, batch, noisy, micro,sort_by_length=recipe.get('length_sorted_microbatches',False))
         if not bool(torch.isfinite(losses).all()):
             raise FloatingPointError('Nonfinite training loss')
         norm = torch.nn.utils.clip_grad_norm_(model.parameters(), recipe['gradient_clip'], error_if_nonfinite=True)
@@ -395,6 +401,7 @@ def train(root, device):
         train_seconds += duration
         metric = {'step': step, 'loss': losses.mean().item(), 'gradient_norm': norm.item(),
                   'base_lr': opt.param_groups[0]['lr'], 'visual_lr': opt.param_groups[1]['lr'], 'task_counts': dict(counts)}
+        if len(opt.param_groups)>2:metric['text_lr']=opt.param_groups[2]['lr']
         for name in sorted(set(plan.names)):
             metric['loss_'+name] = losses[[j for j, n in enumerate(plan.names) if n == name]].mean().item()
         with (directory/'metrics.jsonl').open('a') as f:
@@ -426,5 +433,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     torch.set_num_threads(4)
     torch.cuda.set_device(args.device)
-    torch.cuda.set_per_process_memory_fraction(.5, args.device)
+    recipe=json.loads((args.out/'recipe.json').read_text())
+    torch.cuda.set_per_process_memory_fraction(recipe.get('gpu_memory_fraction',.5), args.device)
     train(args.out, args.device)

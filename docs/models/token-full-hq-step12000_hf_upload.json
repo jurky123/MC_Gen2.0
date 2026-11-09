@@ -1,0 +1,41 @@
+{
+  "repo_id": "Risposta/MC_Gen",
+  "revision": "0e1a7dcbf38a1a63f311268e49424c6a7cbd3b2f",
+  "commit_url": "https://huggingface.co/datasets/Risposta/MC_Gen/commit/0e1a7dcbf38a1a63f311268e49424c6a7cbd3b2f",
+  "folder_url": "https://huggingface.co/datasets/Risposta/MC_Gen/tree/0e1a7dcbf38a1a63f311268e49424c6a7cbd3b2f/checkpoints/token-full-hq-step12000",
+  "verified_files": [
+    "EVALUATION.md",
+    "README.md",
+    "SHA256SUMS.txt",
+    "broad_val_00.png",
+    "evaluation.json",
+    "mcgen-token-full-hq-step12000.pt",
+    "metadata.json",
+    "test_joint_detail_00.png",
+    "test_text_detail_00.png"
+  ],
+  "metadata": {
+    "name": "token-full-hq-step12000",
+    "artifact_type": "experimental_inference_checkpoint",
+    "step": 12000,
+    "filename": "mcgen-token-full-hq-step12000.pt",
+    "sha256": "79a87496a82e0fae1b84f3d92a6361b3b2a43ba6a5987336f93368de66262de6",
+    "bytes": 347403674,
+    "source_checkpoint_sha256": "b5999346943faf7c2e8fdfdd88bd3076aade5bed0d59d051b034191b59c89917",
+    "text_backend": "qwen3_vl_tokens",
+    "text_identity": "2a5575891df79d6483341b3ff83ab69abae80a73f589abe3a39c07d2333e64f0",
+    "visual_identity": "a87c3ae189e45bff2333821a1b7a6db43126b8eb1140783d80d7ebf6619c5050",
+    "native_size": 16,
+    "model_tensors_exact": true,
+    "optimizer_included": false,
+    "encoder_included": false,
+    "time_mlp_frozen": true,
+    "hf_repo": "Risposta/MC_Gen",
+    "hf_prefix": "checkpoints/token-full-hq-step12000",
+    "default_release_replaced": false,
+    "selection": "balanced and text best at completed12000; same tensors as final",
+    "limitations": "Paired T2I improves; broad T2I regresses; reference generalization is flat."
+  },
+  "previous_releases_preserved": true,
+  "default_release_replaced": false
+}

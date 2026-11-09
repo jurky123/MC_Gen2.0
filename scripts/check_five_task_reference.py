@@ -47,7 +47,7 @@ def check(root, device, microbatches):
                 opt.zero_grad(set_to_none=True)
                 torch.cuda.synchronize(device)
                 started = time.monotonic()
-                last_parts = accumulate_loss(model, batch, noisy, micro)
+                last_parts = accumulate_loss(model, batch, noisy, micro,sort_by_length=recipe.get('length_sorted_microbatches',False))
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1., error_if_nonfinite=True)
                 opt.step()
                 torch.cuda.synchronize(device)
@@ -71,7 +71,8 @@ def check(root, device, microbatches):
     plan = data.sample_plan(recipe, torch.Generator().manual_seed(1471))
     batch = data.plan_batch(plan, device)
     opt.zero_grad(set_to_none=True)
-    parts = accumulate_loss(model, batch, noisy_batch(batch[0], 1481, device), chosen['microbatch'])
+    parts = accumulate_loss(model, batch, noisy_batch(batch[0], 1481, device), chosen['microbatch'],
+                            sort_by_length=recipe.get('length_sorted_microbatches',False))
     visual_grad = sum(p.grad.detach().float().square().sum().item() for p in model.visual_adapter.parameters() if p.grad is not None)**.5
     time_unchanged = all(torch.equal(time_before[k], v) for k, v in model.time.state_dict().items())
     passed = (text_grad > 0 and text_updated and no_visual_grad and visual_grad > 0 and bool(torch.isfinite(parts).all())
@@ -100,5 +101,6 @@ if __name__ == '__main__':
     args = p.parse_args()
     torch.set_num_threads(4)
     torch.cuda.set_device(args.device)
-    torch.cuda.set_per_process_memory_fraction(.5, args.device)
+    recipe=json.loads((args.out/'recipe.json').read_text())
+    torch.cuda.set_per_process_memory_fraction(recipe.get('gpu_memory_fraction',.5), args.device)
     check(args.out, args.device, args.microbatches)

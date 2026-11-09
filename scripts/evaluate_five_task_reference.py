@@ -95,6 +95,7 @@ def prepare(root, out):
     assert not any(overlaps.values())
     paths = {'previous': Path(read(root/'initialization.json')['checkpoint']),
              'best': root/'training/best_balanced.pt', 'last': root/'training/latest.pt'}
+    if data.cfg.text.backend=='qwen3_vl_tokens':paths['previous']=root/'training/initial.pt'
     models = {}
     for variant, path in paths.items():
         state = load_checkpoint(path)
@@ -122,6 +123,7 @@ def prepare(root, out):
         'all_test_targets_included': True, 'fresh_validation_excludes_all_training_monitors': True,
         'seeds': list(SEEDS), 'steps': 32, 'precision': 'float32', 'cfg': 1.,
         'views': [n for n, _, _ in TASK_VIEWS], 'short_is_original_caption': True,
+        'text_condition_protocol':data.cfg.text.backend,
         'test_used_for_checkpoint_selection': False, 'no_output_filtering': True,
         'holdout_scope': 'reference fine-tuning, not a claim about base pretraining'})
     print('PREPARED', dict(Counter(r['split'] for r in selected)), flush=True)
@@ -184,6 +186,7 @@ def generate(out, variant, device):
 
 def render(out, publish):
     protocol, rows = read(out/'protocol.json'), read(out/'samples.json')
+    previous_label='Token init0' if protocol.get('text_condition_protocol')=='qwen3_vl_tokens' else 'Previous8000'
     assert file_hash(out/'features.pt') == protocol['features_sha256']
     for variant in VARIANTS:
         assert read(out/f'progress_{variant}.json')['phase'] == 'complete'
@@ -234,7 +237,7 @@ def render(out, publish):
                     entries = [(inputs(r)+[raw(r, v, n, s) for v in VARIANTS], r['case_id']+' | '+r['captions'][0],
                                 'Same reference, caption and noise; FP32 native16') for r in part]
                     draw_sheet(out/'panels'/name, f'{split.upper()} | {n} | seed{s+1}',
-                        ['HD reference', 'MC target', 'Previous8000', 'Balanced best', 'New final'], entries)
+                        ['HD reference', 'MC target', previous_label, 'Balanced best', 'New final'], entries)
                     panels.append(name)
             for v in VARIANTS:
                 name = f'{split}_{v}_modes_{page:02d}.png'
@@ -246,13 +249,18 @@ def render(out, publish):
     for s in range(2):
         name = f'common_s{s}.png'
         entries = [([out/'native'/f'common_{j:02d}_{v}_s{s}.png' for v in VARIANTS], prompt, 'Pure text | CFG2 | matched noise') for j, prompt in enumerate(COMMON)]
-        draw_sheet(out/'panels'/name, 'Common T2I regression', ['Previous8000', 'Balanced best', 'New final'], entries)
+        draw_sheet(out/'panels'/name, 'Common T2I regression', [previous_label, 'Balanced best', 'New final'], entries)
         panels.append(name)
     payload = json.dumps({'panels': panels}, ensure_ascii=False)
     body = '''<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>五任务训练 · 训练集外评估</title><style>body{font:16px/1.6 system-ui;background:#111827;color:#e5e7eb;max-width:1120px;margin:24px auto;padding:0 16px}a{color:#93c5fd}img{max-width:100%}article{background:#1f2937;padding:16px;margin:18px 0;border-radius:10px}select{font:inherit;padding:8px;margin:8px}.controls{position:sticky;top:0;background:#1f2937}</style><p><a href="/five-task/">本轮训练验证与文字响应</a> · <a href="/recovery-evaluation/">上一轮评估</a></p><h1>五任务训练：训练集外评估</h1><p>全部测试56个、额外验证32个、训练24个；每个目标两个种子，未筛选生成结果。默认测试集。对照上一轮8000步、本轮综合验证最佳、本轮最终权重。粗标为原始名称，精标为已有MC描述；缺少精标的旧数据如实回退粗标。</p><div class="controls"><label>数据<select id="split"><option value="test">测试56</option><option value="val">额外验证32</option><option value="train">训练24</option></select></label><label>任务<select id="view"><option value="joint_short">粗标图文</option><option value="joint_detail">精标图文</option><option value="text_short">粗标文生图</option><option value="text_detail">精标文生图</option><option value="reference">纯参考图</option><option value="last_modes">最终权重五任务</option><option value="best_modes">综合最佳五任务</option><option value="previous_modes">上一轮五任务</option></select></label><select id="seed"><option value="0">种子A</option><option value="1">种子B（任务对比）</option></select></div><div id="items"></div><h2>常见文生图回归</h2>'''
     for s in range(2):
         body += f'<img loading="lazy" src="panels/common_s{s}.png">'
     body += '''<p>未见范围为本轮参考图微调。像素对齐指标不能代替MC风格、文字语义与装饰的人工审查。</p><script>const data=PAYLOAD;const split=document.getElementById('split'),view=document.getElementById('view'),seed=document.getElementById('seed'),items=document.getElementById('items');function show(){const key=split.value+'_'+view.value+(view.value.endsWith('_modes')?'_':'_s'+seed.value+'_');items.replaceChildren();data.panels.filter(p=>p.startsWith(key)).forEach(p=>{const a=document.createElement('article'),link=document.createElement('a'),im=document.createElement('img');link.href='panels/'+p;link.textContent=p;im.src=link.href;im.loading='lazy';a.append(link,document.createElement('br'),im);items.append(a)})}[split,view,seed].forEach(x=>x.addEventListener('change',show));show();</script>'''.replace('PAYLOAD', payload)
+    if protocol.get('text_condition_protocol')=='qwen3_vl_tokens':
+        body=body.replace('上一轮8000步','新token条件初始化0步')
+        body=body.replace('/five-task/','/token-full/')
+        body=body.replace('五任务训练','多token全量训练')
+        body=body.replace('上一轮五任务','初始化五任务')
     (out/'index.html').write_text(body)
     js = re.search(r'<script>(.*?)</script>', body, re.S).group(1)
     check = out/'gallery_check.js'

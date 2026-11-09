@@ -31,6 +31,24 @@ curl -L --fail -o checkpoints/SHA256SUMS.txt \
 
 <a id="five-task-reference-8000"></a>
 
+## 多 token 文本实验：12000步
+
+本轮完整训练的文字与综合最佳均为12,000步。高质量配对文生图有改善，但广域文生图退化，参考泛化基本持平，作为独立实验保留。[对照与评估](TOKEN_TEXT_EVALUATION_20261109.md)
+
+```bash
+curl -L --fail --create-dirs -o checkpoints/mcgen-token-full-hq-step12000.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/0e1a7dcbf38a1a63f311268e49424c6a7cbd3b2f/checkpoints/token-full-hq-step12000/mcgen-token-full-hq-step12000.pt
+
+MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B mcgen sample \
+  --checkpoint checkpoints/mcgen-token-full-hq-step12000.pt \
+  --prompt 'blue diamond sword' --steps 32 --text-scale 2 \
+  --out outputs/token_sword.png --export-scale 8 --device cuda:0
+```
+
+图文联合额外添加 `--reference examples/token_text_20261109/test_00_reference.png --conditioning-mode visual_tokens --text-scale 1 --ref-scale 1`；纯参考图省略prompt。需要本次多token实现，检查点自动选择正确文本编码协议，不能使用旧汇总向量缓存。Qwen编码器仍需按上文单独下载。
+
+[实验权重、评估与SHA256](https://huggingface.co/datasets/Risposta/MC_Gen/tree/0e1a7dcbf38a1a63f311268e49424c6a7cbd3b2f/checkpoints/token-full-hq-step12000) · [真实数据与生成抽样](../examples/token_text_20261109/README.md)。旧版默认发布与完整本地训练快照保留。
+
 ## 五任务参考图：8000步
 
 按本次选择保留 **8,000步文字最佳检查点**，支持文生图、纯参考图和图文联合。这个检查点未冻结时间MLP；12,000步冻结续训仅作为[对照](../examples/time_freeze_reference/README.md)。较早版本完整保留，复杂轮廓与装饰仍不稳定。

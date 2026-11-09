@@ -29,6 +29,23 @@ def initialize(data,device):
     if file_hash(info['checkpoint'])!=info['sha256']:raise ValueError('Initialization changed')
     state=load_checkpoint(info['checkpoint'])
     if state.get('diagnostic_only') or state.get('target_leakage'):raise ValueError('Diagnostic weights are not production initializers')
+    if data.cfg.text.backend=='qwen3_vl_tokens':
+        from mcgen.config import Experiment
+        from mcgen.model import PixelFlow
+        transition=info.get('text_protocol_transition',{})
+        if (transition.get('source_identity')!=state['text_identity']
+                or transition.get('target_identity')!=data.encoder.identity
+                or state['visual_identity']!=data.visual_identity):
+            raise ValueError('Unverified pooled-to-token initialization')
+        source=Experiment.from_dict(state['config'])
+        a,b=source.to_dict()['model'],data.cfg.to_dict()['model']
+        a.pop('text_length');b.pop('text_length')
+        if a!=b or source.text.backend!='qwen3_vl_embedding':
+            raise ValueError('Token initialization may change only text sequence length and protocol')
+        torch.manual_seed(data.cfg.train.seed)
+        model=PixelFlow(data.cfg.model).to(device)
+        model.load_state_dict(state['model'],strict=True)
+        return model,info
     if state['text_identity']!=data.encoder.identity or state['visual_identity']!=data.visual_identity:
         raise ValueError('Frozen encoder identity mismatch')
     torch.manual_seed(data.cfg.train.seed)
@@ -36,9 +53,15 @@ def initialize(data,device):
 
 
 def optimizer(model,recipe):
-    base=[p for n,p in model.named_parameters() if not n.startswith('visual_adapter.')]
-    return torch.optim.AdamW([{'params':base,'lr':recipe['base_lr']},
-                             {'params':model.visual_adapter.parameters(),'lr':recipe['visual_lr']}],weight_decay=.01)
+    def text_parameter(name):
+        return not name.startswith('visual_adapter.') and (name.startswith('text.') or '.cross_attention.' in name)
+    base=[p for n,p in model.named_parameters() if not n.startswith('visual_adapter.')
+          and not ('text_lr' in recipe and text_parameter(n))]
+    groups=[{'params':base,'lr':recipe['base_lr']},
+            {'params':model.visual_adapter.parameters(),'lr':recipe['visual_lr']}]
+    if 'text_lr' in recipe:
+        groups.append({'params':[p for n,p in model.named_parameters() if text_parameter(n)],'lr':recipe['text_lr']})
+    return torch.optim.AdamW(groups,weight_decay=.01)
 
 
 def check(root,device):

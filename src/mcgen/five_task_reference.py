@@ -2,6 +2,7 @@
 from collections import defaultdict
 from dataclasses import dataclass
 import math
+import json
 
 import torch
 
@@ -69,11 +70,12 @@ class FiveTaskSampler:
 class FiveTaskData(RecoveryData):
     def __init__(self, root):
         super().__init__(root)
-        self.five_sampler = FiveTaskSampler(self.rows)
+        recipe=json.loads((root/'recipe.json').read_text()) if (root/'recipe.json').exists() else {}
+        self.five_sampler = FiveTaskSampler(self.rows,recipe.get('source_hq_fraction',.6))
         self.replay = None
         if (root/'text_replay.json').exists():
             from .text_replay import TextReplayData
-            self.replay = TextReplayData(root, self.cfg, self.encoder.identity)
+            self.replay = TextReplayData(root, self.cfg, self.encoder.identity,encoder=self.encoder)
             paired_hashes = {p['target_hash'] for p in self.rows}
             if any(r['target_hash'] in paired_hashes
                    for ds in self.replay.datasets.values() for r in ds.records):
@@ -113,7 +115,8 @@ def learning_rates(update, recipe):
     warm = min(1., (update+1)/recipe['warmup_steps'])
     late = max(0., (update-recipe['decay_start'])/max(1, recipe['steps']-recipe['decay_start']))
     factor = recipe['lr_floor']+(1-recipe['lr_floor'])*(1+math.cos(math.pi*min(late, 1.)))/2
-    return recipe['base_lr']*warm*factor, recipe['visual_lr']*warm*factor
+    rates=(recipe['base_lr']*warm*factor, recipe['visual_lr']*warm*factor)
+    return rates+(recipe['text_lr']*warm*factor,) if 'text_lr' in recipe else rates
 
 
 def noisy_batch(target, seed, device):
@@ -123,22 +126,34 @@ def noisy_batch(target, seed, device):
     return target*(1-t[:, None, None, None])+eps*t[:, None, None, None], t, eps-target
 
 
-def accumulate_loss(model, batch, noisy, microbatch, *, autocast=True):
+def accumulate_loss(model, batch, noisy, microbatch, *, autocast=True,sort_by_length=False):
     """Exactly weight every view once, including the final short microbatch."""
     if microbatch < 1:
         raise ValueError('Positive microbatch required')
     _, text, mask, refs, present = batch
     x, t, velocity = noisy
     n = len(x)
-    values = []
-    for start in range(0, n, microbatch):
+    order=torch.argsort(mask.sum(-1),stable=True) if sort_by_length else torch.arange(n,device=x.device)
+    values=x.new_empty(n)
+    start=0
+    while start<n:
         stop = min(start+microbatch, n)
-        r = None if refs is None else refs[start:stop]
-        p = None if present is None else present[start:stop]
+        if sort_by_length:
+            counts=mask.sum(-1)
+            first=int(counts[order[start]])
+            bound=0 if first==0 else 2**max(0,(first-1).bit_length())
+            while stop>start+1 and int(counts[order[stop-1]])>bound:
+                stop-=1
+        ids=order[start:stop]
+        r = None if refs is None else refs[ids]
+        p = None if present is None else present[ids]
+        m=mask[ids]
+        length=max(1,int(m.nonzero()[:,-1].max())+1) if m.any() else 1
         with torch.autocast(x.device.type, dtype=torch.bfloat16, enabled=autocast):
-            ctx = model.context(text[start:stop], mask[start:stop], r, p)
-            prediction = model(x[start:stop], t[start:stop], ctx)
-            per_sample = (prediction.float()-velocity[start:stop]).square().mean((1, 2, 3))
+            ctx = model.context(text[ids,:length], m[:,:length], r, p)
+            prediction = model(x[ids], t[ids], ctx)
+            per_sample = (prediction.float()-velocity[ids]).square().mean((1, 2, 3))
         (per_sample.sum()/n).backward()
-        values.append(per_sample.detach())
-    return torch.cat(values)
+        values[ids]=per_sample.detach()
+        start=stop
+    return values

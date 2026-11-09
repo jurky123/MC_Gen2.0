@@ -119,7 +119,7 @@ class MixedData:
         from PIL import Image
         from .catalog import file_hash
         from .config import Experiment
-        from .disk_text import DiskTextEncoder
+        from .disk_text import load_text_cache
         from .images import content_hash, encode, native_grid
         from .tasks import conditioned_prompts
         self.root = root
@@ -141,9 +141,10 @@ class MixedData:
             start = int(offset)
             if hashlib.sha256(np.asarray(self.features[start:start+32]).tobytes()).hexdigest() != digest:
                 raise ValueError('Visual features changed')
-        self.encoder = DiskTextEncoder(root/'text_features')
+        self.encoder = load_text_cache(root/'text_features')
         text_meta = json.loads((root/'text_features/metadata.json').read_text())
-        for name, key in [('features.uint16.mmap', 'features_sha256'), ('masks.uint8.mmap', 'masks_sha256')]:
+        checks = [] if getattr(self.encoder,'is_ragged',False) else [('features.uint16.mmap', 'features_sha256'), ('masks.uint8.mmap', 'masks_sha256')]
+        for name, key in checks:
             if file_hash(root/'text_features'/name) != text_meta[key]:
                 raise ValueError('Text features changed')
         arrays, texts, masks = [], [], []
@@ -158,8 +159,14 @@ class MixedData:
             texts.append(torch.stack((h[0], h[-1])))
             masks.append(torch.stack((m[0], m[-1])))
         self.targets = torch.stack(arrays)
-        self.text = torch.stack(texts)
-        self.mask = torch.stack(masks)
+        if getattr(self.encoder,'is_ragged',False):
+            import torch.nn.functional as F
+            length=max(t.shape[1] for t in texts)
+            self.text=torch.stack([F.pad(t,(0,0,0,length-t.shape[1])) for t in texts])
+            self.mask=torch.stack([F.pad(m,(0,length-m.shape[1])) for m in masks])
+        else:
+            self.text = torch.stack(texts)
+            self.mask = torch.stack(masks)
         owners = {}
         for row in self.rows:
             for kind, key in [('target', row['target_hash']), ('reference', row['reference_sha256'])]:

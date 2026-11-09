@@ -75,12 +75,27 @@ class RecoveryData(MixedData):
         reference=torch.empty(self.features.shape,dtype=torch.bfloat16,device=device)
         for start in range(0,len(self.rows),128):
             reference[start:start+128]=torch.from_numpy(np.array(self.features[start:start+128],copy=True)).view(torch.bfloat16).to(device)
-        self.cached={name:value.to(device) for name,value in [('target',self.targets),('text',self.text),
-            ('mask',self.mask),('coarse',self.coarse_text),('coarse_mask',self.coarse_mask)]}
+        values=[('target',self.targets)]
+        if not getattr(getattr(self,'encoder',None),'is_ragged',False):
+            values += [('text',self.text),('mask',self.mask),('coarse',self.coarse_text),('coarse_mask',self.coarse_mask)]
+        self.cached={name:value.to(device) for name,value in values}
         self.cached['reference']=reference
 
     def batch(self,ids,tasks,variants,device):
         indices=torch.tensor(ids,dtype=torch.long,device=device)
+        if getattr(getattr(self,'encoder',None),'is_ragged',False):
+            captions=[self.categories[i] if v==2 else self.rows[i]['captions'][0 if v==0 else -1]
+                      for i,v in zip(ids,variants)]
+            text,mask=self.encoder.encode(conditioned_prompts(captions,self.cfg),device)
+            if self.cached is None:
+                import numpy as np
+                refs=torch.from_numpy(np.array(self.features[ids],copy=True)).view(torch.bfloat16).to(device)
+                target=self.targets[ids].to(device)
+            else:
+                refs=self.cached['reference'][indices];target=self.cached['target'][indices]
+            mask=mask & torch.tensor([t in ('joint','text') for t in tasks],device=device)[:,None]
+            present=torch.tensor([t in ('joint','reference') for t in tasks],device=device)
+            return target,text,mask,refs,present
         labels=torch.tensor(variants,dtype=torch.long,device=device)
         if self.cached is None:
             text=self.text[ids,[min(v,1) for v in variants]].to(device)

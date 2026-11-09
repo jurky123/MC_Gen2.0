@@ -30,6 +30,16 @@ Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 
 ## 近期参考图结果
 
+**多 token 文本条件 · 全量训练 12,000 步**
+
+![相同参考图与文字：旧汇总向量模型和新版多token模型](docs/images/token_text_20261109/reference_test.png)
+
+依次为参考图、MC目标、旧版、新版。固定取前4个测试目标，保留失败结果。
+
+高质量配对上的文生图有所改善，但广域文生图退化，参考图泛化基本持平；本轮作为独立实验保留，原发布版本不变。
+
+[文生图对照与评估](docs/TOKEN_TEXT_EVALUATION_20261109.md) · [少量原图、标签与生成结果](examples/token_text_20261109/README.md) · [实验权重与用法](docs/USAGE.md#多-token-文本实验12000步)
+
 **2000张多类型文生图回放实验**
 
 ![回放训练后：固定前4个参考测试目标的实际生成对照](docs/images/text_replay_20261108/overview_test.png)

@@ -17,6 +17,8 @@ def main(root, evaluation, device):
     root = root.resolve()
     gallery = Path('outputs/native16_data_review_20261107')
     publish = gallery/('five-task-broad-replay-evaluation' if (root/'text_replay.json').exists() else 'five-task-evaluation')
+    recipe=json.loads((root/'recipe.json').read_text())
+    if recipe.get('evaluation_gallery_name'):publish=gallery/recipe['evaluation_gallery_name']
     handle = (root/'queue.lock').open('w')
     fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
     proof = json.loads((root/'code_verification.json').read_text())

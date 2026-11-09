@@ -48,6 +48,35 @@ def test_full_update_budget_does_not_freeze_text_or_decay_too_early():
     assert learning_rates(15999, r)[0] >= .3*2e-6
 
 
+def test_hq_oversampling_and_text_learning_rate_are_explicit():
+    sampler=FiveTaskSampler(rows(),hq_fraction=.8)
+    plan=sampler.sample(4096,0,torch.Generator().manual_seed(19))
+    assert .77<plan.ids.count(0)/len(plan)<.83
+    recipe={'steps':12000,'warmup_steps':500,'decay_start':8000,'base_lr':1e-6,'visual_lr':1e-5,'text_lr':1e-5,'lr_floor':.2}
+    assert learning_rates(1000,recipe)==(1e-6,1e-5,1e-5)
+    assert len(learning_rates(0,recipe))==3
+
+
+def test_length_grouped_microbatches_keep_losses_and_gradients_aligned():
+    torch.manual_seed(38)
+    cfg=copy.deepcopy(tiny_config().model)
+    cfg.conditioning='text_only';cfg.byte_tokens=False;cfg.text_dim=12;cfg.text_length=16
+    model=PixelFlow(cfg).eval()
+    with torch.no_grad():
+        for p in model.parameters():p.add_(torch.randn_like(p)*.03)
+    other=copy.deepcopy(model)
+    target=torch.randn(7,4,cfg.size,cfg.size)
+    mask=torch.arange(16)[None]<torch.tensor([0,15,2,8,3,1,10])[:,None]
+    batch=(target,torch.randn(7,16,12),mask,None,None)
+    noisy=noisy_batch(target,177,'cpu')
+    a=accumulate_loss(model,batch,noisy,7,autocast=False)
+    b=accumulate_loss(other,batch,noisy,3,autocast=False,sort_by_length=True)
+    torch.testing.assert_close(a,b,rtol=1e-5,atol=1e-6)
+    for (name,p),(_,q) in zip(model.named_parameters(),other.named_parameters()):
+        assert (p.grad is None)==(q.grad is None),name
+        if p.grad is not None:torch.testing.assert_close(p.grad,q.grad,rtol=3e-4,atol=3e-6,msg=name)
+
+
 def test_microbatch_accumulation_matches_full_batch_with_short_tail():
     torch.manual_seed(19)
     cfg = copy.deepcopy(tiny_config().model)

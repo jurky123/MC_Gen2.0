@@ -93,11 +93,11 @@ class TextConfig:
     def __post_init__(self):
         if type(self.cache_mb) is not int or self.cache_mb < 0:
             raise ValueError("cache_mb must be a nonnegative integer")
-        if self.backend not in ("hf", "byte", "qwen3_vl_embedding"):
+        if self.backend not in ("hf", "byte", "qwen3_vl_embedding", "qwen3_vl_tokens"):
             raise ValueError("unsupported text backend")
-        if self.backend in ("hf", "qwen3_vl_embedding") and not self.model:
+        if self.backend in ("hf", "qwen3_vl_embedding", "qwen3_vl_tokens") and not self.model:
             raise ValueError("hf text backend requires an explicit local model path or pinned model ID")
-        if self.backend in ("hf", "qwen3_vl_embedding") and not Path(self.model).is_dir() and not re.fullmatch(r"[0-9a-f]{40}", self.revision):
+        if self.backend in ("hf", "qwen3_vl_embedding", "qwen3_vl_tokens") and not Path(self.model).is_dir() and not re.fullmatch(r"[0-9a-f]{40}", self.revision):
             raise ValueError("remote text models require a 40-character commit SHA revision (not main/tag)")
         if not self.layers or any(not isinstance(x, int) for x in self.layers):
             raise ValueError("layers must be a nonempty integer list")
@@ -171,7 +171,7 @@ class Experiment:
         if self.conditioning_input not in ("native", "multimodal_embedding", "visual_tokens"):
             raise ValueError("unsupported conditioning_input")
         if self.conditioning_input == 'visual_tokens' and (not self.model.visual_adapter
-                or self.text.backend != 'qwen3_vl_embedding' or self.train.trainable not in ('visual_adapter', 'joint_finetune')):
+                or self.text.backend not in ('qwen3_vl_embedding', 'qwen3_vl_tokens') or self.train.trainable not in ('visual_adapter', 'joint_finetune')):
             raise ValueError('visual token training requires Qwen and frozen-backbone visual_adapter training')
         if self.model.visual_adapter and self.conditioning_input != 'visual_tokens':
             raise ValueError('visual adapter requires the explicit spatial token protocol')
@@ -201,6 +201,10 @@ class Experiment:
             raise ValueError("style must be a string")
         if self.text.backend == "byte" and not self.model.byte_tokens:
             raise ValueError("byte backend requires byte_tokens")
+        if self.text.backend == 'qwen3_vl_tokens' and (self.model.text_dim!=4096
+                or self.model.byte_tokens or self.model.text_length>512
+                or self.model.text_normalization!='layernorm'):
+            raise ValueError('Qwen token states require4096 features, <=512 positions and per-token layernorm')
         mix = self.train.task_mix
         if mix and self.task == "text" and (mix["reference"] or mix["joint"]):
             raise ValueError("text experiment cannot sample reference tasks")

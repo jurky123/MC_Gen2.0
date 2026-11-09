@@ -10,6 +10,11 @@ from .config import fingerprint
 class TextEncoder:
     def __init__(self, cfg, model_cfg, device="cpu"):
         self.embedding = None
+        if cfg.backend == "qwen3_vl_tokens":
+            from .qwen_text_tokens import QwenVLTextTokens
+            self.embedding = QwenVLTextTokens(cfg, model_cfg, device)
+            self.identity = self.embedding.identity
+            return
         if cfg.backend == "qwen3_vl_embedding":
             from .qwen_embedding import QwenVLEmbedding
             self.embedding = QwenVLEmbedding(cfg, model_cfg, device)

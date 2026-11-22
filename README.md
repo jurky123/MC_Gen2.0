@@ -22,6 +22,8 @@ Text-to-Image · Reference-to-Image (experimental) · 16×16 RGBA
 原因主要猜测还是对于MC素材这种低像素风格目前的VLM能力不强，所以没法从低分辨率信息得到精确描述。
 训练数据已上传huggingface：https://huggingface.co/datasets/Risposta/MC_Gen
 
+[最新 MC/HD 配对数据发布说明](docs/data-releases.md) · 通用合集 v5（主集 3,592 对）与变体矩阵 v3（970 对）。
+
 [参考图配对数据与标注](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/data/reference-20261107)：高质量主数据与无损16×16训练版本，附真实数据预览。
 参考图实验使用flux和qwen_image生成的高清图片-MC素材配对。早期冻结底座训练适配器，近期加入粗标/精标五任务训练与时间MLP冻结续训。
 展示图使用GPT 6.1sol制作（GPT审美还是太差了）

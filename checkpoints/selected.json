@@ -1,0 +1,15 @@
+{
+  "step": 8400,
+  "selection": "best_mixed_validation",
+  "source_checkpoint": "outputs/coarse_scratch_5500_visual/best_mixed.pt",
+  "source_sha256": "d354d4ccd6e48bebc124e0ebd5757af0d038f8579569b07171e8acc572f1a93f",
+  "inference_checkpoint": "checkpoints/mcgen-coarse-step8400.pt",
+  "inference_sha256": "d354d4ccd6e48bebc124e0ebd5757af0d038f8579569b07171e8acc572f1a93f",
+  "inference_bytes": 347404954,
+  "generator_parameters": 86668292,
+  "text_encoder": "Qwen/Qwen3-VL-Embedding-8B",
+  "text_encoder_frozen": true,
+  "text_identity": "2a5575891df79d6483341b3ff83ab69abae80a73f589abe3a39c07d2333e64f0",
+  "visual_identity": "a87c3ae189e45bff2333821a1b7a6db43126b8eb1140783d80d7ebf6619c5050",
+  "hf_path": "checkpoints/coarse-step8400/mcgen-coarse-step8400.pt"
+}

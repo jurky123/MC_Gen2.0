@@ -2,7 +2,7 @@
 license: other
 license_name: research-only
 license_link: https://github.com/jurky123/MC_Gen2.0
-pretty_name: "MC-Gen 2.0 — Minecraft / pixel-art 32x32 texture datasets"
+pretty_name: "MC-Gen 2.0 — Minecraft item textures and generation checkpoints"
 task_categories:
   - text-to-image
 tags:
@@ -17,22 +17,71 @@ size_categories:
   - 1M<n<10M
 ---
 
-# MC-Gen 2.0 — training datasets
+# MC Gen 2.0
 
-Training-ready datasets for the **MC-Gen 2.0** project: a small pixel-space
-Rectified-Flow Transformer that generates Minecraft / voxel-game style
-low-resolution textures (32x32, RGBA).
+用英文物品名、高清参考图，或两者一起，生成 **16×16 RGBA Minecraft 风格物品图**。当前推荐权重为 **coarse-step8400**。提示词可以从 `poison apple`、`ghost boots`、`diamond sword` 这样的短名称开始。
 
-The source code lives on GitHub: **https://github.com/jurky123/MC_Gen2.0**
+[项目代码](https://github.com/jurky123/MC_Gen2.0) · [下载当前权重](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/coarse-step8400/mcgen-coarse-step8400.pt)
 
-This repository only contains the **preprocessed, training-ready** datasets.
-Raw downloads (itch.io, OpenGameArt, Kaggle, Modrinth, Hugging Face mirrors)
-are intentionally not included.
+## 生成效果
+
+![文件名粗标签生成的 16 个物品](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/coarse-step8400/text.png)
+
+上图取自广域验证抽样的前 16 个提示，全部使用同一种子。下图来自高清配对测试集，每行从左到右为高清参考、MC 目标、纯文字、文字加参考、纯参考。
+
+![同一测试物品在三种输入下的生成结果](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/coarse-step8400/reference.png)
+
+在 263 个配对测试目标上，图文联合的轮廓 IoU 为 **0.661**，纯参考图为 **0.639**，纯文字为 **0.556**。短名称往往对应多种合理外观，这组数字衡量与配对目标的接近程度。
+
+## 快速使用
+
+在项目根目录安装依赖并下载生成器及冻结编码器。
+
+```bash
+pip install -e '.[embedding]'
+curl -fL --create-dirs -o checkpoints/mcgen-coarse-step8400.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/coarse-step8400/mcgen-coarse-step8400.pt
+python scripts/download_qwen_vl_embedding.py --out ../Qwen3-VL-Embedding-8B
+export MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B
+mcgen sample --checkpoint checkpoints/mcgen-coarse-step8400.pt \
+  --prompt 'diamond sword' --steps 32 --text-scale 2 --seed 42 \
+  --device cuda:0 --out outputs/sword.png
+```
+
+图文联合生成时添加 `--reference item.png --conditioning-mode visual_tokens`。纯参考图生成时省略 `--prompt`。参考图测试采用 `--text-scale 1 --ref-scale 1`。
+
+[权重及校验文件](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/coarse-step8400) · [冻结编码器](https://huggingface.co/Qwen/Qwen3-VL-Embedding-8B)
+
+## 训练数据
+
+从零训练生成器，使用 284,825 条广域文件名标签，以及 3,586 个高清与 MC 配对训练目标。配对中 2,472 个使用来源文件名提取的标签，其余 1,114 个使用数据包中的简短物品名。先训练文生图，再从第 5,500 步底座学习高清参考条件，最后混合训练三种生成模式。
 
 > **License: research / study only.** The datasets aggregate third-party game
 > assets with heterogeneous licenses. They are published here for academic and
 > personal study only. Do not use them commercially, and keep the provenance
 > fields in the metadata for attribution. See *Provenance* below.
+
+## 最新 MC/HD 配对数据
+
+| 发布 | 配对数 |
+| --- | --- |
+| 通用合集 HDRepair v5 | 3,592 主集 / 3,685 含历史试验 |
+| 变体矩阵 HDRepair v3 | 970（198 首批 + 772 追加） |
+
+数据用途、训练索引、修复与隔离统计、下载链接和 SHA-256 见[配对数据发布说明](releases/README.md)。两份 ZIP 独立发布，跨包合并需去重。
+
+<!-- reference-data-20261107:start -->
+## Reference image pairs · 2026-11-07
+
+[Data and labels](data/reference-20261107/README.md) · [Files](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/data/reference-20261107)
+
+1,000 user-curated high-quality HD/MC pairs, plus reviewed legacy pairs. Captions, original filenames, provenance and existing splits are preserved.
+The current **lossless16** version has **1,064 training / 1,350 validation / 56 test pairs** (864 / 711 / 56 distinct targets).
+The other 500 genuine32×32 targets are archived separately and excluded from16×16 training; no lossy32→16 candidates are included.
+Download the high-quality-native16 and reviewed-legacy archives for the current training version. See the data card for extraction and per-source attribution.
+
+![Reference data and actual training labels](data/reference-20261107/preview.png)
+<!-- reference-data-20261107:end -->
 
 ## Contents
 

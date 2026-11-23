@@ -1,0 +1,3609 @@
+{
+  "checkpoint_sha256": "d354d4ccd6e48bebc124e0ebd5757af0d038f8579569b07171e8acc572f1a93f",
+  "solver": "heun",
+  "steps": 32,
+  "text_cfg": 2,
+  "image_cfg": 1,
+  "samples": [
+    {
+      "id": "T001",
+      "file": "text/T001.png",
+      "source_id": "resource:a715841545e193b10a928e6ed03e953d056371e26121ce06d3435619e2ad2a7a:short",
+      "seed": 2026112500,
+      "prompt": "chromium hoe",
+      "split": "val"
+    },
+    {
+      "id": "T002",
+      "file": "text/T002.png",
+      "source_id": "resource:2bdedefbffd6f1b2ba42c9cf437d9b8a6a79f3a71fe56f0064aae0b54a029c2f:short",
+      "seed": 2026112501,
+      "prompt": "bee",
+      "split": "val"
+    },
+    {
+      "id": "T003",
+      "file": "text/T003.png",
+      "source_id": "resource:f13b52926c5b51ec04eeca4bfab3f55b9b582f2a18c01aa5775978a0e35dd3d9:short",
+      "seed": 2026112502,
+      "prompt": "bronze leggings",
+      "split": "val"
+    },
+    {
+      "id": "T004",
+      "file": "text/T004.png",
+      "source_id": "resource:d48ffb2d7b146b42aab88981e3001bde5bae9659e624512872c7e46cdc430098:short",
+      "seed": 2026112503,
+      "prompt": "apple ice cream",
+      "split": "val"
+    },
+    {
+      "id": "T005",
+      "file": "text/T005.png",
+      "source_id": "resource:3c6df4aaa105c174911e89e22c0be01d3a1f3eeaefcd92fcf6fe451a25aae15a:short",
+      "seed": 2026112504,
+      "prompt": "pa prism boots",
+      "split": "val"
+    },
+    {
+      "id": "T006",
+      "file": "text/T006.png",
+      "source_id": "resource:a447b24564ab071c1eddddcb8023f059e44f50d46784f4f0b7ffa626e6835f4e:short",
+      "seed": 2026112505,
+      "prompt": "tin shovel",
+      "split": "val"
+    },
+    {
+      "id": "T007",
+      "file": "text/T007.png",
+      "source_id": "resource:261c0d0925d9b2dd9e24acba0b590da8798086d712111731cfeff0051ad307f1:short",
+      "seed": 2026112506,
+      "prompt": "emerald helmet",
+      "split": "val"
+    },
+    {
+      "id": "T008",
+      "file": "text/T008.png",
+      "source_id": "resource:1ec0fc464fc00f8a19000dd77544f5728dc78523e95729191235a41403904ebd:short",
+      "seed": 2026112507,
+      "prompt": "titanium ingot",
+      "split": "val"
+    },
+    {
+      "id": "T009",
+      "file": "text/T009.png",
+      "source_id": "resource:f39d89da06741d2b104f7b46d246b4403d32137dde4fe3b89619aaeca82b96ae:short",
+      "seed": 2026112508,
+      "prompt": "pa palintinium pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T010",
+      "file": "text/T010.png",
+      "source_id": "resource:6373676494df89e685c3b134b8d87da98a6a44f8208c7995cbe6238b3aa68fec:short",
+      "seed": 2026112509,
+      "prompt": "pa australian sapphire axe",
+      "split": "val"
+    },
+    {
+      "id": "T011",
+      "file": "text/T011.png",
+      "source_id": "resource:8389b7a95057479953a6fb59792c59b21744b80dcc64635408a27484aca43774:short",
+      "seed": 2026112510,
+      "prompt": "scope gem",
+      "split": "val"
+    },
+    {
+      "id": "T012",
+      "file": "text/T012.png",
+      "source_id": "resource:02aeb72c0b7f796a92a3551093a91f159fffcbf817f56920caacbf49068a270b:short",
+      "seed": 2026112511,
+      "prompt": "pink sapphire chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T013",
+      "file": "text/T013.png",
+      "source_id": "resource:f1961e78db88edb28e0c8f11ef7a14e423aa1587fdce148787a7bff6b3b2c7be:short",
+      "seed": 2026112512,
+      "prompt": "prismarine bow",
+      "split": "val"
+    },
+    {
+      "id": "T014",
+      "file": "text/T014.png",
+      "source_id": "resource:ab80b0663b40b64c1a7612f5bec7cb5367916bb370e31fbf2e145bf7bd0f0dbe:short",
+      "seed": 2026112513,
+      "prompt": "pa pink diamond sword",
+      "split": "val"
+    },
+    {
+      "id": "T015",
+      "file": "text/T015.png",
+      "source_id": "resource:02460a8b2407e2617f985fbcf690a48065a25dc7b0f06de76420f5cc19ba389b:short",
+      "seed": 2026112514,
+      "prompt": "guide book",
+      "split": "val"
+    },
+    {
+      "id": "T016",
+      "file": "text/T016.png",
+      "source_id": "resource:1950ec70ea4a2ceffa0164918075549e78486023ecc72d5e7595c09162ff6a75:short",
+      "seed": 2026112515,
+      "prompt": "shield broken ticex draconium",
+      "split": "val"
+    },
+    {
+      "id": "T017",
+      "file": "text/T017.png",
+      "source_id": "resource:cf16c73d93ae7bef423481146f405f6f89d0b1865a266677ce949f3170867b52:short",
+      "seed": 2026112516,
+      "prompt": "echo shard hoe",
+      "split": "val"
+    },
+    {
+      "id": "T018",
+      "file": "text/T018.png",
+      "source_id": "resource:da8628c00f70729586c471de85f04c2681b2aa20feb3ed61ec8073537789ef09:short",
+      "seed": 2026112517,
+      "prompt": "blueberry jam",
+      "split": "val"
+    },
+    {
+      "id": "T019",
+      "file": "text/T019.png",
+      "source_id": "resource:19039c2fa6b6ec500def8661ea0ad06b8a8b99689735160118c94433c64cdd16:short",
+      "seed": 2026112518,
+      "prompt": "stone leggings",
+      "split": "val"
+    },
+    {
+      "id": "T020",
+      "file": "text/T020.png",
+      "source_id": "resource:79822d42c8068151b8b01c9f009e821d7ec8e6b59a5f6ab13c2384b0fc8d8f13:short",
+      "seed": 2026112519,
+      "prompt": "apple",
+      "split": "val"
+    },
+    {
+      "id": "T021",
+      "file": "text/T021.png",
+      "source_id": "resource:9d4db043f9abdba97966eeadcfa44e9418736b06fe0762cce2705c31a5883c22:short",
+      "seed": 2026112520,
+      "prompt": "greenpearl 1 boots",
+      "split": "val"
+    },
+    {
+      "id": "T022",
+      "file": "text/T022.png",
+      "source_id": "resource:5d050894198cb64242d5f2d876bcb06e3c62efdaa192a1505382a16d8cd01fb7:short",
+      "seed": 2026112521,
+      "prompt": "upgrade golden shovel",
+      "split": "val"
+    },
+    {
+      "id": "T023",
+      "file": "text/T023.png",
+      "source_id": "resource:3f5d67b340381d0619d43cbaf8ef2f84b0e7b4d53581a986d83123521506605c:short",
+      "seed": 2026112522,
+      "prompt": "thunder cracker helmet",
+      "split": "val"
+    },
+    {
+      "id": "T024",
+      "file": "text/T024.png",
+      "source_id": "resource:e98d1efd67e38252e5332803d53fad15efeaab68950c3f9c9b9c0ea7e9186fef:short",
+      "seed": 2026112523,
+      "prompt": "chromium ingot",
+      "split": "val"
+    },
+    {
+      "id": "T025",
+      "file": "text/T025.png",
+      "source_id": "resource:864a2dea4cc4035c335b97eb64edc2552e09d558c5c029f1f49e3ff36a217408:short",
+      "seed": 2026112524,
+      "prompt": "glowstone pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T026",
+      "file": "text/T026.png",
+      "source_id": "resource:4300a3a0a1f8318cd8bb9f346654dd1eed6a2885159b144446deaa06d876aa42:short",
+      "seed": 2026112525,
+      "prompt": "pa zinc axe",
+      "split": "val"
+    },
+    {
+      "id": "T027",
+      "file": "text/T027.png",
+      "source_id": "resource:84b2b3491428ce98072534214ce639367f6d593fee3ad0e5db2bbf060c69113a:short",
+      "seed": 2026112526,
+      "prompt": "frozeniron gem",
+      "split": "val"
+    },
+    {
+      "id": "T028",
+      "file": "text/T028.png",
+      "source_id": "resource:2a7e5132262828685bbc1d39723482140d01b23afcd2a1d0ed27927f9deb6604:short",
+      "seed": 2026112527,
+      "prompt": "lunar infused soleilunium chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T029",
+      "file": "text/T029.png",
+      "source_id": "resource:f42eb803837a33432521ffeeb13e7f7f90acee7ec7b90ed7bc91074fe4ed3002:short",
+      "seed": 2026112528,
+      "prompt": "small bow",
+      "split": "val"
+    },
+    {
+      "id": "T030",
+      "file": "text/T030.png",
+      "source_id": "resource:e9b6743b4d30e37b7c19de70b5d524379ccacedad5900e4c2f9c0d3023ae088f:short",
+      "seed": 2026112529,
+      "prompt": "pa indigo cyber sword",
+      "split": "val"
+    },
+    {
+      "id": "T031",
+      "file": "text/T031.png",
+      "source_id": "resource:78f6bbeef82b535d725f1fd9de1566c73ee82a727a2778da0196caba450c5220:short",
+      "seed": 2026112530,
+      "prompt": "weapon book",
+      "split": "val"
+    },
+    {
+      "id": "T032",
+      "file": "text/T032.png",
+      "source_id": "resource:a13688815b73b46d759a54bdcb8456ff74843409fb9d1bf1785fc6dd99f5e1f4:short",
+      "seed": 2026112531,
+      "prompt": "shield ticex draconic",
+      "split": "val"
+    },
+    {
+      "id": "T033",
+      "file": "text/T033.png",
+      "source_id": "resource:c44bd5f477d83fe349bc74c79540ac54a636a73f816035d57a429422fa9a8c6f:short",
+      "seed": 2026112532,
+      "prompt": "steel hoe",
+      "split": "val"
+    },
+    {
+      "id": "T034",
+      "file": "text/T034.png",
+      "source_id": "resource:3a70580fb3c8ff04290177e84e2da6734cba9209e0f9f181c2c235f6d57efa84:short",
+      "seed": 2026112533,
+      "prompt": "hydra piece",
+      "split": "val"
+    },
+    {
+      "id": "T035",
+      "file": "text/T035.png",
+      "source_id": "resource:a872b1c17c69ed8005946147ff20ee3727830d1d5fc8c50c34c1ec79876fda85:short",
+      "seed": 2026112534,
+      "prompt": "pa catseye leggings",
+      "split": "val"
+    },
+    {
+      "id": "T036",
+      "file": "text/T036.png",
+      "source_id": "resource:cf2419213daee1e81661259752ffbc84fee15be6b88ba03608a6ebf1f176edf4:short",
+      "seed": 2026112535,
+      "prompt": "tobacco apple",
+      "split": "val"
+    },
+    {
+      "id": "T037",
+      "file": "text/T037.png",
+      "source_id": "resource:c79dfd75923663c5300a0eacdd2b06545a64744929c31652608b05355907fbe0:short",
+      "seed": 2026112536,
+      "prompt": "aluminum boots",
+      "split": "val"
+    },
+    {
+      "id": "T038",
+      "file": "text/T038.png",
+      "source_id": "resource:d2702c687fe33b11f1be824d3c42b2cd0800e2c65ab491e3b2494c15a9bb9650:short",
+      "seed": 2026112537,
+      "prompt": "pyrite shovel",
+      "split": "val"
+    },
+    {
+      "id": "T039",
+      "file": "text/T039.png",
+      "source_id": "resource:7e6d1bcbc1c7409d3fd429c8648982ec8ccc8b97a3ab406783a7b7afd1be261d:short",
+      "seed": 2026112538,
+      "prompt": "pa zircon 8 helmet",
+      "split": "val"
+    },
+    {
+      "id": "T040",
+      "file": "text/T040.png",
+      "source_id": "resource:2cdf2ab0ff31222dfd5d3c7af3a7a4f111a04d9d0f7b98c9e1232a8b57aacef9:short",
+      "seed": 2026112539,
+      "prompt": "tetromite ingot",
+      "split": "val"
+    },
+    {
+      "id": "T041",
+      "file": "text/T041.png",
+      "source_id": "resource:8348d1fc7e5d1564fabb0b7eb9bab4f45a6f8ba7783738108be385ac6803a9a0:short",
+      "seed": 2026112540,
+      "prompt": "enderium pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T042",
+      "file": "text/T042.png",
+      "source_id": "resource:48e734dfc89f4db1210566518ce6b6fbbd717f3f5fb578ae4ee3658d857bebef:short",
+      "seed": 2026112541,
+      "prompt": "battle axe gold",
+      "split": "val"
+    },
+    {
+      "id": "T043",
+      "file": "text/T043.png",
+      "source_id": "resource:78d57cd9ed6c1f5095626449d401df8dd8729965898451926cbbb07c35cd8222:short",
+      "seed": 2026112542,
+      "prompt": "sapphire gem 1",
+      "split": "val"
+    },
+    {
+      "id": "T044",
+      "file": "text/T044.png",
+      "source_id": "resource:ae9a3df5621ec96869fc3a1898a056f91d6e33a3035b0b1e46d0a5c796d74951:short",
+      "seed": 2026112543,
+      "prompt": "pa eclipse diamond chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T045",
+      "file": "text/T045.png",
+      "source_id": "resource:707b1bbf6146f374f00f8dac3d4087cbeaa15cc15ffad9ad152f53c191af966a:short",
+      "seed": 2026112544,
+      "prompt": "fire bow",
+      "split": "val"
+    },
+    {
+      "id": "T046",
+      "file": "text/T046.png",
+      "source_id": "resource:3cb09a23473c188f770fc4a3c0a7a829b26421ae9a35360b7a397bf05bd49528:short",
+      "seed": 2026112545,
+      "prompt": "oh sword",
+      "split": "val"
+    },
+    {
+      "id": "T047",
+      "file": "text/T047.png",
+      "source_id": "resource:49697c2cae1a6429b491a8d4165a50222fa1c31c5f78403d499151d8708215bd:short",
+      "seed": 2026112546,
+      "prompt": "plant book",
+      "split": "val"
+    },
+    {
+      "id": "T048",
+      "file": "text/T048.png",
+      "source_id": "resource:3101be1a7d7d007a639187391bdc42eb35546755b02f8c7bc399da07eb4fa6f9:short",
+      "seed": 2026112547,
+      "prompt": "shield broken ticex etheric",
+      "split": "val"
+    },
+    {
+      "id": "T049",
+      "file": "text/T049.png",
+      "source_id": "resource:9a91270dadf3670de879ad52d291f7e7d915c8f7bd4e1383f4a0aeb9eaa8ef6e:short",
+      "seed": 2026112548,
+      "prompt": "cherry blossom hoe",
+      "split": "val"
+    },
+    {
+      "id": "T050",
+      "file": "text/T050.png",
+      "source_id": "resource:b9757c1e92d81cac7b6cd9c4d7f041b1cfc286ba570ae0708cec1807c4e4ad35:short",
+      "seed": 2026112549,
+      "prompt": "poshirt",
+      "split": "val"
+    },
+    {
+      "id": "T051",
+      "file": "text/T051.png",
+      "source_id": "resource:47cb0851dbf96da623fe3485c3c9daee83545e6ada187bd47b48ca156dcc54d7:short",
+      "seed": 2026112550,
+      "prompt": "amazonit leggings",
+      "split": "val"
+    },
+    {
+      "id": "T052",
+      "file": "text/T052.png",
+      "source_id": "resource:40bd0b1428178823c843d1d316ffc3b005add69abb8d777d0ade15967cb8d21c:short",
+      "seed": 2026112551,
+      "prompt": "blue apple",
+      "split": "val"
+    },
+    {
+      "id": "T053",
+      "file": "text/T053.png",
+      "source_id": "resource:ce20308132327e233ce893bb548d406ae5aa337156a20e81a8e588ee276e59b8:short",
+      "seed": 2026112552,
+      "prompt": "max upgrade golden boots",
+      "split": "val"
+    },
+    {
+      "id": "T054",
+      "file": "text/T054.png",
+      "source_id": "resource:9323bcb578db9342c5f0cd17172427b0c797899e297cd5124dd57aa309615153:short",
+      "seed": 2026112553,
+      "prompt": "insanto shovel",
+      "split": "val"
+    },
+    {
+      "id": "T055",
+      "file": "text/T055.png",
+      "source_id": "resource:ef6f772e756e3a4076cdd05930e09cdc7d433fc1f8fb90b32aa4741dedec79c4:short",
+      "seed": 2026112554,
+      "prompt": "highland helmet",
+      "split": "val"
+    },
+    {
+      "id": "T056",
+      "file": "text/T056.png",
+      "source_id": "resource:f6c5f11b8c7fab88f2d5cfa4add6c0741eaf60bee4f457abe4090343f1d8f5ec:short",
+      "seed": 2026112555,
+      "prompt": "bismuth ingot",
+      "split": "val"
+    },
+    {
+      "id": "T057",
+      "file": "text/T057.png",
+      "source_id": "resource:7bff9e21a5f629be1c3d1033c688fcf42c17378c574a43d50d9dd64e1f24603f:short",
+      "seed": 2026112556,
+      "prompt": "chromatic pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T058",
+      "file": "text/T058.png",
+      "source_id": "resource:3244b5f01b917052b904a60676232be10bdaa467385ba9c633fcfa59682f5114:short",
+      "seed": 2026112557,
+      "prompt": "signalum axe",
+      "split": "val"
+    },
+    {
+      "id": "T059",
+      "file": "text/T059.png",
+      "source_id": "resource:83d11ad8bc181f89e77df99fc7308cbc4aceebad510137c039e672e950a50b90:short",
+      "seed": 2026112558,
+      "prompt": "hungry gem",
+      "split": "val"
+    },
+    {
+      "id": "T060",
+      "file": "text/T060.png",
+      "source_id": "resource:14a9d5db396d715943fd9520a1da044b60cd75e3a918f0bc4c904e6e68e697ba:short",
+      "seed": 2026112559,
+      "prompt": "soleilunium chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T061",
+      "file": "text/T061.png",
+      "source_id": "resource:e69f00a43fa32d799329917e3e4e84f0dfaf7378cce978492444c258c179154c:short",
+      "seed": 2026112560,
+      "prompt": "golden bow",
+      "split": "val"
+    },
+    {
+      "id": "T062",
+      "file": "text/T062.png",
+      "source_id": "resource:a1228e8e775dc5a798ad9a7718fcaf096bcafc41dc6a378ef7e424d2458d021d:short",
+      "seed": 2026112561,
+      "prompt": "enzanite iron sword",
+      "split": "val"
+    },
+    {
+      "id": "T063",
+      "file": "text/T063.png",
+      "source_id": "resource:afd2aac7e5622908611e97504ea69a7c11cf019d2874dce5027f6850cd963ef0:short",
+      "seed": 2026112562,
+      "prompt": "book infection",
+      "split": "val"
+    },
+    {
+      "id": "T064",
+      "file": "text/T064.png",
+      "source_id": "resource:c8aff1757e13b816ca148203b5c95d3df58ace69d9cb51b200a6e1ff1c5dcff7:short",
+      "seed": 2026112563,
+      "prompt": "shield ticex crystal matrix",
+      "split": "val"
+    },
+    {
+      "id": "T065",
+      "file": "text/T065.png",
+      "source_id": "resource:4e8b0e032277e90498a939043b5534aff0bbadbc52098b0a25e88c35d4f36d13:short",
+      "seed": 2026112564,
+      "prompt": "bound iron hoe broken",
+      "split": "val"
+    },
+    {
+      "id": "T066",
+      "file": "text/T066.png",
+      "source_id": "resource:ebbcd3f1e7a52408c8e3713058c5b595cf2553f8a287f661320fa1b47b03302e:short",
+      "seed": 2026112565,
+      "prompt": "steel door",
+      "split": "val"
+    },
+    {
+      "id": "T067",
+      "file": "text/T067.png",
+      "source_id": "resource:d57b378f33a664a994c92189a521bb2b87f8db6298cca965e9a67ce079167d0b:short",
+      "seed": 2026112566,
+      "prompt": "steel leggings",
+      "split": "val"
+    },
+    {
+      "id": "T068",
+      "file": "text/T068.png",
+      "source_id": "resource:91d61fc02312cf2451a1e5bb449c996fe86af017eb363618058c7c88fc66b8d6:short",
+      "seed": 2026112567,
+      "prompt": "enchanted netherite apple",
+      "split": "val"
+    },
+    {
+      "id": "T069",
+      "file": "text/T069.png",
+      "source_id": "resource:4c8dbfccdeea8799b5fdd448a3dbff8b16e967a914824096c0f896b22cd71d0d:short",
+      "seed": 2026112568,
+      "prompt": "andor boots",
+      "split": "val"
+    },
+    {
+      "id": "T070",
+      "file": "text/T070.png",
+      "source_id": "resource:841d81e5c31b7979e8f30648b4f15c3b10eb2c9b79a2247eb03fae43e1e3261b:short",
+      "seed": 2026112569,
+      "prompt": "ostrum shovel new",
+      "split": "val"
+    },
+    {
+      "id": "T071",
+      "file": "text/T071.png",
+      "source_id": "resource:da2c497ab8cce89594148b5f738381f175983c4ecf5d69f6cd15190ef523d666:short",
+      "seed": 2026112570,
+      "prompt": "pa mythril helmet",
+      "split": "val"
+    },
+    {
+      "id": "T072",
+      "file": "text/T072.png",
+      "source_id": "resource:35f8678f2e065b61ff8adc308d1985bc284754bdf2bb725dac26f166382a7957:short",
+      "seed": 2026112571,
+      "prompt": "glow ingot",
+      "split": "val"
+    },
+    {
+      "id": "T073",
+      "file": "text/T073.png",
+      "source_id": "resource:fb04a3c7e4880fa0f27fa2cd658100ee9f31626b0cf7adea34494ff57032a4a3:short",
+      "seed": 2026112572,
+      "prompt": "emerald pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T074",
+      "file": "text/T074.png",
+      "source_id": "resource:d8e749f852586c94603a5f727edae1f33355c44438efb6d9b7f0686327c4c614:short",
+      "seed": 2026112573,
+      "prompt": "axe ticex draconium",
+      "split": "val"
+    },
+    {
+      "id": "T075",
+      "file": "text/T075.png",
+      "source_id": "resource:1adc2fda954d69f5a8b67b5df055d0521ab2a2bba8236f29bccc59c991b94bb6:short",
+      "seed": 2026112574,
+      "prompt": "derposity gem",
+      "split": "val"
+    },
+    {
+      "id": "T076",
+      "file": "text/T076.png",
+      "source_id": "resource:e2a92d086e48de719d377832e06b4211d311effe203eee1e7cb141f8a22be885:short",
+      "seed": 2026112575,
+      "prompt": "adamantium chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T077",
+      "file": "text/T077.png",
+      "source_id": "resource:2b808f878d948fc65afc6bf0c9be8350b4065dfe1a56af05baa284260329b0d7:short",
+      "seed": 2026112576,
+      "prompt": "wyvern bow e 2",
+      "split": "val"
+    },
+    {
+      "id": "T078",
+      "file": "text/T078.png",
+      "source_id": "resource:7ff40f2c26e04f75677fcd3dfbc8dda28dd947fc66c3dfa996fcd7f88bcafdfc:short",
+      "seed": 2026112577,
+      "prompt": "sword mithril",
+      "split": "val"
+    },
+    {
+      "id": "T079",
+      "file": "text/T079.png",
+      "source_id": "resource:8967d87f27be0600f963e7a1fd3a2580fc65c6f17f1a10998891f19707da9b15:short",
+      "seed": 2026112578,
+      "prompt": "the book of sin",
+      "split": "val"
+    },
+    {
+      "id": "T080",
+      "file": "text/T080.png",
+      "source_id": "resource:f8a171da418455bfb1e8bad99a37d6d629677e9b4fdb5f01f0dfd778b15a2865:short",
+      "seed": 2026112579,
+      "prompt": "ico shield",
+      "split": "val"
+    },
+    {
+      "id": "T081",
+      "file": "text/T081.png",
+      "source_id": "resource:dfc3bb4517cfd5aff548d8a158ca029d1e29bd7137f2d1498d1dc97c44426080:short",
+      "seed": 2026112580,
+      "prompt": "dragonsteel hoe",
+      "split": "val"
+    },
+    {
+      "id": "T082",
+      "file": "text/T082.png",
+      "source_id": "resource:f0dbd55acb396383628b2c947c15c507e99f2d3d18b435c27157e268d7272dcc:short",
+      "seed": 2026112581,
+      "prompt": "pinkps honey boba texture v 2",
+      "split": "val"
+    },
+    {
+      "id": "T083",
+      "file": "text/T083.png",
+      "source_id": "resource:704b9536743b0796a74affe357c77df417f267ab0464477430286087da34460e:short",
+      "seed": 2026112582,
+      "prompt": "pinkpearl 1 leggings",
+      "split": "val"
+    },
+    {
+      "id": "T084",
+      "file": "text/T084.png",
+      "source_id": "resource:eb4f4cabcd0ba487ae5d14a60bb651ebb9abe393563aad4abe8814e7d55417c1:short",
+      "seed": 2026112583,
+      "prompt": "limeps golden apple boba texture v 2",
+      "split": "val"
+    },
+    {
+      "id": "T085",
+      "file": "text/T085.png",
+      "source_id": "resource:f234d551ba8b62511629a3acb6469f51ac36e5fd01aa2b2e49a6dd63ac493a1d:short",
+      "seed": 2026112584,
+      "prompt": "vanity commander boots",
+      "split": "val"
+    },
+    {
+      "id": "T086",
+      "file": "text/T086.png",
+      "source_id": "resource:9b40d7b819520f435608f1447756d1141787a1b0ec760b2bb26f901b583e3f06:short",
+      "seed": 2026112585,
+      "prompt": "primarite shovel",
+      "split": "val"
+    },
+    {
+      "id": "T087",
+      "file": "text/T087.png",
+      "source_id": "resource:e14bf8a3818f7c65ed2b0f604f6aeacf4dffdf411d2e6f915b82062d7e007e91:short",
+      "seed": 2026112586,
+      "prompt": "pa zircon 5 helmet",
+      "split": "val"
+    },
+    {
+      "id": "T088",
+      "file": "text/T088.png",
+      "source_id": "resource:95f9668c10ca90567a9ced818a05aba685ec58700394d616d5de2734b2a318d2:short",
+      "seed": 2026112587,
+      "prompt": "bronze ingot",
+      "split": "val"
+    },
+    {
+      "id": "T089",
+      "file": "text/T089.png",
+      "source_id": "resource:173faad45d2a7f070b5579e61e622e1483e32f0ff33d3e1cca7066c22013e3b2:short",
+      "seed": 2026112588,
+      "prompt": "pa aluminium pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T090",
+      "file": "text/T090.png",
+      "source_id": "resource:41f177cd3c744a5725f06e52f1d6b59463dbd0837de3c094fbec8d4151eb7a22:short",
+      "seed": 2026112589,
+      "prompt": "battle axe iron",
+      "split": "val"
+    },
+    {
+      "id": "T091",
+      "file": "text/T091.png",
+      "source_id": "resource:48cc4f7fa051ec11df8ba30e29fd14293b5a6e470f128e10fd9de8995301c881:short",
+      "seed": 2026112590,
+      "prompt": "infinitium gem",
+      "split": "val"
+    },
+    {
+      "id": "T092",
+      "file": "text/T092.png",
+      "source_id": "resource:b2dcd68bafe5bb9a4317f1f79f21cafa1aed8287b36522f4f72b6cabe41b416b:short",
+      "seed": 2026112591,
+      "prompt": "endiorite chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T093",
+      "file": "text/T093.png",
+      "source_id": "resource:0c27be42ad0ac35240c22c8e1c525aba66a9d81e7b9131f54f8ed56a76e3a0c0:short",
+      "seed": 2026112592,
+      "prompt": "chaotic bow e 1",
+      "split": "val"
+    },
+    {
+      "id": "T094",
+      "file": "text/T094.png",
+      "source_id": "resource:6ed424e995217d211b08bc6fc07cbc1e21c94526f421cf9a0242536d293cbc09:short",
+      "seed": 2026112593,
+      "prompt": "nightmare sword swiftness",
+      "split": "val"
+    },
+    {
+      "id": "T095",
+      "file": "text/T095.png",
+      "source_id": "resource:1359857da1bfc5767c081e12c395cbfab112fdcc7c0933c95a751c32ed1dee2f:short",
+      "seed": 2026112594,
+      "prompt": "book extract crawler plate",
+      "split": "val"
+    },
+    {
+      "id": "T096",
+      "file": "text/T096.png",
+      "source_id": "resource:5eda77a1b0d1ab850b863aa44fb3351632842da525843dbc41c0e508c642cddc:short",
+      "seed": 2026112595,
+      "prompt": "shield broken ticex wyvern",
+      "split": "val"
+    },
+    {
+      "id": "T097",
+      "file": "text/T097.png",
+      "source_id": "resource:e6b1a30ec92b8e308ea0688d19a224bae7d0897f5954b00c9434d72a623a82fa:short",
+      "seed": 2026112596,
+      "prompt": "obsidian hoe",
+      "split": "val"
+    },
+    {
+      "id": "T098",
+      "file": "text/T098.png",
+      "source_id": "resource:88d4aa9a60dbf89279aac79548cd60a82d464732d756f4c71adaffd2fdeadbbb:short",
+      "seed": 2026112597,
+      "prompt": "infernal rod cast",
+      "split": "val"
+    },
+    {
+      "id": "T099",
+      "file": "text/T099.png",
+      "source_id": "resource:94e118b2c703669f859ea5ca6d72ce3e5217b29341d476ab5e8a7dd4d4f4bcc6:short",
+      "seed": 2026112598,
+      "prompt": "pa silver leggings",
+      "split": "val"
+    },
+    {
+      "id": "T100",
+      "file": "text/T100.png",
+      "source_id": "resource:001808b69b87966a0b41787d2cb816f9d0ef6533fa5c404aacac6990de2077b6:short",
+      "seed": 2026112599,
+      "prompt": "poisonous apple",
+      "split": "val"
+    },
+    {
+      "id": "T101",
+      "file": "text/T101.png",
+      "source_id": "resource:4a8e8d5806f1e534bdd7da1be91290f366129f44d7eca286b6bcf654bf3dc5cc:short",
+      "seed": 2026112600,
+      "prompt": "boots base",
+      "split": "val"
+    },
+    {
+      "id": "T102",
+      "file": "text/T102.png",
+      "source_id": "resource:cc8627d67b89525e8ed906f3dbaad1879fb81144983ddd1d61a8ef960406c5ca:short",
+      "seed": 2026112601,
+      "prompt": "quartz shovel",
+      "split": "val"
+    },
+    {
+      "id": "T103",
+      "file": "text/T103.png",
+      "source_id": "resource:a526e5929c3c45e2b078dfb1b8a816c94a0c8dcb62af045695be3679fb657619:short",
+      "seed": 2026112602,
+      "prompt": "rubis helmet item",
+      "split": "val"
+    },
+    {
+      "id": "T104",
+      "file": "text/T104.png",
+      "source_id": "resource:dfa0e2b893087f38d041832cf21770d0bc498f2235e3689dd1e86cfa3736424a:short",
+      "seed": 2026112603,
+      "prompt": "silver ingot",
+      "split": "val"
+    },
+    {
+      "id": "T105",
+      "file": "text/T105.png",
+      "source_id": "resource:ead397bbe67c3cb94e7c2bb73d9ba05439c2b8c8c5aefd2a4cdeac57ba2eb844:short",
+      "seed": 2026112604,
+      "prompt": "super tools pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T106",
+      "file": "text/T106.png",
+      "source_id": "resource:bbec30889bed9afc91fb84888b15a818542cd656db9873841c17166b61eb23af:short",
+      "seed": 2026112605,
+      "prompt": "cherry axe",
+      "split": "val"
+    },
+    {
+      "id": "T107",
+      "file": "text/T107.png",
+      "source_id": "resource:30e5292d2c1c67a2c688de627c35c4b1b7d65a73213aad51d883edb55dc00a90:short",
+      "seed": 2026112606,
+      "prompt": "blazing gem",
+      "split": "val"
+    },
+    {
+      "id": "T108",
+      "file": "text/T108.png",
+      "source_id": "resource:ebc0ba017432c0ea6034ec8ee85612704c1dbcaf29653bc83a56cdbfbcec4e10:short",
+      "seed": 2026112607,
+      "prompt": "willshaper chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T109",
+      "file": "text/T109.png",
+      "source_id": "resource:5f0efd30803a3e91fd61708d30cb9b734262171dfec863a9464f1f06350116ca:short",
+      "seed": 2026112608,
+      "prompt": "titan bow darkness",
+      "split": "val"
+    },
+    {
+      "id": "T110",
+      "file": "text/T110.png",
+      "source_id": "resource:e4ee44419136056e106850963024948276d500477a5ff3cc1fab727537cd539c:short",
+      "seed": 2026112609,
+      "prompt": "purple sword",
+      "split": "val"
+    },
+    {
+      "id": "T111",
+      "file": "text/T111.png",
+      "source_id": "resource:6dcebd63ee9b6eb97e53a255fbd0f3094dd4990ee9574299c9c44aa8cde116da:short",
+      "seed": 2026112610,
+      "prompt": "book supporters",
+      "split": "val"
+    },
+    {
+      "id": "T112",
+      "file": "text/T112.png",
+      "source_id": "resource:8b4e74b2cacd46b119e57e4d8dd16a7ab1da88ebc3250b1761fc24615c8699ec:short",
+      "seed": 2026112611,
+      "prompt": "shield broken ticex draconic",
+      "split": "val"
+    },
+    {
+      "id": "T113",
+      "file": "text/T113.png",
+      "source_id": "resource:2c6afa8b490fe3000adafc8c7c1cb14fe76bb247c6d73d922499faeee641e9b5:short",
+      "seed": 2026112612,
+      "prompt": "pa white pearl hoe",
+      "split": "val"
+    },
+    {
+      "id": "T114",
+      "file": "text/T114.png",
+      "source_id": "resource:e32fb1b379da98c2b4cd9e989ff1d2f8f6da058435d5becef70a09632dd39009:short",
+      "seed": 2026112613,
+      "prompt": "zzssdp",
+      "split": "val"
+    },
+    {
+      "id": "T115",
+      "file": "text/T115.png",
+      "source_id": "resource:6de7942cb99d961bec389b0814c4c4817f8a3433c23798708455690ab623aedf:short",
+      "seed": 2026112614,
+      "prompt": "feywood leggings",
+      "split": "val"
+    },
+    {
+      "id": "T116",
+      "file": "text/T116.png",
+      "source_id": "resource:5c8c5f5ed3581118e26e14432dd8bc96c24e5629ac28ac911f3d63176135e07b:short",
+      "seed": 2026112615,
+      "prompt": "toffee golden apple",
+      "split": "val"
+    },
+    {
+      "id": "T117",
+      "file": "text/T117.png",
+      "source_id": "resource:0920f6f75f0c6de6d6655b1231e20a165f8e64e7bc79185def9520750f3b0162:short",
+      "seed": 2026112616,
+      "prompt": "palis boots",
+      "split": "val"
+    },
+    {
+      "id": "T118",
+      "file": "text/T118.png",
+      "source_id": "resource:46d7dd8b6267d1dfb25b07b1b17336ab033139fe6446c0b2006b9f919c341ddb:short",
+      "seed": 2026112617,
+      "prompt": "pa fire opal shovel",
+      "split": "val"
+    },
+    {
+      "id": "T119",
+      "file": "text/T119.png",
+      "source_id": "resource:cffbb962068a25284d9a4d4692f67791b971613e24add9ad3348de771cf657e8:short",
+      "seed": 2026112618,
+      "prompt": "helmet trim",
+      "split": "val"
+    },
+    {
+      "id": "T120",
+      "file": "text/T120.png",
+      "source_id": "resource:d6b7e71c1049c5be5cf4404ea0ab565321578d42db91bd2f931356ff39338fb1:short",
+      "seed": 2026112619,
+      "prompt": "platinum ingot",
+      "split": "val"
+    },
+    {
+      "id": "T121",
+      "file": "text/T121.png",
+      "source_id": "resource:84bf44f86190581087e222254b544f5dd9970ba27fa696cab751a41190f0af9e:short",
+      "seed": 2026112620,
+      "prompt": "pa wither pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T122",
+      "file": "text/T122.png",
+      "source_id": "resource:50cef7c1090520a70d43a07872a30b2a04ce1082ff85c1462736be39adf32c89:short",
+      "seed": 2026112621,
+      "prompt": "obsidian axe",
+      "split": "val"
+    },
+    {
+      "id": "T123",
+      "file": "text/T123.png",
+      "source_id": "resource:28492c24b15d3a034f5d7b62a066450725ca227cece97726cd8c0b1882163b05:short",
+      "seed": 2026112622,
+      "prompt": "traptanium gem",
+      "split": "val"
+    },
+    {
+      "id": "T124",
+      "file": "text/T124.png",
+      "source_id": "resource:102dfe6a3dd9bac8eb2fa2ee1ab34afc0eaa8e4000c09aecb29386dea045f129:short",
+      "seed": 2026112623,
+      "prompt": "lead chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T125",
+      "file": "text/T125.png",
+      "source_id": "resource:8cf49bfb2b45a519f8539d7171d67147981abf295454189f6e4e5ed03a1f50bd:short",
+      "seed": 2026112624,
+      "prompt": "nocturnal bow",
+      "split": "val"
+    },
+    {
+      "id": "T126",
+      "file": "text/T126.png",
+      "source_id": "resource:75355d4b8b42015e1845654de35a240883ce1165bf4b18741625dfd14d677a7e:short",
+      "seed": 2026112625,
+      "prompt": "copper sword",
+      "split": "val"
+    },
+    {
+      "id": "T127",
+      "file": "text/T127.png",
+      "source_id": "resource:0841532d8ce446d9b44e74440765f19bbd2b8455fc96ee5385de7f632a20f437:short",
+      "seed": 2026112626,
+      "prompt": "book enchanted",
+      "split": "val"
+    },
+    {
+      "id": "T128",
+      "file": "text/T128.png",
+      "source_id": "resource:1ed0660dd91742392e13a67d523c1dec9d18ee1d98ce79a13e98f5e2ea776a30:short",
+      "seed": 2026112627,
+      "prompt": "the shield of infinitypants",
+      "split": "val"
+    },
+    {
+      "id": "T129",
+      "file": "text/T129.png",
+      "source_id": "resource:4d92e0517360df11f2adf4eaa3d16a3742aa229420b19e081efa00976e0edc67:short",
+      "seed": 2026112628,
+      "prompt": "ancient essence hoe",
+      "split": "val"
+    },
+    {
+      "id": "T130",
+      "file": "text/T130.png",
+      "source_id": "resource:beb05cd37b6c03c131894ee7ca0d539b39c965f44df8cb31454a69d284be4bbd:short",
+      "seed": 2026112629,
+      "prompt": "glass crest crossbow pulling 2",
+      "split": "val"
+    },
+    {
+      "id": "T131",
+      "file": "text/T131.png",
+      "source_id": "resource:a32eb8fae2c43483b0f1cf55477041d1b3d2bf91b5419cee3b502046d17b4a97:short",
+      "seed": 2026112630,
+      "prompt": "super gold leggings",
+      "split": "val"
+    },
+    {
+      "id": "T132",
+      "file": "text/T132.png",
+      "source_id": "resource:3992dd114dfcd94e4be380a61143343ba996f593ce46483e6296ab2ba6aad130:short",
+      "seed": 2026112631,
+      "prompt": "golden apple boba texture v 2",
+      "split": "val"
+    },
+    {
+      "id": "T133",
+      "file": "text/T133.png",
+      "source_id": "resource:48cc9d69a919449809234a8fc520d4bcedb8fca7fa6b3cb78b6419b93ea1cacc:short",
+      "seed": 2026112632,
+      "prompt": "ice boots",
+      "split": "val"
+    },
+    {
+      "id": "T134",
+      "file": "text/T134.png",
+      "source_id": "resource:7964555810dffb65968bffbd8200c26eead33351bedd35ab3369058a65a57a52:short",
+      "seed": 2026112633,
+      "prompt": "bronze shovel",
+      "split": "val"
+    },
+    {
+      "id": "T135",
+      "file": "text/T135.png",
+      "source_id": "resource:696714e86b2fca263ea658f08b81e7be18c403ba6fdc50781bcf36116f72f13e:short",
+      "seed": 2026112634,
+      "prompt": "pa neon meteorite helmet",
+      "split": "val"
+    },
+    {
+      "id": "T136",
+      "file": "text/T136.png",
+      "source_id": "resource:8f42f62b87f92887cae0c5ae7a7ff20248a25e69eebaf0539e986f3d2d822dd9:short",
+      "seed": 2026112635,
+      "prompt": "universo ingot",
+      "split": "val"
+    },
+    {
+      "id": "T137",
+      "file": "text/T137.png",
+      "source_id": "resource:730a6a0682a9c012ab8aa5469463fdfc68b8b3a0fc850dae015b2f2e41fbcabc:short",
+      "seed": 2026112636,
+      "prompt": "charcoal pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T138",
+      "file": "text/T138.png",
+      "source_id": "resource:92b22edc1963e8e23fccfbbdc945baf34a9a9793f78358757cb3c0a85517a4ea:short",
+      "seed": 2026112637,
+      "prompt": "upgrade diamond axe",
+      "split": "val"
+    },
+    {
+      "id": "T139",
+      "file": "text/T139.png",
+      "source_id": "resource:e786403ed9877a8c944de5cc40e680cf6db2b1cdcb64eabe99437f21b032cd83:short",
+      "seed": 2026112638,
+      "prompt": "amulet gem",
+      "split": "val"
+    },
+    {
+      "id": "T140",
+      "file": "text/T140.png",
+      "source_id": "resource:fe4020c4e5317b2cd3a52fe896dfc8e64d7e81c65b40e1eae6c54cd57fb22f15:short",
+      "seed": 2026112639,
+      "prompt": "ruby chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T141",
+      "file": "text/T141.png",
+      "source_id": "resource:5de0369f3f3321968ad26c13bc24c8177a722e0af1a3563b90692d3d01faa636:short",
+      "seed": 2026112640,
+      "prompt": "wyvern bow e 0",
+      "split": "val"
+    },
+    {
+      "id": "T142",
+      "file": "text/T142.png",
+      "source_id": "resource:c9f96bb7ecd844b7cad5ceae644978f57da9b058c8f4017d18520fc4d6d3f75c:short",
+      "seed": 2026112641,
+      "prompt": "spectre sword",
+      "split": "val"
+    },
+    {
+      "id": "T143",
+      "file": "text/T143.png",
+      "source_id": "resource:6ba37841bfdcc23e5998522b4fd478387e77f2ae71ba6d3f2449ed5216d13051:short",
+      "seed": 2026112642,
+      "prompt": "red book",
+      "split": "val"
+    },
+    {
+      "id": "T144",
+      "file": "text/T144.png",
+      "source_id": "resource:45ef65dfa00156ea6c8b5e094b35dd751664fddea9ebbd8541105af1595f16fb:short",
+      "seed": 2026112643,
+      "prompt": "the shield of infinitychestplate",
+      "split": "val"
+    },
+    {
+      "id": "T145",
+      "file": "text/T145.png",
+      "source_id": "resource:526769398e49202a28a6240003da1a39aa18efa7f9c62d61dafae7c26708a241:short",
+      "seed": 2026112644,
+      "prompt": "amethyst hoe",
+      "split": "val"
+    },
+    {
+      "id": "T146",
+      "file": "text/T146.png",
+      "source_id": "resource:fc6f90a1d09e947098bcaffa63ffff1a377673ca512f400e0b5380e589279b70:short",
+      "seed": 2026112645,
+      "prompt": "pasture blanket light 9 icon",
+      "split": "val"
+    },
+    {
+      "id": "T147",
+      "file": "text/T147.png",
+      "source_id": "resource:4ab0168a4ef0ab46f1ed3a67ceaef4c03f0b5b6d0b7ccbb90369ff85b0334b92:short",
+      "seed": 2026112646,
+      "prompt": "pa rare star sapphire leggings",
+      "split": "val"
+    },
+    {
+      "id": "T148",
+      "file": "text/T148.png",
+      "source_id": "resource:e66ce7b08b1214d05f11c34ce21e9e2e9785ef87c408d2354c3c676c71d931b0:short",
+      "seed": 2026112647,
+      "prompt": "pink apple",
+      "split": "val"
+    },
+    {
+      "id": "T149",
+      "file": "text/T149.png",
+      "source_id": "resource:26d260658cf5efdb7fe0df7ac109afa52ef49c93034a6607296496fc55409752:short",
+      "seed": 2026112648,
+      "prompt": "bedrock boots",
+      "split": "val"
+    },
+    {
+      "id": "T150",
+      "file": "text/T150.png",
+      "source_id": "resource:0dbe2c4ab747fb1ada8bf74d3374eb9be8d442fafd874dd2feaa1b870d1a615d:short",
+      "seed": 2026112649,
+      "prompt": "mining dimension tools shovel",
+      "split": "val"
+    },
+    {
+      "id": "T151",
+      "file": "text/T151.png",
+      "source_id": "resource:7b634ec30bd45b45a854def67ca3d8e88995aa059ce2f25167feb0e8d5409816:short",
+      "seed": 2026112650,
+      "prompt": "steel helmet",
+      "split": "val"
+    },
+    {
+      "id": "T152",
+      "file": "text/T152.png",
+      "source_id": "resource:cfa7a928c6e1a9074f9a076305efcd5b960ffca93fb472fc539682646fd4291c:short",
+      "seed": 2026112651,
+      "prompt": "zinc ingot",
+      "split": "val"
+    },
+    {
+      "id": "T153",
+      "file": "text/T153.png",
+      "source_id": "resource:fdab8a2bdd59d5f1751b15fb923cece3d72a14d89a3a6e0b78de97266422a30a:short",
+      "seed": 2026112652,
+      "prompt": "andesite pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T154",
+      "file": "text/T154.png",
+      "source_id": "resource:393d42da5d64deef078e144b5ee0eb04b293351f70b5be69ad825d1791962627:short",
+      "seed": 2026112653,
+      "prompt": "ruby axe",
+      "split": "val"
+    },
+    {
+      "id": "T155",
+      "file": "text/T155.png",
+      "source_id": "resource:c63a115d246c6869aafc1abcf8089143db2e87f990e9849dc61f4609194d31fb:short",
+      "seed": 2026112654,
+      "prompt": "labradorite gem",
+      "split": "val"
+    },
+    {
+      "id": "T156",
+      "file": "text/T156.png",
+      "source_id": "resource:642a8740ce0828ad00ac2ec7f2a0ba36ce75917fd86388252d7d96f6cc26d3fb:short",
+      "seed": 2026112655,
+      "prompt": "pa rare beryl chestplate 13",
+      "split": "val"
+    },
+    {
+      "id": "T157",
+      "file": "text/T157.png",
+      "source_id": "resource:42613da68e1b26a83afef956eadd01936eb3cd73b430a45a0c10853e85fa7684:short",
+      "seed": 2026112656,
+      "prompt": "multi bow 3",
+      "split": "val"
+    },
+    {
+      "id": "T158",
+      "file": "text/T158.png",
+      "source_id": "resource:508421ecd3328312d16cf8eb9e67ad608483b0ccd031e49659aaf934354badc4:short",
+      "seed": 2026112657,
+      "prompt": "blood diamond sword katana",
+      "split": "val"
+    },
+    {
+      "id": "T159",
+      "file": "text/T159.png",
+      "source_id": "resource:647a6cbdd507a73f6ef1ed33d773256c1eb9f3d8943685963164d19545b13925:short",
+      "seed": 2026112658,
+      "prompt": "book blueprint",
+      "split": "val"
+    },
+    {
+      "id": "T160",
+      "file": "text/T160.png",
+      "source_id": "resource:f12be6ce7ee1bb45094cc5b530e0d88746a62da945a6f543c088b96a7cf3184b:short",
+      "seed": 2026112659,
+      "prompt": "dream shield chain",
+      "split": "val"
+    },
+    {
+      "id": "T161",
+      "file": "text/T161.png",
+      "source_id": "resource:354660e8f1bbb1754660d176700ce4ba5cc38dd4e7792d23174c55e350917b6d:short",
+      "seed": 2026112660,
+      "prompt": "bronze hoe",
+      "split": "val"
+    },
+    {
+      "id": "T162",
+      "file": "text/T162.png",
+      "source_id": "resource:a71e185f39323a906e56c7c8fb2e79106ffb8b7c2951d2ad72bb829aa0c81d36:short",
+      "seed": 2026112661,
+      "prompt": "kinetic energy storage upgrade",
+      "split": "val"
+    },
+    {
+      "id": "T163",
+      "file": "text/T163.png",
+      "source_id": "resource:c9b35b4f390bd81ca82f84fe147c2105d9c015c5a00bfa852dc55c3b16a8e84e:short",
+      "seed": 2026112662,
+      "prompt": "titanium leggings",
+      "split": "val"
+    },
+    {
+      "id": "T164",
+      "file": "text/T164.png",
+      "source_id": "resource:24365d25d215f6fe7b4de1cf55c391e623df3e428bb7cd9c8add7a678c52a434:short",
+      "seed": 2026112663,
+      "prompt": "magenta apple",
+      "split": "val"
+    },
+    {
+      "id": "T165",
+      "file": "text/T165.png",
+      "source_id": "resource:b5cbb105448a630c7673d3f78e527b996c8e5f2558c793dc0df8b757b777e55d:short",
+      "seed": 2026112664,
+      "prompt": "super redstone boots",
+      "split": "val"
+    },
+    {
+      "id": "T166",
+      "file": "text/T166.png",
+      "source_id": "resource:7712797469f4a26c8c2b6b01899a24804880eb91c6586e1db2c3b8a8a61738ee:short",
+      "seed": 2026112665,
+      "prompt": "thanlium shovel",
+      "split": "val"
+    },
+    {
+      "id": "T167",
+      "file": "text/T167.png",
+      "source_id": "resource:4edc846cc5673b366673222fd6f87c28f305168da3657b2cce16c289e5688606:short",
+      "seed": 2026112666,
+      "prompt": "umbranova helmet",
+      "split": "val"
+    },
+    {
+      "id": "T168",
+      "file": "text/T168.png",
+      "source_id": "resource:e4f6224df20d9e074fca2fca3286fc71230a2158995ad9cc61b255c682f0e1dc:short",
+      "seed": 2026112667,
+      "prompt": "whitesherry ingot",
+      "split": "val"
+    },
+    {
+      "id": "T169",
+      "file": "text/T169.png",
+      "source_id": "resource:f3b80613220cea2a8387d8f26fed830a47567b975715317279a634b6d2ebdd93:short",
+      "seed": 2026112668,
+      "prompt": "flint pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T170",
+      "file": "text/T170.png",
+      "source_id": "resource:c421c025719b056a4b41b0e8c6c74a1d65aafdfe5caa1fe7d4f946c687f27961:short",
+      "seed": 2026112669,
+      "prompt": "corundum axe",
+      "split": "val"
+    },
+    {
+      "id": "T171",
+      "file": "text/T171.png",
+      "source_id": "resource:972fc3215a3b799b8d8b6f3bc8df0de55d82cd8c65a74471e38d4b9e2d6763ec:short",
+      "seed": 2026112670,
+      "prompt": "ring gem",
+      "split": "val"
+    },
+    {
+      "id": "T172",
+      "file": "text/T172.png",
+      "source_id": "resource:e0265fde0ff080f9969058d4aa43e8ffe0bab13e8ef4b3e2a1ee0316d8271d4e:short",
+      "seed": 2026112671,
+      "prompt": "netherite power chestplate",
+      "split": "val"
+    },
+    {
+      "id": "T173",
+      "file": "text/T173.png",
+      "source_id": "resource:643f2849ff10790278df6fac61ae0e2dc80d7f0f19305a2cf4fa340cf932e55b:short",
+      "seed": 2026112672,
+      "prompt": "skeleton leader battle bow inv",
+      "split": "val"
+    },
+    {
+      "id": "T174",
+      "file": "text/T174.png",
+      "source_id": "resource:1a64c6b7a407a7c52679445adf15e580b5c49dee1a93ede6331b0a6d920344b0:short",
+      "seed": 2026112673,
+      "prompt": "pa white black core cyber sword",
+      "split": "val"
+    },
+    {
+      "id": "T175",
+      "file": "text/T175.png",
+      "source_id": "resource:9aa7ca86e6f172b210d80448cbfa33e8ddebabf11f9cab02022877c3438ece5a:short",
+      "seed": 2026112674,
+      "prompt": "book",
+      "split": "val"
+    },
+    {
+      "id": "T176",
+      "file": "text/T176.png",
+      "source_id": "resource:60f8882df1ad228d0688102053e748eb2f2bc119caa7b8118623bb782f1eeac5:short",
+      "seed": 2026112675,
+      "prompt": "shield gold old",
+      "split": "val"
+    },
+    {
+      "id": "T177",
+      "file": "text/T177.png",
+      "source_id": "resource:b232b8a5432122d74d042a86b867936f2f4996ccb9d110a840dd0dea879c4afe:short",
+      "seed": 2026112676,
+      "prompt": "pa flourite hoe",
+      "split": "val"
+    },
+    {
+      "id": "T178",
+      "file": "text/T178.png",
+      "source_id": "resource:8f922477c689c3930523ad7d6f57a8070bc4796cb3a435d28dc41998d6db5359:short",
+      "seed": 2026112677,
+      "prompt": "sycamore bark",
+      "split": "val"
+    },
+    {
+      "id": "T179",
+      "file": "text/T179.png",
+      "source_id": "resource:38e844b3c15d1b96a113a8e7ff445609d7be814c03225b52c329f14c9ce54841:short",
+      "seed": 2026112678,
+      "prompt": "ruby leggings",
+      "split": "val"
+    },
+    {
+      "id": "T180",
+      "file": "text/T180.png",
+      "source_id": "resource:854b9ac083ef115563a24eb5e063dbc79d66914d7a819b52549ab4052d220c15:short",
+      "seed": 2026112679,
+      "prompt": "apple diamond",
+      "split": "val"
+    },
+    {
+      "id": "T181",
+      "file": "text/T181.png",
+      "source_id": "resource:799f07970a5eeaffccb509e6f0e1391bfdf4f909d9190ee877f8ed6d96f8305c:short",
+      "seed": 2026112680,
+      "prompt": "transport boots 6",
+      "split": "val"
+    },
+    {
+      "id": "T182",
+      "file": "text/T182.png",
+      "source_id": "resource:f51c4eb72c5e4251a871fd65161f1bee9608261f8782ffcbbf2e5d60c50aa73a:short",
+      "seed": 2026112681,
+      "prompt": "pa quartz infused shovel",
+      "split": "val"
+    },
+    {
+      "id": "T183",
+      "file": "text/T183.png",
+      "source_id": "resource:7705a5cc3059e61f9bc24639a6e9e4c9448c922f582518093f9736a9bbc4a4f7:short",
+      "seed": 2026112682,
+      "prompt": "miner helmet",
+      "split": "val"
+    },
+    {
+      "id": "T184",
+      "file": "text/T184.png",
+      "source_id": "resource:6a0010aa938707493bb4e7a142fd40037432ef61f0ba2a09c9df244436e77eeb:short",
+      "seed": 2026112683,
+      "prompt": "aluminum ingot",
+      "split": "val"
+    },
+    {
+      "id": "T185",
+      "file": "text/T185.png",
+      "source_id": "resource:a83245b8afebccdd578cc244bf85a302aaa86124f4b4d1fb1c6673d9803da0a8:short",
+      "seed": 2026112684,
+      "prompt": "magnetite pickaxe",
+      "split": "val"
+    },
+    {
+      "id": "T186",
+      "file": "text/T186.png",
+      "source_id": "resource:5f0ed859c4abad610bb81987270d5c14389071adcba56e8d5c5616e845e36b82:short",
+      "seed": 2026112685,
+      "prompt": "rutheniu axe",
+      "split": "val"
+    },
+    {
+      "id": "T187",
+      "file": "text/T187.png",
+      "source_id": "resource:308fe4ce450e388d6b3661ffefc0fdae7ad8d09a48b58bc3158b02a49f75ae50:short",
+      "seed": 2026112686,
+      "prompt": "necklace gem",
+      "split": "val"
+    },
+    {
+      "id": "T188",
+      "file": "text/T188.png",
+      "source_id": "resource:acbde826ad51b4d78142004beb2ba531a5f2601ebd4d4f65bd84ea334e181da5:short",
+      "seed": 2026112687,
+      "prompt": "pa rare beryl chestplate 9 1 2 4 5 3 1 1",
+      "split": "val"
+    },
+    {
+      "id": "T189",
+      "file": "text/T189.png",
+      "source_id": "resource:8c1026148125a65c312d13f9d98f7460204ec7417328bd10e5f205dcdc34fa55:short",
+      "seed": 2026112688,
+      "prompt": "darkness bow",
+      "split": "val"
+    },
+    {
+      "id": "T190",
+      "file": "text/T190.png",
+      "source_id": "resource:ad00d4101e9add92c968fa93a7f0e392e6c00d0f1f3407612d8382fe934b9900:short",
+      "seed": 2026112689,
+      "prompt": "jade sword",
+      "split": "val"
+    },
+    {
+      "id": "T191",
+      "file": "text/T191.png",
+      "source_id": "resource:37215554e69ebb946005ed18fd23bd23d2163b219055b9b3d06ac65fa8ed60ba:short",
+      "seed": 2026112690,
+      "prompt": "ore book",
+      "split": "val"
+    },
+    {
+      "id": "T192",
+      "file": "text/T192.png",
+      "source_id": "resource:c1897347849de35534f2092e1d8b6a261ac9c11bb9291e4b21db3de1cb3632f9:short",
+      "seed": 2026112691,
+      "prompt": "shield ticex draconium",
+      "split": "val"
+    },
+    {
+      "id": "T193",
+      "file": "text/T193.png",
+      "source_id": "resource:7673f3dc87c663b383af2df7fa3b8b116dce405b838739d2984536650857eb71:short",
+      "seed": 2026112692,
+      "prompt": "enori hoe",
+      "split": "val"
+    },
+    {
+      "id": "T194",
+      "file": "text/T194.png",
+      "source_id": "resource:658fbccc10a4113202c9b706df8cfa4a98c2212667a99433228a35f40421220b:short",
+      "seed": 2026112693,
+      "prompt": "orange marinated pork",
+      "split": "val"
+    },
+    {
+      "id": "T195",
+      "file": "text/T195.png",
+      "source_id": "resource:53905c715707468d170af69ea4c73366ee232fe031877b48927957664f5ef5a0:short",
+      "seed": 2026112694,
+      "prompt": "brynnian leggings",
+      "split": "val"
+    },
+    {
+      "id": "T196",
+      "file": "text/T196.png",
+      "source_id": "resource:6495756964f63145ad336fe6394c920b797e8bd02c41dc99155390a8e2b4cbe1:short",
+      "seed": 2026112695,
+      "prompt": "canned golden apple",
+      "split": "val"
+    },
+    {
+      "id": "T197",
+      "file": "text/T197.png",
+      "source_id": "resource:0bc735be9a42ac5ae456d0ac11c2935ef29c55e83571d571ffbf310c85161c06:short",
+      "seed": 2026112696,
+      "prompt": "boots",
+      "split": "val"
+    },
+    {
+      "id": "T198",
+      "file": "text/T198.png",
+      "source_id": "resource:cfd8d05f631bd6079e0fa7cf874fb7cd71676efc591168752ebd6d0e807e22f4:short",
+      "seed": 2026112697,
+      "prompt": "magic shovel",
+      "split": "val"
+    },
+    {
+      "id": "T199",
+      "file": "text/T199.png",
+      "source_id": "resource:25b79d7ad098a4d6c03b0d839db6ad6ba1c422f65610519ff798c70ba7634fe9:short",
+      "seed": 2026112698,
+      "prompt": "blue diamond helmet",
+      "split": "val"
+    },
+    {
+      "id": "T200",
+      "file": "text/T200.png",
+      "source_id": "resource:02e29d4f0a2bd17033abf60cc0868b80ad63e8e13e9f99c2977ed1196e09417b:short",
+      "seed": 2026112699,
+      "prompt": "iron ingot je 3 be 2",
+      "split": "val"
+    },
+    {
+      "id": "I001",
+      "file": "image/I001.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0052",
+      "seed": 2026113500,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "959ade45d62e71c75c4cfee54a849fcc68b9ab12cb0237a2162d297daeb87a9d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I002",
+      "file": "image/I002.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0003",
+      "seed": 2026113501,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "3cecd7a04a3cbf7837fe0e6422efc88f14283de1f86eeca92edc4857ad220bee",
+      "release": "general_v5"
+    },
+    {
+      "id": "I003",
+      "file": "image/I003.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0561",
+      "seed": 2026113502,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2955305fe55d67056053f3b22aa06adad08b7b70dbfe48b96c131a357f11351b",
+      "release": "general_v5"
+    },
+    {
+      "id": "I004",
+      "file": "image/I004.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0058",
+      "seed": 2026113503,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "673f94028936c0e433e16ad1a9660d196b9d1b6718da23954dbc6e6e90b4d932",
+      "release": "general_v5"
+    },
+    {
+      "id": "I005",
+      "file": "image/I005.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0500",
+      "seed": 2026113504,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "5969c17f51801137b6fd9f0226dde4862d3b0172d03716286be62fb43c717e89",
+      "release": "general_v5"
+    },
+    {
+      "id": "I006",
+      "file": "image/I006.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0202",
+      "seed": 2026113505,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "754f6134fae2f5892f4b2d72c00facec4e1dd818054a5fb0bf3dd41594b98dba",
+      "release": "general_v5"
+    },
+    {
+      "id": "I007",
+      "file": "image/I007.png",
+      "source_id": "variants_v3:VM1000_0538894_R1",
+      "seed": 2026113506,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "3ba075b180f83521b13f495286b0b824fab5562b878e4fd09598aa56e29c9f07",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I008",
+      "file": "image/I008.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0188",
+      "seed": 2026113507,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "3400bd4adbde3c787bd820907916dc1eae0c3c5e0e101e3c3442ed3f2321c689",
+      "release": "general_v5"
+    },
+    {
+      "id": "I009",
+      "file": "image/I009.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0451",
+      "seed": 2026113508,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6e8999094ea0d6d4116302fb5a1792f8fb61a9294bc0c7f3c99fef4bc426bcef",
+      "release": "general_v5"
+    },
+    {
+      "id": "I010",
+      "file": "image/I010.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0162",
+      "seed": 2026113509,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "266cb739d974109223ff8d946dc24e3bf441073ee060f9f27dafe9bb84f8be43",
+      "release": "general_v5"
+    },
+    {
+      "id": "I011",
+      "file": "image/I011.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0199",
+      "seed": 2026113510,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "9d01398fd06b15c91f32e60034afca4728faaf3f4923582b5f82760a24bd708c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I012",
+      "file": "image/I012.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0013",
+      "seed": 2026113511,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2d17b2505dc024b8db7a8ea50ace9554d4cd5e341f45d1f0df8ad508083c6b5a",
+      "release": "general_v5"
+    },
+    {
+      "id": "I013",
+      "file": "image/I013.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0316",
+      "seed": 2026113512,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "600409b8a9889d04abdaee7a07ff31f86384efe815aafc3e330fc32a8c65f9c5",
+      "release": "general_v5"
+    },
+    {
+      "id": "I014",
+      "file": "image/I014.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0236",
+      "seed": 2026113513,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "1041c194bd5ab2f42ce66b39190e568d4832749d12becea78e8b0572dd162d42",
+      "release": "general_v5"
+    },
+    {
+      "id": "I015",
+      "file": "image/I015.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0408",
+      "seed": 2026113514,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "89196a76323f03304d9655c64adbeed34cb6d0657daa733ba5340115997ca79f",
+      "release": "general_v5"
+    },
+    {
+      "id": "I016",
+      "file": "image/I016.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0113",
+      "seed": 2026113515,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "ef86c6b62a37864b801bad2e781cb9ffc451e486b342600b4b30c602d3a8e748",
+      "release": "general_v5"
+    },
+    {
+      "id": "I017",
+      "file": "image/I017.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0281",
+      "seed": 2026113516,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "76fe4689413189997e784bd901645988c62e0d649ec4535ebc0b4d558b188bf9",
+      "release": "general_v5"
+    },
+    {
+      "id": "I018",
+      "file": "image/I018.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0282",
+      "seed": 2026113517,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "df6651d4f0f0df018a7e28dec260dc7a0a7271a618adf0f90b78e39fc04fb6eb",
+      "release": "general_v5"
+    },
+    {
+      "id": "I019",
+      "file": "image/I019.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0172",
+      "seed": 2026113518,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f39efe70aef536ae5d2ebac21e9d8d598a451db1de412b3ef0175d400a6090a3",
+      "release": "general_v5"
+    },
+    {
+      "id": "I020",
+      "file": "image/I020.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0047",
+      "seed": 2026113519,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "34a35054d52e2edc00bd690a2cd61a491dd40ea9fb285b7a0401677f834c3d06",
+      "release": "general_v5"
+    },
+    {
+      "id": "I021",
+      "file": "image/I021.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0096",
+      "seed": 2026113520,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b8cabba53edbbe1282fa4e10c2fd3a48d947f6ba49ae9a5d2ae07296c19f41db",
+      "release": "general_v5"
+    },
+    {
+      "id": "I022",
+      "file": "image/I022.png",
+      "source_id": "variants_v3:VM1000_0568088",
+      "seed": 2026113521,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a6d2d278161a398c8002d8b76d7197333d6b80eda48656df61588beb5524fa1e",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I023",
+      "file": "image/I023.png",
+      "source_id": "variants_v3:VM1000_0861371_R1",
+      "seed": 2026113522,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "07b0571a2c01322c367039a186aa94b341666067d849be666bfe52bdfb4371e8",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I024",
+      "file": "image/I024.png",
+      "source_id": "variants_v3:VM1000_0779909",
+      "seed": 2026113523,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b1978e4db5a2de74b1a2fda001ddafa3dc8217fd14c133f248c377c4de205d19",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I025",
+      "file": "image/I025.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0222",
+      "seed": 2026113524,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "251470a80c355a2b8015a595c4195534e64a29ef6d5e2293f176e44271897e3c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I026",
+      "file": "image/I026.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0220",
+      "seed": 2026113525,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "5b7010ed7e6a9c16cf2c992ee9d337ed8da6505d50173702f4098620beb0c64a",
+      "release": "general_v5"
+    },
+    {
+      "id": "I027",
+      "file": "image/I027.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0480",
+      "seed": 2026113526,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a5c8966d16beabc3f77a7c2040b304e2ffbdf04b54bc9b5d857c000f795d6930",
+      "release": "general_v5"
+    },
+    {
+      "id": "I028",
+      "file": "image/I028.png",
+      "source_id": "variants_v3:VM1000_0994303_R1",
+      "seed": 2026113527,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "4c5818270f7316b21c5cd8fd85c2b6835c92d5bc34401bb9cd0e476266d9b0fd",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I029",
+      "file": "image/I029.png",
+      "source_id": "variants_v3:VM1000_0890982",
+      "seed": 2026113528,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "5d1dbf339edd3930c43ae9d9bc2efa07911ef53521d6c10cf7f342af6530d682",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I030",
+      "file": "image/I030.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0497",
+      "seed": 2026113529,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d783957afeb740698e0214f59577fdd1d353e9a1d87ebfc4210c9df1186aa5ef",
+      "release": "general_v5"
+    },
+    {
+      "id": "I031",
+      "file": "image/I031.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0284",
+      "seed": 2026113530,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f7188cf7b17ab35ab392d9c48d952e8a5a1d9b826803d4ea7ce20dae4a74edab",
+      "release": "general_v5"
+    },
+    {
+      "id": "I032",
+      "file": "image/I032.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0109",
+      "seed": 2026113531,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "56abceeb72f5d93d9d3a5c125d29d9664e989b771ab1b3b0b5400d97a97b8467",
+      "release": "general_v5"
+    },
+    {
+      "id": "I033",
+      "file": "image/I033.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0148",
+      "seed": 2026113532,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "231a54e10eea1fcb699905ee4be50a2da64cd25b82c2d1af2896bd6bb74b5fbd",
+      "release": "general_v5"
+    },
+    {
+      "id": "I034",
+      "file": "image/I034.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0485",
+      "seed": 2026113533,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "0591b3f4ed3efccd9d0162d6f79255a799b8e3ef961af878e7f6b466a3b2af20",
+      "release": "general_v5"
+    },
+    {
+      "id": "I035",
+      "file": "image/I035.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0076",
+      "seed": 2026113534,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "1838c3285a604906edc57311a8137dda8e39ee6a9857adb811f2549ddc741361",
+      "release": "general_v5"
+    },
+    {
+      "id": "I036",
+      "file": "image/I036.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0446",
+      "seed": 2026113535,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "da54f8701774c6f978bab583ec292b9f64f197e89ba35a4908e005fec3d1c30b",
+      "release": "general_v5"
+    },
+    {
+      "id": "I037",
+      "file": "image/I037.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0573",
+      "seed": 2026113536,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a340a8c141607f881909ab79a3edd9a400ba55f29a4b0ed346ff0e281c80929e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I038",
+      "file": "image/I038.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0376",
+      "seed": 2026113537,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "201e4e7a55056f72315e4deb6e67cbb573f6d88b20256721a9a0f6b080657944",
+      "release": "general_v5"
+    },
+    {
+      "id": "I039",
+      "file": "image/I039.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0023_R1",
+      "seed": 2026113538,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e42400959a6ab37b82b482425568b085f6a583b71dcfaa797228ace6fec9186d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I040",
+      "file": "image/I040.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0358",
+      "seed": 2026113539,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "8f3983a6d1fb140a00b869f5570dba29b5f35f84d33cbea1d319618f959b5482",
+      "release": "general_v5"
+    },
+    {
+      "id": "I041",
+      "file": "image/I041.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0180",
+      "seed": 2026113540,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "eaf3febc08a145a8f39cf14b16e125eaa9fffb2fbb1ed30809f553904770f3a0",
+      "release": "general_v5"
+    },
+    {
+      "id": "I042",
+      "file": "image/I042.png",
+      "source_id": "variants_v3:VM1000_0845892",
+      "seed": 2026113541,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "7555b6fb60eeefe4fcbd6dd3182180a43272e34f81ea28cdc1f01d065c7afde9",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I043",
+      "file": "image/I043.png",
+      "source_id": "variants_v3:VM1000_0994319",
+      "seed": 2026113542,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "ea7678a0c4f9fb7c5e7b95e248c9aed669475efcabbc049d393a390fed61ed39",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I044",
+      "file": "image/I044.png",
+      "source_id": "variants_v3:VM1000_0845832",
+      "seed": 2026113543,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "7ee7392d183aef8a4a90202ccb28e79d419906f7e50097128aa006d48194b9bb",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I045",
+      "file": "image/I045.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0024",
+      "seed": 2026113544,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "93919bfd7549119a0e6e6cce3a422d8652ec40abe1411c06690e92c392b2f841",
+      "release": "general_v5"
+    },
+    {
+      "id": "I046",
+      "file": "image/I046.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0192",
+      "seed": 2026113545,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a4df7394590f7e99965075ed334310f0324c71097a7719bdc35068c1ca42e959",
+      "release": "general_v5"
+    },
+    {
+      "id": "I047",
+      "file": "image/I047.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0465",
+      "seed": 2026113546,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "4111d5e6ad003ab2eb6a5e601649e16e30c50af0c56cece48c8884b84d79d8a7",
+      "release": "general_v5"
+    },
+    {
+      "id": "I048",
+      "file": "image/I048.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0018",
+      "seed": 2026113547,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "c6d28c9a4865cd0e071a4b936577ffb7316f28058ece20a6df0771edbb99fd15",
+      "release": "general_v5"
+    },
+    {
+      "id": "I049",
+      "file": "image/I049.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0029",
+      "seed": 2026113548,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b0044ed11d79e10f355ae8b7e2ce9ba6ad6875618ccd5c4af905d36daeecf057",
+      "release": "general_v5"
+    },
+    {
+      "id": "I050",
+      "file": "image/I050.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0298_R1",
+      "seed": 2026113549,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "11dd9ea335cbe1142ad49d9f5ac5879c0f874a76569aef10be23e84a129de214",
+      "release": "general_v5"
+    },
+    {
+      "id": "I051",
+      "file": "image/I051.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0136",
+      "seed": 2026113550,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "91e30776444ce65b0c55f198fa8d3899a572898978fa0796a305bae70d5c64c8",
+      "release": "general_v5"
+    },
+    {
+      "id": "I052",
+      "file": "image/I052.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0479",
+      "seed": 2026113551,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "8996e572d5a44dbc3f34bcc904eb33868a4ec332f6f645a0d7545be7657d81a3",
+      "release": "general_v5"
+    },
+    {
+      "id": "I053",
+      "file": "image/I053.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0003",
+      "seed": 2026113552,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "af733d1c22a1d737f6d9388c56f32c9da191c473ab4c73a29e6c76af0dc57460",
+      "release": "general_v5"
+    },
+    {
+      "id": "I054",
+      "file": "image/I054.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0277",
+      "seed": 2026113553,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d372ce82e6eb54f7f1eca61d491a92e1c964a80e6a93a238e0637253834d8eda",
+      "release": "general_v5"
+    },
+    {
+      "id": "I055",
+      "file": "image/I055.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0299",
+      "seed": 2026113554,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f16e519e7e3a22126ea8f6279581973a02cdb1f4804cccc0e5d5c2321df2087d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I056",
+      "file": "image/I056.png",
+      "source_id": "variants_v3:VM1000_0986317",
+      "seed": 2026113555,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "9122fa5888f4ebe4d5eb51d985fda2de92d14fcde11ff4d12d16bfe03ef84bf7",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I057",
+      "file": "image/I057.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0325",
+      "seed": 2026113556,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6db9164d8d8d372d9c47397e7fa0aa527e4aa0da83ad849e5fe9ef049950e5fc",
+      "release": "general_v5"
+    },
+    {
+      "id": "I058",
+      "file": "image/I058.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0581",
+      "seed": 2026113557,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "490afce1e4a4469e1199bd72deb81ee95dc5558a578b1006b34aa939d01cb684",
+      "release": "general_v5"
+    },
+    {
+      "id": "I059",
+      "file": "image/I059.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0424",
+      "seed": 2026113558,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "cc080040c223ec7476baf22592ac5cbec5127ab304e4c07443e581ede586fd64",
+      "release": "general_v5"
+    },
+    {
+      "id": "I060",
+      "file": "image/I060.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0455",
+      "seed": 2026113559,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e7b8588d3b79edfdd93a6132ae96f9401c0b6fd1c96bec2911fb06470b9a401e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I061",
+      "file": "image/I061.png",
+      "source_id": "variants_v3:VM1000_0994314",
+      "seed": 2026113560,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2ca7ba52790366eefb4f7b610ebab3b308c6ff63905326f1f731b60a0d411674",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I062",
+      "file": "image/I062.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0170",
+      "seed": 2026113561,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e3142b3028238578af7ca14d12b66d86c4d757561308d0b1cebdb7dfe37468a7",
+      "release": "general_v5"
+    },
+    {
+      "id": "I063",
+      "file": "image/I063.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0071",
+      "seed": 2026113562,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "56a067dc3b6f5ada90da405161b4f348e41dafdb661a96110f4b5eeac91c5744",
+      "release": "general_v5"
+    },
+    {
+      "id": "I064",
+      "file": "image/I064.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0344",
+      "seed": 2026113563,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "9646ecd2bb413e5023523ac996458e9782f14af2011b38c12974eb669851c75c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I065",
+      "file": "image/I065.png",
+      "source_id": "variants_v3:VM1000_0970520",
+      "seed": 2026113564,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "552328a7ecedda74d074d33d6a989f884d4f122b7951a1e7d804ec6799c80141",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I066",
+      "file": "image/I066.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0148",
+      "seed": 2026113565,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e790482e15257a87ba4fe86f850e4aaf7b0bfc596e89c6675f9d82f0c84f8062",
+      "release": "general_v5"
+    },
+    {
+      "id": "I067",
+      "file": "image/I067.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0054",
+      "seed": 2026113566,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e7dce88febf820e9a898352adf7d5157e4eaf26c2bb0c766d1cbb385a505ff36",
+      "release": "general_v5"
+    },
+    {
+      "id": "I068",
+      "file": "image/I068.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0329",
+      "seed": 2026113567,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "c39be5dc415a0fd868d042f080b55c28e6aa144da39121deb739eed1f19014f3",
+      "release": "general_v5"
+    },
+    {
+      "id": "I069",
+      "file": "image/I069.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0574",
+      "seed": 2026113568,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b6d0b858f1295e03aed7a78a23bdcbbf40e89f7115a00b7afc5c2c34b6273881",
+      "release": "general_v5"
+    },
+    {
+      "id": "I070",
+      "file": "image/I070.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0394",
+      "seed": 2026113569,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2577420c41c4efcb912bc77b2b7462ae0d09fd0cf790d6652704fa1b8728b7ee",
+      "release": "general_v5"
+    },
+    {
+      "id": "I071",
+      "file": "image/I071.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0110",
+      "seed": 2026113570,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "4bb186039b68b6ada1d1577a450abbc22872550e02c6683c3c30298e2f0107f9",
+      "release": "general_v5"
+    },
+    {
+      "id": "I072",
+      "file": "image/I072.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0485",
+      "seed": 2026113571,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d0dba5695c1577a4473f14ecb58701007448d35bed4792f8157204d4f61c6aaf",
+      "release": "general_v5"
+    },
+    {
+      "id": "I073",
+      "file": "image/I073.png",
+      "source_id": "variants_v3:VM1000_0891014_R1",
+      "seed": 2026113572,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "505af85a88bd2a635d9afd7468add4a8f94f23378233755daba35cf42d70c67f",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I074",
+      "file": "image/I074.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0452",
+      "seed": 2026113573,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "351c3dcb8e706c41177f02fb5f8d82fccad923f53153c62e48a1c4c623f7de04",
+      "release": "general_v5"
+    },
+    {
+      "id": "I075",
+      "file": "image/I075.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0280",
+      "seed": 2026113574,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "399d2e58cab668385ffc6c8a931f0ae8cae6c5fb5446283ea3dfc02e89d2bf6a",
+      "release": "general_v5"
+    },
+    {
+      "id": "I076",
+      "file": "image/I076.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0405",
+      "seed": 2026113575,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b1b8fbdedaea447cdd03160542ae77c08f19c661fcdbe1438eb1b957569d7e10",
+      "release": "general_v5"
+    },
+    {
+      "id": "I077",
+      "file": "image/I077.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0257",
+      "seed": 2026113576,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "72c85a9d70024d4a9c830133605384cb02b87e63be6f6111fa899058cd72d2bb",
+      "release": "general_v5"
+    },
+    {
+      "id": "I078",
+      "file": "image/I078.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0526",
+      "seed": 2026113577,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2aeeeb23c170288b4e8e52acd658dcb961192de89de71df8e708dd3e60eb7d32",
+      "release": "general_v5"
+    },
+    {
+      "id": "I079",
+      "file": "image/I079.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0053",
+      "seed": 2026113578,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "ff1ba72cbce710c12d32e272fde0d455e1fb14b755a2b6fb542a2961c22efafa",
+      "release": "general_v5"
+    },
+    {
+      "id": "I080",
+      "file": "image/I080.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0259",
+      "seed": 2026113579,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "51f0caa65fc700dc2b1636b40fbdd9535b5d799137302aa8a6e5691c22da69bb",
+      "release": "general_v5"
+    },
+    {
+      "id": "I081",
+      "file": "image/I081.png",
+      "source_id": "variants_v3:VM1000_0994160",
+      "seed": 2026113580,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "38e9e1324c69b23d13adb1771037174e38fad9ef4cfa877804b40a5bd9ed6967",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I082",
+      "file": "image/I082.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0226",
+      "seed": 2026113581,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "cd5ec517b5c13b7b00f53ab99e9943178bc1f3157e468cb40d5a5337eac4763a",
+      "release": "general_v5"
+    },
+    {
+      "id": "I083",
+      "file": "image/I083.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0387",
+      "seed": 2026113582,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f7bc0a2e7e59d3f65f196314683b530c8e635be3f8384a1ee3e804d317a7e5a1",
+      "release": "general_v5"
+    },
+    {
+      "id": "I084",
+      "file": "image/I084.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0343",
+      "seed": 2026113583,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "83740947cc87f26c0f041cd6fb60b2ea564601754d7dceb0a4c694ce0d3f4404",
+      "release": "general_v5"
+    },
+    {
+      "id": "I085",
+      "file": "image/I085.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0506",
+      "seed": 2026113584,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "df00809853da2dd3360fb8c36a306e703ff85c23949ce99b54ee19b7ddcb093c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I086",
+      "file": "image/I086.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0184",
+      "seed": 2026113585,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "7a1f620e0be641b510768ed0c53acddcd6386d1a78ab7ef079fba8d2dfe69c83",
+      "release": "general_v5"
+    },
+    {
+      "id": "I087",
+      "file": "image/I087.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0439",
+      "seed": 2026113586,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "081fdc02f7f1d3f8e7566958f8b94ec7173fe1232d88744227d123e0569ab1ea",
+      "release": "general_v5"
+    },
+    {
+      "id": "I088",
+      "file": "image/I088.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0037",
+      "seed": 2026113587,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "87f709208c1648213c763c5a4b8a9174682337577afde04f1b2a003927eec4dd",
+      "release": "general_v5"
+    },
+    {
+      "id": "I089",
+      "file": "image/I089.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0072",
+      "seed": 2026113588,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f4fed43f1629bf39e92606d95cd44c711bb6182bc3b2b41f69e8e1d300649996",
+      "release": "general_v5"
+    },
+    {
+      "id": "I090",
+      "file": "image/I090.png",
+      "source_id": "variants_v3:VM1000_0589321_R1",
+      "seed": 2026113589,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "15448989e8b6740da30762496a72edebe64f13a271a14fdc2c74c112c54bfa70",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I091",
+      "file": "image/I091.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0484",
+      "seed": 2026113590,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e56372c79b16b39ecd814aec3a56f7408b42ee89297d15fe0e268f59c458320e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I092",
+      "file": "image/I092.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0128",
+      "seed": 2026113591,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d30d6b531b60dfd4e53072d974bd4d4a1e66d6a32556fa9b9194a5681783cc61",
+      "release": "general_v5"
+    },
+    {
+      "id": "I093",
+      "file": "image/I093.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0274",
+      "seed": 2026113592,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "0299e52ece4953be23fc5cc179cd4bcad05d9faadc843412c10e58af5b732d73",
+      "release": "general_v5"
+    },
+    {
+      "id": "I094",
+      "file": "image/I094.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0475",
+      "seed": 2026113593,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a78578cd06ab34a386fc2a3e72ecdc34e78018167fdfbad4543a378b1dcbb65c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I095",
+      "file": "image/I095.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0316",
+      "seed": 2026113594,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f5d0d303d0cd36c56959e46efef162464d735cca69cbe52dff9c3af5955c561f",
+      "release": "general_v5"
+    },
+    {
+      "id": "I096",
+      "file": "image/I096.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0148",
+      "seed": 2026113595,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f80fa2329ce4ebd25b47ea548d66b2fea2c976171a470b539c85efd7fa7ac881",
+      "release": "general_v5"
+    },
+    {
+      "id": "I097",
+      "file": "image/I097.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_REPL_0008",
+      "seed": 2026113596,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "805fe5781f8dc67c1336d635d44c0baa419a0ba214c4ef4fde6f0ce3e392608b",
+      "release": "general_v5"
+    },
+    {
+      "id": "I098",
+      "file": "image/I098.png",
+      "source_id": "variants_v3:VM1000_0944708",
+      "seed": 2026113597,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "9463c597f85c6a8fcef37155491651ca5e014149cf944de5e3cb9dfeef1ab148",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I099",
+      "file": "image/I099.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0069",
+      "seed": 2026113598,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "47fb96eae43e75edd9d65bbda5834b8070baaa01b776713f27439f33dcf7d489",
+      "release": "general_v5"
+    },
+    {
+      "id": "I100",
+      "file": "image/I100.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0132",
+      "seed": 2026113599,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a09866ccf3c58a95db222c10f6cf2a712c34fdb511241258b1d6868117562391",
+      "release": "general_v5"
+    },
+    {
+      "id": "I101",
+      "file": "image/I101.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0435",
+      "seed": 2026113600,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "88d69633b6cd2fb3b840ed4c1997118fbcbe755febfa88edda39da52f9da1b83",
+      "release": "general_v5"
+    },
+    {
+      "id": "I102",
+      "file": "image/I102.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0094",
+      "seed": 2026113601,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "0fa46cc55e9cf6de13e9826d4ad52fde8aaf7d62907285cea9caf885e8ea24c7",
+      "release": "general_v5"
+    },
+    {
+      "id": "I103",
+      "file": "image/I103.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0130",
+      "seed": 2026113602,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "070c0c58234eee4de077b31d8f484c92f9ba32f1dd8c6c2a5e44fd025bdf1452",
+      "release": "general_v5"
+    },
+    {
+      "id": "I104",
+      "file": "image/I104.png",
+      "source_id": "variants_v3:VM1000_0994260_R1",
+      "seed": 2026113603,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "84f51247f1992f62524366a59a41b93e419056029d1fbb64402ced9c6af7e968",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I105",
+      "file": "image/I105.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0492",
+      "seed": 2026113604,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2eb6f85f99332a68b0d44222825732696956db7a1340602ed5780e4ad9b33e05",
+      "release": "general_v5"
+    },
+    {
+      "id": "I106",
+      "file": "image/I106.png",
+      "source_id": "variants_v3:VM1000_0944440",
+      "seed": 2026113605,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "12ac22fe783bccd92b1e87850da6b3204b360ec1deced6779fa4639cbcf5faa3",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I107",
+      "file": "image/I107.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0216",
+      "seed": 2026113606,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "663ee8a33411cf2ff87ee204ab4f30a929c43d6d3c9ef2697cf35bb46e1ca143",
+      "release": "general_v5"
+    },
+    {
+      "id": "I108",
+      "file": "image/I108.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0330",
+      "seed": 2026113607,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "049ff3d86f7b4e06b3bbc45f18975f3ea0fe2f5916533ba3e8077a54c20b0a8f",
+      "release": "general_v5"
+    },
+    {
+      "id": "I109",
+      "file": "image/I109.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0041",
+      "seed": 2026113608,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "1b8f0b89463747898eb3e8940c3dba25afc52fad3c80d49a1c412e9060461c95",
+      "release": "general_v5"
+    },
+    {
+      "id": "I110",
+      "file": "image/I110.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0546",
+      "seed": 2026113609,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "52029f200e9a9afddb1c62d3b2ac393f355162b90cb32e01ddcc44d6f8196861",
+      "release": "general_v5"
+    },
+    {
+      "id": "I111",
+      "file": "image/I111.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0064",
+      "seed": 2026113610,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "94f9101378d1c88823365a2e8443dcafe2885bcce08836719d9015ae341b3e87",
+      "release": "general_v5"
+    },
+    {
+      "id": "I112",
+      "file": "image/I112.png",
+      "source_id": "variants_v3:VM1000_0891123",
+      "seed": 2026113611,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6ddeaf2542b9465103a9da01b7a1cd3f4256d49403db118e905d88bb3da1e4cb",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I113",
+      "file": "image/I113.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0246",
+      "seed": 2026113612,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d7b40706c447b8e7f8d26d8c137c7d4e1e60f4fbd7e2c243fed598f96ad6ce54",
+      "release": "general_v5"
+    },
+    {
+      "id": "I114",
+      "file": "image/I114.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0209",
+      "seed": 2026113613,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6a379474b30089bf5bbe8347f21c994d3658a0cd510e1a44b649638672fae241",
+      "release": "general_v5"
+    },
+    {
+      "id": "I115",
+      "file": "image/I115.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0454",
+      "seed": 2026113614,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2ffb859a31fca0016c90a2ca880602a9046909026b28bbaa6821b7653644fb03",
+      "release": "general_v5"
+    },
+    {
+      "id": "I116",
+      "file": "image/I116.png",
+      "source_id": "variants_v3:VM1000_0499418",
+      "seed": 2026113615,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "0692d71b7e82494a549d877a5606f8a64b89c5dd36b854d6932c9699b5e29d4b",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I117",
+      "file": "image/I117.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0058",
+      "seed": 2026113616,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "66786bd3b19a506fb651a0fa82458a6264214fa2c77b4dd8c9589231eac02d0e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I118",
+      "file": "image/I118.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0442",
+      "seed": 2026113617,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "091066337e8f289d3a6c22852e255190b48f1da0f994f6e1fdb6aeeadc1d8c4e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I119",
+      "file": "image/I119.png",
+      "source_id": "variants_v3:VM1000_0845868",
+      "seed": 2026113618,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "86feba2d1b57effa3f535c05defe1994cab4304d34bfc3c96f6d9281068678bb",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I120",
+      "file": "image/I120.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0582",
+      "seed": 2026113619,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "07492acbc7686edb10bff48163b24b4f6ccb2c2e224c932ec124198210c04d8e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I121",
+      "file": "image/I121.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0354",
+      "seed": 2026113620,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "8c1807bd611634d59281eac5ad0b62e6abefa1f4ad198e708696b1d6f8404d8c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I122",
+      "file": "image/I122.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0495",
+      "seed": 2026113621,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "da73125c1c2368b4c181cb6b08934024fe6a0213dbd197f1c47f501a86c5d398",
+      "release": "general_v5"
+    },
+    {
+      "id": "I123",
+      "file": "image/I123.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0488",
+      "seed": 2026113622,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f7b1300e893276bbc3602d4ac9dfde8bb9f1f5a9bb4aeb7151b36251201609de",
+      "release": "general_v5"
+    },
+    {
+      "id": "I124",
+      "file": "image/I124.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0174_R1",
+      "seed": 2026113623,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "c09e3724e1021ec09cb1a1c145e2dc4fd2476715dcc0d6e015e0bb77d4f64699",
+      "release": "general_v5"
+    },
+    {
+      "id": "I125",
+      "file": "image/I125.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0309",
+      "seed": 2026113624,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "4f035fd91f94ed21eb5a4f0b0e97ee75fd282ed26bded8b3666ace391f1939d3",
+      "release": "general_v5"
+    },
+    {
+      "id": "I126",
+      "file": "image/I126.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0324",
+      "seed": 2026113625,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d56937b1a5abc14aaf5d392de5c000c2d628b15c44b3207127e2e03ef8b18526",
+      "release": "general_v5"
+    },
+    {
+      "id": "I127",
+      "file": "image/I127.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0378",
+      "seed": 2026113626,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "3d30009326a29e2a84541728664de690df575a5baf6ac76f10197c4bd4b517c4",
+      "release": "general_v5"
+    },
+    {
+      "id": "I128",
+      "file": "image/I128.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0063",
+      "seed": 2026113627,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "46fa56b794c682c1095364ce40568afbbc16f67138bbe68a0b1245e1b908f704",
+      "release": "general_v5"
+    },
+    {
+      "id": "I129",
+      "file": "image/I129.png",
+      "source_id": "variants_v3:VM1000_0538409",
+      "seed": 2026113628,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "45f2dfbcaaa74f425b4de52c7aeeaa69c9837717c0c1f18d1e3a5eeb7726eb21",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I130",
+      "file": "image/I130.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0269",
+      "seed": 2026113629,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "8bfd729108106e0879190a526c03c6d6507029ce81c3a459f256455d010c72cd",
+      "release": "general_v5"
+    },
+    {
+      "id": "I131",
+      "file": "image/I131.png",
+      "source_id": "variants_v3:VM1000_0861040",
+      "seed": 2026113630,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "207dd48df9d7ef129a46a442e6c46a9ea810202a4568658e59f6973d800c3104",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I132",
+      "file": "image/I132.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0197",
+      "seed": 2026113631,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "dda644aa7becee0fb84e7afcfce23f96798e860ddfaa4a866aa2248e866b0db1",
+      "release": "general_v5"
+    },
+    {
+      "id": "I133",
+      "file": "image/I133.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0481",
+      "seed": 2026113632,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "364f6c00baff757c26b694777238d686dbd0d1819104a4b90c5041624735f69a",
+      "release": "general_v5"
+    },
+    {
+      "id": "I134",
+      "file": "image/I134.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0186",
+      "seed": 2026113633,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "38293172d43a28ceffaeca2aacd0d413f84d7d9565a69822825ca0e3b12854ac",
+      "release": "general_v5"
+    },
+    {
+      "id": "I135",
+      "file": "image/I135.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0237",
+      "seed": 2026113634,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "53b9630295cef3738c3371176eca0e9f5f3d57d9b2a8bb4283a472bf35c3a76f",
+      "release": "general_v5"
+    },
+    {
+      "id": "I136",
+      "file": "image/I136.png",
+      "source_id": "variants_v3:VM1000_0920760",
+      "seed": 2026113635,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "710411e1811a0fffc2cacf8512df2a9925f4e14830eb96cb061ffb23e4cc1828",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I137",
+      "file": "image/I137.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0436",
+      "seed": 2026113636,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "288103a12d1917756cd2c0a8d563cc64cb9562101324b37e67723555459bd5ab",
+      "release": "general_v5"
+    },
+    {
+      "id": "I138",
+      "file": "image/I138.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0070",
+      "seed": 2026113637,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "de42b2119a1b6879c7d470848d984bef71275a6841da1c8b82ee3cb136cb7e4f",
+      "release": "general_v5"
+    },
+    {
+      "id": "I139",
+      "file": "image/I139.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0501",
+      "seed": 2026113638,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "3607a12e561d3c8c08028f6899307bba4621d7115ca2e8cd05c24292b0ef9946",
+      "release": "general_v5"
+    },
+    {
+      "id": "I140",
+      "file": "image/I140.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0529",
+      "seed": 2026113639,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "59f0314a40958145b4bd8671d300b2d492cb480a2d70bf9b6a1b197983450b41",
+      "release": "general_v5"
+    },
+    {
+      "id": "I141",
+      "file": "image/I141.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0030",
+      "seed": 2026113640,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f7cfa75fbc043b6d3b05d081bc7ed28beb928dd0a8099c722c5dd9b4ff8e15b4",
+      "release": "general_v5"
+    },
+    {
+      "id": "I142",
+      "file": "image/I142.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0101",
+      "seed": 2026113641,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "41aeeadb4261232830cec923f9bc8af75e79a200eb7a1d9c55c200edbf467ee0",
+      "release": "general_v5"
+    },
+    {
+      "id": "I143",
+      "file": "image/I143.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0215",
+      "seed": 2026113642,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "7a78e6f87fdf4cefc46d9133cdcae9fc2de73267c589fbe6ce09e24393ffb144",
+      "release": "general_v5"
+    },
+    {
+      "id": "I144",
+      "file": "image/I144.png",
+      "source_id": "variants_v3:VM1000_0708993_R1",
+      "seed": 2026113643,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "c924c462cee672efd42eaacdea2df1dd5c708a42280fff9191e164606ebdcb91",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I145",
+      "file": "image/I145.png",
+      "source_id": "variants_v3:VM1000_0890953",
+      "seed": 2026113644,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "aee7aa373d28821dcbb40b73e5d725c0e00bfd1a04003cf6566cdd1e0031c54a",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I146",
+      "file": "image/I146.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0404",
+      "seed": 2026113645,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "68fc045f92d4ce0f789096043512d52357506683d5a25b591ca6be05f449c74e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I147",
+      "file": "image/I147.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0408_R1",
+      "seed": 2026113646,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d0c304ab42cfd0fce1e520cc9d265b4e78ab9f65521f9b5be98cb67c72984dd2",
+      "release": "general_v5"
+    },
+    {
+      "id": "I148",
+      "file": "image/I148.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0219",
+      "seed": 2026113647,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b0352551e63e2896c191de8a81adacedf90f59481c5278b002c3a80baf793d85",
+      "release": "general_v5"
+    },
+    {
+      "id": "I149",
+      "file": "image/I149.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_REPL_0003",
+      "seed": 2026113648,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e3866b510964f8ae3f14406a11c178458ee742210902d86e376c38e5bc6366eb",
+      "release": "general_v5"
+    },
+    {
+      "id": "I150",
+      "file": "image/I150.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0486",
+      "seed": 2026113649,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e5bd90dc6177daed76fe6c9cb1f6fe62188608ff222b5e28f18ce68397c42df4",
+      "release": "general_v5"
+    },
+    {
+      "id": "I151",
+      "file": "image/I151.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0088",
+      "seed": 2026113650,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "78a42f933edd9fa350dfa1f1c74e2372eb20a17a6382ee8483b0f6f733fb28d6",
+      "release": "general_v5"
+    },
+    {
+      "id": "I152",
+      "file": "image/I152.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0002",
+      "seed": 2026113651,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "8324a5fd08425c6d0c898d7e5a61a9a1bba64f1f8e531ca10b6eb84204ba5c2f",
+      "release": "general_v5"
+    },
+    {
+      "id": "I153",
+      "file": "image/I153.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0111",
+      "seed": 2026113652,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f1f4b7d3a7c75222545e00d01265ff0c2e67ddf535e24b0c634af36d923f5997",
+      "release": "general_v5"
+    },
+    {
+      "id": "I154",
+      "file": "image/I154.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0457",
+      "seed": 2026113653,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f16e2deeea7ccf7f0e0fa01031f6f5bcba719abc4a4efd3abd5b9b8a1b726415",
+      "release": "general_v5"
+    },
+    {
+      "id": "I155",
+      "file": "image/I155.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0145",
+      "seed": 2026113654,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "1b62ac4a50ad161d5c35c6ec4801aa807faa0246798fa02f6e7767662de985ec",
+      "release": "general_v5"
+    },
+    {
+      "id": "I156",
+      "file": "image/I156.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0359",
+      "seed": 2026113655,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "e6f88e2395fb7ea96dbe15427511bacbfc965d1dad9c5a91bfb576ee674da4c3",
+      "release": "general_v5"
+    },
+    {
+      "id": "I157",
+      "file": "image/I157.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0212",
+      "seed": 2026113656,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "19d5bd5d1a42b42e714fbf1afa0c5023e6487a023fad9295e90912165d2ff3d6",
+      "release": "general_v5"
+    },
+    {
+      "id": "I158",
+      "file": "image/I158.png",
+      "source_id": "variants_v3:VM1000_0753621",
+      "seed": 2026113657,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "657fc110ec9ec6bef2e5d3df2bd42f489033e474cb786d12f87a0ad0562c5944",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I159",
+      "file": "image/I159.png",
+      "source_id": "variants_v3:VM1000_0847056",
+      "seed": 2026113658,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "129f78d71f7e83a83b83bc7dc0443f8cdfc1fe25e2cf0631d060475938a4e731",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I160",
+      "file": "image/I160.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0199",
+      "seed": 2026113659,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "20e5479877a49be6a741e57015fb19440e79f58e14c97feb0e6fb19372e80a52",
+      "release": "general_v5"
+    },
+    {
+      "id": "I161",
+      "file": "image/I161.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0194",
+      "seed": 2026113660,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "64c1703e93c4dae77eecc3602b065901b6d794b15a87ddef8fc8453cfdfc6d10",
+      "release": "general_v5"
+    },
+    {
+      "id": "I162",
+      "file": "image/I162.png",
+      "source_id": "variants_v3:VM1000_0890922",
+      "seed": 2026113661,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "844efbed3d2d6c7e1d1bb54886540a994de9d790f47e3b834f30da364c92d021",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I163",
+      "file": "image/I163.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0077",
+      "seed": 2026113662,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "de98ec9cad35cfe68f24a0d2754171b1475d4d033fc5f73e624b692c0c5f04e0",
+      "release": "general_v5"
+    },
+    {
+      "id": "I164",
+      "file": "image/I164.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0208",
+      "seed": 2026113663,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f1dc906d1b31c861737cb943ba4676cfe7c678f6d0a093adc16552a69321626c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I165",
+      "file": "image/I165.png",
+      "source_id": "variants_v3:VM1000_0994837_R1",
+      "seed": 2026113664,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "d427287047441c762a29b8a6a363231676f27ce3a441fd677638dde24a7205de",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I166",
+      "file": "image/I166.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0195",
+      "seed": 2026113665,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "ec91a139b37b38c4921b77321b4bc6df4d2c573e47ceac433a58ddeee83d2326",
+      "release": "general_v5"
+    },
+    {
+      "id": "I167",
+      "file": "image/I167.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0290",
+      "seed": 2026113666,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "08bc202b181bff16e9b36841117b422b0eceed84c59689d2312898b0884d410c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I168",
+      "file": "image/I168.png",
+      "source_id": "general_v5:paired1000_batch03__B3_DATA_0067_R1",
+      "seed": 2026113667,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f08d898d66ac13618af2167f787fa83db22f94b8e58b65bf73405287b3d9c374",
+      "release": "general_v5"
+    },
+    {
+      "id": "I169",
+      "file": "image/I169.png",
+      "source_id": "variants_v3:VM1000_0602580_R1",
+      "seed": 2026113668,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "eeb9b1375d95141e5f09c42ea9e82c6c8eb53eeab7abd46edb860a2197f1edd1",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I170",
+      "file": "image/I170.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0388",
+      "seed": 2026113669,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "22406a222d303c49bd0236f2126ddcc7793accb2a33755dcebd41b16f71b8615",
+      "release": "general_v5"
+    },
+    {
+      "id": "I171",
+      "file": "image/I171.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0347",
+      "seed": 2026113670,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "7c41d1a83f3eca51929820fc26e1b6972d1fee67eb162b7c8668a8fffe0b092d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I172",
+      "file": "image/I172.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0081",
+      "seed": 2026113671,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "bed25b05af719d617a58a93dfea8c342446473bcb344349cd73a673f657384a8",
+      "release": "general_v5"
+    },
+    {
+      "id": "I173",
+      "file": "image/I173.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0150",
+      "seed": 2026113672,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "78c95a2d636e0f05fdc932bf1594d08f3a71e8c0c94a0854f5272abd64f8da0b",
+      "release": "general_v5"
+    },
+    {
+      "id": "I174",
+      "file": "image/I174.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0280",
+      "seed": 2026113673,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "8cd863a1d01eaf822ce1dd88d3a7b3eb742152931fcef5140cd2de92a4a61eb6",
+      "release": "general_v5"
+    },
+    {
+      "id": "I175",
+      "file": "image/I175.png",
+      "source_id": "general_v5:sampled500_mc2hd_batch04__B4_MC_0417",
+      "seed": 2026113674,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "47e42279c75d5dec305c28b023bd80b89d1529052eaf27696aa0d137a4fd7ea6",
+      "release": "general_v5"
+    },
+    {
+      "id": "I176",
+      "file": "image/I176.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0062",
+      "seed": 2026113675,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f9bd755493231177309e03531679f01fb1a8a20eda0eb2968934855cffde863d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I177",
+      "file": "image/I177.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0064",
+      "seed": 2026113676,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6c74dc1b7f8c362dfd1ffe2ff5c5a8e7bd710eb9c97198a4ced6395ce35f6b7d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I178",
+      "file": "image/I178.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0088",
+      "seed": 2026113677,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f419c15fa64799370545a52b4bd83b43c1f7c107678ba8d0e787b8b6540f5458",
+      "release": "general_v5"
+    },
+    {
+      "id": "I179",
+      "file": "image/I179.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0346",
+      "seed": 2026113678,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f135da3b6fe3e71fab80890871584e8a939a5081936bcada292432f444080e33",
+      "release": "general_v5"
+    },
+    {
+      "id": "I180",
+      "file": "image/I180.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0415",
+      "seed": 2026113679,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "dee9602a270a8de7746852ee44f2f1e972e0d8b320813e974eddf89b7aa6f23e",
+      "release": "general_v5"
+    },
+    {
+      "id": "I181",
+      "file": "image/I181.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0056",
+      "seed": 2026113680,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "4f2dfb876ed8c5f30896096a29836682cc75c5e2b241771f04bd72fa5c54b18c",
+      "release": "general_v5"
+    },
+    {
+      "id": "I182",
+      "file": "image/I182.png",
+      "source_id": "variants_v3:VM1000_0659778",
+      "seed": 2026113681,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "b1cfb8e0e0626f30c0ef8655d5c6436ff0e79f256b4022edb5e288c3336de523",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I183",
+      "file": "image/I183.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0449",
+      "seed": 2026113682,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "a0e7d843544c0dce92640acf0f07404f515edcb9f3b7ef569cf81734e6f500f6",
+      "release": "general_v5"
+    },
+    {
+      "id": "I184",
+      "file": "image/I184.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0486",
+      "seed": 2026113683,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "61160f494aa55d84176609035570482ae25452bf10977f4ad0d8c9d02bb63877",
+      "release": "general_v5"
+    },
+    {
+      "id": "I185",
+      "file": "image/I185.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0139",
+      "seed": 2026113684,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "183b7b9d608f2c61a77ba906f0c3f8f3e548a321f06cabc82457d53244d04e42",
+      "release": "general_v5"
+    },
+    {
+      "id": "I186",
+      "file": "image/I186.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0368",
+      "seed": 2026113685,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "296201681bc70232e6518632957e193acc0c9b6e5a43837861c3abf97cd724b5",
+      "release": "general_v5"
+    },
+    {
+      "id": "I187",
+      "file": "image/I187.png",
+      "source_id": "variants_v3:VM1000_0755673",
+      "seed": 2026113686,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "0f7b5688a864526d72a769b6069e2678c4416af918f43d1446abe8307b0b4593",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I188",
+      "file": "image/I188.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0376",
+      "seed": 2026113687,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6fe13317c3bc3cbb139a9b6f1f38b009d55444f025c6252cd765d1a257b6c00a",
+      "release": "general_v5"
+    },
+    {
+      "id": "I189",
+      "file": "image/I189.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0227",
+      "seed": 2026113688,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "2b90357fbe5c29dbb3e6b362d62842c928bd3cebf1636afd41181d652cfcd750",
+      "release": "general_v5"
+    },
+    {
+      "id": "I190",
+      "file": "image/I190.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0211",
+      "seed": 2026113689,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "72d84869bb45c69f86dd0dd74d5ab51373fa77f7da865d8bd8a8b9291abc57c8",
+      "release": "general_v5"
+    },
+    {
+      "id": "I191",
+      "file": "image/I191.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0239",
+      "seed": 2026113690,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "4f6132a92798a8438aae7b8fdc339731b20bfe6f46f47fe2e85f2b262ce9c305",
+      "release": "general_v5"
+    },
+    {
+      "id": "I192",
+      "file": "image/I192.png",
+      "source_id": "variants_v3:VM1000_0994631_R1",
+      "seed": 2026113691,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "cdb89f11c0fd4ffb2aacabd7b5aacbb599bcf86341f88668ff648ae5a96d2f88",
+      "release": "variants_v3"
+    },
+    {
+      "id": "I193",
+      "file": "image/I193.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0107_S1",
+      "seed": 2026113692,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "27ba594aef9a6eeeccb65dd3943e63aaec8d21546b7e5548c105db4f0202ff84",
+      "release": "general_v5"
+    },
+    {
+      "id": "I194",
+      "file": "image/I194.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0093",
+      "seed": 2026113693,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "90ce03604e4f714da787e42d5a697d1a4c758adf730cc569933a8c5d68b17663",
+      "release": "general_v5"
+    },
+    {
+      "id": "I195",
+      "file": "image/I195.png",
+      "source_id": "general_v5:sampled1000_mc2hd_batch05__B5_MC_0551",
+      "seed": 2026113694,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6a26a9a6d48f62d35fac755e56ee73233cd2b30895a5a73dbc3f77790fa0e657",
+      "release": "general_v5"
+    },
+    {
+      "id": "I196",
+      "file": "image/I196.png",
+      "source_id": "general_v5:original_gear_blur500_batch02__GEAR2_0186",
+      "seed": 2026113695,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "201b66899c81e827527cbc33388f3ec306b8aed0a03a08eb23eb0a84fcc83e0d",
+      "release": "general_v5"
+    },
+    {
+      "id": "I197",
+      "file": "image/I197.png",
+      "source_id": "general_v5:paired1000_batch03__B3_MC_0407",
+      "seed": 2026113696,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "3f438b6431b0eb5dcbf5ca950054bcccb7fed1cf057940dcb5f9690b7622b543",
+      "release": "general_v5"
+    },
+    {
+      "id": "I198",
+      "file": "image/I198.png",
+      "source_id": "general_v5:paired1000_batch03__B3_AUTH_0045",
+      "seed": 2026113697,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "f73054c564634c98258a5cecf9de4e0aff67fc94dda1eecae4957af624c1f3e8",
+      "release": "general_v5"
+    },
+    {
+      "id": "I199",
+      "file": "image/I199.png",
+      "source_id": "general_v5:original_gear_blur500__GEAR500_0201",
+      "seed": 2026113698,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "ba0c798d0916a86fdb311c65a85de2683949c56020454448d99c6a3b95c22ebb",
+      "release": "general_v5"
+    },
+    {
+      "id": "I200",
+      "file": "image/I200.png",
+      "source_id": "general_v5:mcgen2_items_500__ITEM_0419",
+      "seed": 2026113699,
+      "prompt": "",
+      "split": "test",
+      "reference_sha256": "6f68bd62aa8559d44ec9f5258055eeeac74403836051680b479770ac20375147",
+      "release": "general_v5"
+    }
+  ]
+}

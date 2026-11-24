@@ -26,9 +26,9 @@ size_categories:
 | 版本 | 条件编码方式 | 使用场景 |
 | --- | --- | --- |
 | [本地版 · coarse-step8400](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/coarse-step8400) | 本机 Qwen3-VL-Embedding-8B 提取文本和视觉 token | 离线生成 |
-| [API 版 · api-step11516](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step11516) | 北京百炼 `qwen3-vl-embedding` 分别返回文字和参考图的 2560 维向量 | 本机仅运行 MC 生成器 |
+| [API 默认版 · api-step10516](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step10516) | 北京百炼 `qwen3-vl-embedding` 分别返回文字和参考图的 2560 维向量 | 本机仅运行 MC 生成器 |
 
-[API 版使用说明](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step11516) · [GitHub 快速开始](https://github.com/jurky123/MC_Gen2.0#-快速开始)
+[API 版使用说明](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step10516) · [GitHub 快速开始](https://github.com/jurky123/MC_Gen2.0#-快速开始)
 
 ## 生成效果
 

@@ -78,7 +78,7 @@ class Transfer(PixelFlow):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--checkpoint', type=Path, required=True)
+    parser.add_argument('--checkpoint', type=Path, default=Path('checkpoints/mcgen-api-step10516.pt'))
     parser.add_argument('--prompt', default='')
     parser.add_argument('--reference', type=Path)
     parser.add_argument('--device', default='cuda:0')

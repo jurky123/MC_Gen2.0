@@ -23,7 +23,7 @@
 | 版本 | 条件编码方式 | 使用场景 |
 | --- | --- | --- |
 | [本地版 · coarse-step8400](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/coarse-step8400) | 本机 Qwen3-VL-Embedding-8B 提取文本和视觉 token | 离线生成 |
-| [API 版 · api-step11516](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step11516) | 北京百炼 `qwen3-vl-embedding` 分别返回文字和参考图的 2560 维向量 | 本机仅运行 MC 生成器 |
+| [API 默认版 · api-step10516](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step10516) | 北京百炼 `qwen3-vl-embedding` 分别返回文字和参考图的 2560 维向量 | 本机仅运行 MC 生成器 |
 
 ![MC Gen 2.0 Text-to-Image Showcase](docs/images/readme/text2img_showcase.png)
 
@@ -131,19 +131,19 @@ mcgen sample \
 
 ```bash
 pip install -e .
-curl -fL --create-dirs -o checkpoints/mcgen-api-step11516.pt \
-  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/api-step11516/mcgen-api-step11516.pt
+curl -fL --create-dirs -o checkpoints/mcgen-api-step10516.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/api-step10516/mcgen-api-step10516.pt
 
 # 文生图
-python scripts/sample_api.py --checkpoint checkpoints/mcgen-api-step11516.pt \
+python scripts/sample_api.py \
   --prompt 'diamond sword' --seed 42 --out outputs/api-sword.png
 
 # 图文联合；仅用参考图时省略 --prompt
-python scripts/sample_api.py --checkpoint checkpoints/mcgen-api-step11516.pt \
+python scripts/sample_api.py \
   --prompt 'ruby battle axe' --reference path/to/item.png --out outputs/api-axe.png
 ```
 
-默认使用 `cuda:0` 和 24 步 Heun 采样；CPU 推理可加 `--device cpu`。在 263 个配对测试目标上，API 版的编码空间 MAE 为纯文字 **0.3691**、纯参考图 **0.3223**、图文联合 **0.3120**（越低越好）。
+默认使用 `cuda:0` 和 24 步 Heun 采样；CPU 推理可加 `--device cpu`。在 263 个配对测试目标上，API 版的编码空间 MAE 为纯文字 **0.3652**、纯参考图 **0.3302**、图文联合 **0.3037**（越低越好）。
 
 ---
 

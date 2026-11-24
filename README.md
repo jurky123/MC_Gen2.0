@@ -26,7 +26,7 @@
 
 ## ✨ 核心特性
 
-- **原生 16×16 像素空间生成**：采用 Pixel-Space Rectified Flow Transformer，不经过 VAE 压缩，直接输出原生 16×16 Straight-RGBA 图像，像素边缘干净锐利、自带完整透明通道。
+- **原生 16×16 像素空间生成**：采用 Pixel-Space Rectified Flow Transformer，直接输出原生 16×16 Straight-RGBA 图像。
 - **单权重三模式统一**：同一份 `coarse-step8400` 权重同时支持 **纯文生图（Text-to-Image）**、**纯参考图风格化（Image-to-Image）** 与 **图文联合生成（Text + Reference）**，文本与视觉引导强度可独立调节。
 - **轻量生成器 + 冻结多模态编码器**：生成器本体仅 **86.7M 参数（~331 MB）**，搭配冻结的 `Qwen3-VL-Embedding-8B` 提取文本语义与高清参考图视觉 token。
 

@@ -18,7 +18,12 @@
 
 <br>
 
-**MC Gen 2.0** 支持使用**英文物品名**、**高清参考图**，或**两者结合**，直接生成原生 **16×16 RGBA** 透明背景的 Minecraft 风格物品纹理。当前推荐权重为 **[coarse-step8400](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/coarse-step8400)**，提示词可以从 `diamond sword`、`fire bow`、`poison apple`、`ruby chestplate` 这类简洁的英文名称开始。
+**MC Gen 2.0** 支持使用**英文物品名**、**高清参考图**，或**两者结合**，直接生成原生 **16×16 RGBA** 透明背景的 Minecraft 风格物品纹理。提示词可以从 `diamond sword`、`fire bow`、`poison apple`、`ruby chestplate` 这类简洁的英文名称开始。
+
+| 版本 | 条件编码方式 | 使用场景 |
+| --- | --- | --- |
+| [本地版 · coarse-step8400](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/coarse-step8400) | 本机 Qwen3-VL-Embedding-8B 提取文本和视觉 token | 离线生成 |
+| [API 版 · api-step11516](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step11516) | 北京百炼 `qwen3-vl-embedding` 分别返回文字和参考图的 2560 维向量 | 本机仅运行 MC 生成器 |
 
 ![MC Gen 2.0 Text-to-Image Showcase](docs/images/readme/text2img_showcase.png)
 
@@ -49,7 +54,9 @@
 
 ## 🚀 快速开始
 
-### 1. 安装依赖
+### 本地编码器版
+
+#### 1. 安装依赖
 
 需要 Python `>= 3.11` 与 PyTorch `>= 2.4`（推荐 CUDA 环境）：
 
@@ -59,7 +66,7 @@ cd MC_Gen2.0
 pip install -e '.[embedding]'
 ```
 
-### 2. 下载模型权重与冻结编码器
+#### 2. 下载模型权重与冻结编码器
 
 在项目根目录下载当前推荐的生成器权重 `coarse-step8400`（约 331 MB）以及冻结多模态编码器 `Qwen3-VL-Embedding-8B`：
 
@@ -73,7 +80,7 @@ python scripts/download_qwen_vl_embedding.py --out ../Qwen3-VL-Embedding-8B
 export MCGEN_EMBEDDING_MODEL=../Qwen3-VL-Embedding-8B
 ```
 
-### 3. 运行推理
+#### 3. 运行推理
 
 #### 文生图（Text-to-Image）
 
@@ -116,11 +123,33 @@ mcgen sample \
 > - **提示词建议**：推荐使用简洁的英文物品名（如 `poison apple`、`ghost boots`、`emerald pickaxe`、`book enchanted`）。
 > - **HTTP API 与冒烟测试**：可使用 `mcgen serve --checkpoint checkpoints/mcgen-coarse-step8400.pt --device cuda:0 --port 8000` 启动 FastAPI 服务，或运行 `mcgen smoke --out outputs/smoke` 做纯 CPU 端到端验证。
 
+### 百炼 API 版
+
+生成器仍在本机运行。新提示词和参考图会发往北京百炼进行向量化，结果缓存在 `.cache/mcgen-api/`。百炼按账号用量计费。本版下载一个推理文件即可，文件已包含生成器与适配器。
+
+在项目根目录执行以下命令。请先在运行环境中设置北京地域的 `DASHSCOPE_API_KEY`。
+
+```bash
+pip install -e .
+curl -fL --create-dirs -o checkpoints/mcgen-api-step11516.pt \
+  https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/api-step11516/mcgen-api-step11516.pt
+
+# 文生图
+python scripts/sample_api.py --checkpoint checkpoints/mcgen-api-step11516.pt \
+  --prompt 'diamond sword' --seed 42 --out outputs/api-sword.png
+
+# 图文联合；仅用参考图时省略 --prompt
+python scripts/sample_api.py --checkpoint checkpoints/mcgen-api-step11516.pt \
+  --prompt 'ruby battle axe' --reference path/to/item.png --out outputs/api-axe.png
+```
+
+默认使用 `cuda:0` 和 24 步 Heun 采样；CPU 推理可加 `--device cpu`。在 263 个配对测试目标上，API 版的编码空间 MAE 为纯文字 **0.3691**、纯参考图 **0.3223**、图文联合 **0.3120**（越低越好）。
+
 ---
 
 ## 📊 模型规格与指标
 
-### 推荐权重信息
+### 本地编码器版权重信息
 
 | 项目 | 参数 / 说明 |
 | --- | --- |
@@ -133,7 +162,7 @@ mcgen sample \
 | **默认采样器** | Heun（32 steps，亦支持 Euler） |
 | **SHA-256** | `d354d4ccd6e48bebc124e0ebd5757af0d038f8579569b07171e8acc572f1a93f` |
 
-### 配对测试集定量结果
+### 本地编码器版配对测试结果
 
 在 **263 个高清 / MC 配对测试目标** 上的轮廓一致性评测（`--steps 32`，参考图模式采用 `--text-scale 1 --ref-scale 1`）：
 
@@ -147,7 +176,7 @@ mcgen sample \
 
 ## 📦 训练数据与策略
 
-生成器完全**从零训练**，训练分为三个阶段：
+本地编码器版生成器完全**从零训练**，训练分为三个阶段：
 
 ```mermaid
 flowchart LR

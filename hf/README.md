@@ -19,9 +19,16 @@ size_categories:
 
 # MC Gen 2.0
 
-用英文物品名、高清参考图，或两者一起，生成 **16×16 RGBA Minecraft 风格物品图**。当前推荐权重为 **coarse-step8400**。提示词可以从 `poison apple`、`ghost boots`、`diamond sword` 这样的短名称开始。
+用英文物品名、高清参考图，或两者一起，生成 **16×16 RGBA Minecraft 风格物品图**。本地编码器版权重为 **coarse-step8400**。提示词可以从 `poison apple`、`ghost boots`、`diamond sword` 这样的短名称开始。
 
 [项目代码](https://github.com/jurky123/MC_Gen2.0) · [下载当前权重](https://huggingface.co/datasets/Risposta/MC_Gen/resolve/main/checkpoints/coarse-step8400/mcgen-coarse-step8400.pt)
+
+| 版本 | 条件编码方式 | 使用场景 |
+| --- | --- | --- |
+| [本地版 · coarse-step8400](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/coarse-step8400) | 本机 Qwen3-VL-Embedding-8B 提取文本和视觉 token | 离线生成 |
+| [API 版 · api-step11516](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step11516) | 北京百炼 `qwen3-vl-embedding` 分别返回文字和参考图的 2560 维向量 | 本机仅运行 MC 生成器 |
+
+[API 版使用说明](https://huggingface.co/datasets/Risposta/MC_Gen/tree/main/checkpoints/api-step11516) · [GitHub 快速开始](https://github.com/jurky123/MC_Gen2.0#-快速开始)
 
 ## 生成效果
 
@@ -33,7 +40,7 @@ size_categories:
 
 在 263 个配对测试目标上，图文联合的轮廓 IoU 为 **0.661**，纯参考图为 **0.639**，纯文字为 **0.556**。短名称往往对应多种合理外观，这组数字衡量与配对目标的接近程度。
 
-## 快速使用
+## 本地编码器版快速使用
 
 在项目根目录安装依赖并下载生成器及冻结编码器。
 
